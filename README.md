@@ -76,9 +76,3 @@ http://localhost:8080/swagger-ui.html
 
 #### Swagger的启用和禁用
 在application.yml中修改swagger.enabled即可，true表示启用Swagger，false表示禁用Swagger。在项目启动后可查看Swagger的状态。
-
----
-
-# 代码生成
-
-java -jar mybatis-generator-core-1.4.0.jar -configfile generator.xml -overwrite
