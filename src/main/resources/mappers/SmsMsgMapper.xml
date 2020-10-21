@@ -5,7 +5,7 @@
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="send_phone_num" property="sendPhoneNum" jdbcType="VARCHAR" />
     <result column="context" property="context" jdbcType="VARCHAR" />
-    <result column="send_time" property="sendTime" jdbcType="DATE" />
+    <result column="send_time" property="sendTime" jdbcType="TIMESTAMP" />
   </resultMap>
   <sql id="Example_Where_Clause" >
     <where >
@@ -83,7 +83,7 @@
     </if>
   </select>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from sms_msg
     where id = #{id,jdbcType=INTEGER}
@@ -104,7 +104,7 @@
     </selectKey>
     insert into sms_msg (send_phone_num, context, send_time
       )
-    values (#{sendPhoneNum,jdbcType=VARCHAR}, #{context,jdbcType=VARCHAR}, #{sendTime,jdbcType=DATE}
+    values (#{sendPhoneNum,jdbcType=VARCHAR}, #{context,jdbcType=VARCHAR}, #{sendTime,jdbcType=TIMESTAMP}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.smsposterpro.dao.user.model.SmsMsg" >
@@ -131,7 +131,7 @@
         #{context,jdbcType=VARCHAR},
       </if>
       <if test="sendTime != null" >
-        #{sendTime,jdbcType=DATE},
+        #{sendTime,jdbcType=TIMESTAMP},
       </if>
     </trim>
   </insert>
@@ -154,7 +154,7 @@
         context = #{record.context,jdbcType=VARCHAR},
       </if>
       <if test="record.sendTime != null" >
-        send_time = #{record.sendTime,jdbcType=DATE},
+        send_time = #{record.sendTime,jdbcType=TIMESTAMP},
       </if>
     </set>
     <if test="_parameter != null" >
@@ -166,7 +166,7 @@
     set id = #{record.id,jdbcType=INTEGER},
       send_phone_num = #{record.sendPhoneNum,jdbcType=VARCHAR},
       context = #{record.context,jdbcType=VARCHAR},
-      send_time = #{record.sendTime,jdbcType=DATE}
+      send_time = #{record.sendTime,jdbcType=TIMESTAMP}
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -181,7 +181,7 @@
         context = #{context,jdbcType=VARCHAR},
       </if>
       <if test="sendTime != null" >
-        send_time = #{sendTime,jdbcType=DATE},
+        send_time = #{sendTime,jdbcType=TIMESTAMP},
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
@@ -190,7 +190,7 @@
     update sms_msg
     set send_phone_num = #{sendPhoneNum,jdbcType=VARCHAR},
       context = #{context,jdbcType=VARCHAR},
-      send_time = #{sendTime,jdbcType=DATE}
+      send_time = #{sendTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>
