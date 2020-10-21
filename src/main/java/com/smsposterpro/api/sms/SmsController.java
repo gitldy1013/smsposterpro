@@ -4,16 +4,19 @@ import com.smsposterpro.api.BaseController;
 import com.smsposterpro.core.model.ApiResponse;
 import com.smsposterpro.core.model.PageWrap;
 import com.smsposterpro.dao.user.model.SmsMsg;
+import com.smsposterpro.dto.Root;
 import com.smsposterpro.service.sms.SmsMsgService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -110,6 +113,19 @@ public class SmsController extends BaseController {
         }
         writer.println("</table>");
         writer.close();
+    }
+
+    @CrossOrigin(allowCredentials = "true")
+    @GetMapping("/query")
+    @ApiOperation("查询")
+    public @ResponseBody
+    Root<SmsMsg> query(HttpServletResponse res) {
+        Root<SmsMsg> root = new Root<>();
+        List<SmsMsg> list = userService.findList(new SmsMsg());
+        root.setRows(list);
+        root.setTotal(list.size());
+        root.setTotalNotFiltered(list.size());
+        return root;
     }
 
     /**
