@@ -5,10 +5,13 @@ import com.smsposterpro.core.model.ApiResponse;
 import com.smsposterpro.core.model.PageWrap;
 import com.smsposterpro.dao.user.model.SmsMsg;
 import com.smsposterpro.dto.Root;
+import com.smsposterpro.handler.NonStaticResourceHttpRequestHandler;
 import com.smsposterpro.service.sms.SmsMsgService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +26,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -37,6 +44,9 @@ import java.util.List;
 @RequestMapping("/task")
 @Api(tags = "示例接口")
 public class SmsController extends BaseController {
+
+    @Autowired
+    private NonStaticResourceHttpRequestHandler nonStaticResourceHttpRequestHandler;
 
     @Autowired
     private SmsMsgService userService;
@@ -153,4 +163,29 @@ public class SmsController extends BaseController {
         userService.deleteById(id);
         return ApiResponse.success(null);
     }
+
+    @GetMapping("/video")
+    public void videoPreview(HttpServletRequest request, HttpServletResponse response, String realPath) throws Exception {
+
+        //假如我把视频1.mp4放在了static下的video文件夹里面
+        //sourcePath 是获取resources文件夹的绝对地址
+        //realPath 即是视频所在的磁盘地址
+        String sourcePath = ClassUtils.getDefaultClassLoader().getResource("").getPath().substring(1);
+        realPath = sourcePath + "static/video/1.mp4";
+
+
+        Path filePath = Paths.get(realPath);
+        if (Files.exists(filePath)) {
+            String mimeType = Files.probeContentType(filePath);
+            if (!StringUtils.isEmpty(mimeType)) {
+                response.setContentType(mimeType);
+            }
+            request.setAttribute(NonStaticResourceHttpRequestHandler.ATTR_FILE, filePath);
+            nonStaticResourceHttpRequestHandler.handleRequest(request, response);
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
+        }
+    }
+
 }
