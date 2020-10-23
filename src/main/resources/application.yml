@@ -7,6 +7,12 @@ project:
 # WEB服务器配置
 server:
   port: 8080
+#  ssl:
+#    key-store: classpath:keystore.p12
+#    key-store-password: 135618
+#    key-store-type: PKCS12
+#    key-alias: tomcat
+#    enabled: true
 
 spring:
   # 数据源配置
