@@ -16,12 +16,12 @@ public class TomcatConfig {
 
     private int httpPort = 8080;
 
-    @Bean
+    //@Bean
     public WebServerFactoryCustomizer<ConfigurableWebServerFactory> webServerFactoryCustomizer() {
         return factory -> factory.setPort(httpPort);
     }
 
-    @Bean
+    //@Bean
     public ServletWebServerFactory servletContainer() {
 
         TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
