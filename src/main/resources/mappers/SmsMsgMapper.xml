@@ -6,6 +6,7 @@
     <result column="send_phone_num" property="sendPhoneNum" jdbcType="VARCHAR" />
     <result column="context" property="context" jdbcType="VARCHAR" />
     <result column="send_time" property="sendTime" jdbcType="TIMESTAMP" />
+    <result column="to" property="to" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Example_Where_Clause" >
     <where >
@@ -66,7 +67,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List" >
-    id, send_phone_num, context, send_time
+    id, send_phone_num, context, send_time, to
   </sql>
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.smsposterpro.dao.user.model.SmsMsgExample" >
     select
@@ -83,7 +84,7 @@
     </if>
   </select>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
-    select
+    select 
     <include refid="Base_Column_List" />
     from sms_msg
     where id = #{id,jdbcType=INTEGER}
@@ -102,10 +103,10 @@
     <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into sms_msg (send_phone_num, context, send_time
-      )
-    values (#{sendPhoneNum,jdbcType=VARCHAR}, #{context,jdbcType=VARCHAR}, #{sendTime,jdbcType=TIMESTAMP}
-      )
+    insert into sms_msg (send_phone_num, context, send_time, 
+      to)
+    values (#{sendPhoneNum,jdbcType=VARCHAR}, #{context,jdbcType=VARCHAR}, #{sendTime,jdbcType=TIMESTAMP}, 
+      #{to,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.smsposterpro.dao.user.model.SmsMsg" >
     <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
@@ -122,6 +123,9 @@
       <if test="sendTime != null" >
         send_time,
       </if>
+      <if test="to != null" >
+        to,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="sendPhoneNum != null" >
@@ -132,6 +136,9 @@
       </if>
       <if test="sendTime != null" >
         #{sendTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="to != null" >
+        #{to,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -156,6 +163,9 @@
       <if test="record.sendTime != null" >
         send_time = #{record.sendTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="record.to != null" >
+        to = #{record.to,jdbcType=VARCHAR},
+      </if>
     </set>
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
@@ -166,7 +176,8 @@
     set id = #{record.id,jdbcType=INTEGER},
       send_phone_num = #{record.sendPhoneNum,jdbcType=VARCHAR},
       context = #{record.context,jdbcType=VARCHAR},
-      send_time = #{record.sendTime,jdbcType=TIMESTAMP}
+      send_time = #{record.sendTime,jdbcType=TIMESTAMP},
+      to = #{record.to,jdbcType=VARCHAR}
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -183,6 +194,9 @@
       <if test="sendTime != null" >
         send_time = #{sendTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="to != null" >
+        to = #{to,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
@@ -190,7 +204,8 @@
     update sms_msg
     set send_phone_num = #{sendPhoneNum,jdbcType=VARCHAR},
       context = #{context,jdbcType=VARCHAR},
-      send_time = #{sendTime,jdbcType=TIMESTAMP}
+      send_time = #{sendTime,jdbcType=TIMESTAMP},
+      to = #{to,jdbcType=VARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>
