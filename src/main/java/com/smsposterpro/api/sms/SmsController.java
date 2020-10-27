@@ -34,6 +34,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import static com.smsposterpro.core.model.ApiResponse.success;
+
 /**
  * 示例Controller
  *
@@ -73,7 +75,7 @@ public class SmsController extends BaseController {
     @PostMapping("/put")
     @ApiOperation("创建")
     public ApiResponse<SmsMsg> create(@RequestBody SmsMsg req) {
-        return ApiResponse.success(userService.create(req));
+        return success(userService.create(req));
     }
 
     /**
@@ -85,7 +87,7 @@ public class SmsController extends BaseController {
     @GetMapping("/{id}")
     @ApiOperation("根据ID查询")
     public ApiResponse<SmsMsg> finById(@PathVariable Integer id) {
-        return ApiResponse.success(userService.findById(id));
+        return success(userService.findById(id));
     }
 
     /**
@@ -96,8 +98,8 @@ public class SmsController extends BaseController {
      */
     @PostMapping("/list")
     @ApiOperation("分页查询")
-    public ApiResponse findPage(@RequestBody PageWrap<SmsMsg> pageWrap) {
-        return ApiResponse.success(userService.findPage(pageWrap));
+    public ApiResponse<SmsMsg> findPage(@RequestBody PageWrap<SmsMsg> pageWrap) {
+        return success(userService.findPage(pageWrap));
     }
 
     @GetMapping("/")
@@ -149,7 +151,7 @@ public class SmsController extends BaseController {
     @ApiOperation("根据ID修改")
     public ApiResponse<SmsMsg> updateById(@RequestBody SmsMsg req) {
         userService.updateById(req);
-        return ApiResponse.success(null);
+        return success(null);
     }
 
     /**
@@ -160,9 +162,9 @@ public class SmsController extends BaseController {
      */
     @GetMapping("/delete/{id}")
     @ApiOperation("根据ID删除")
-    public ApiResponse delete(@PathVariable Integer id) {
+    public ApiResponse<Integer> delete(@PathVariable Integer id) {
         userService.deleteById(id);
-        return ApiResponse.success(null);
+        return success(null);
     }
 
     @GetMapping("/video")

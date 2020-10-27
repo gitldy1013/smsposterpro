@@ -9,9 +9,9 @@ public class SmsMsg {
 
     private String context;
 
-    private String to;
-
     private Date sendTime;
+
+    private String to;
 
     public Integer getId() {
         return id;
@@ -50,6 +50,6 @@ public class SmsMsg {
     }
 
     public void setTo(String to) {
-        this.to = to;
+        this.to = to == null ? null : to.trim();
     }
 }
