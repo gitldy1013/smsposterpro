@@ -9,6 +9,8 @@ public class SmsMsg {
 
     private String context;
 
+    private String to;
+
     private Date sendTime;
 
     public Integer getId() {
@@ -41,5 +43,13 @@ public class SmsMsg {
 
     public void setSendTime(Date sendTime) {
         this.sendTime = sendTime;
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
     }
 }
