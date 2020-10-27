@@ -365,73 +365,73 @@ public class SmsMsgExample {
             return (Criteria) this;
         }
 
-        public Criteria andToIsNull() {
-            addCriterion("to is null");
+        public Criteria andRecPhoneIsNull() {
+            addCriterion("rec_phone is null");
             return (Criteria) this;
         }
 
-        public Criteria andToIsNotNull() {
-            addCriterion("to is not null");
+        public Criteria andRecPhoneIsNotNull() {
+            addCriterion("rec_phone is not null");
             return (Criteria) this;
         }
 
-        public Criteria andToEqualTo(String value) {
-            addCriterion("to =", value, "to");
+        public Criteria andRecPhoneEqualTo(String value) {
+            addCriterion("rec_phone =", value, "recPhone");
             return (Criteria) this;
         }
 
-        public Criteria andToNotEqualTo(String value) {
-            addCriterion("to <>", value, "to");
+        public Criteria andRecPhoneNotEqualTo(String value) {
+            addCriterion("rec_phone <>", value, "recPhone");
             return (Criteria) this;
         }
 
-        public Criteria andToGreaterThan(String value) {
-            addCriterion("to >", value, "to");
+        public Criteria andRecPhoneGreaterThan(String value) {
+            addCriterion("rec_phone >", value, "recPhone");
             return (Criteria) this;
         }
 
-        public Criteria andToGreaterThanOrEqualTo(String value) {
-            addCriterion("to >=", value, "to");
+        public Criteria andRecPhoneGreaterThanOrEqualTo(String value) {
+            addCriterion("rec_phone >=", value, "recPhone");
             return (Criteria) this;
         }
 
-        public Criteria andToLessThan(String value) {
-            addCriterion("to <", value, "to");
+        public Criteria andRecPhoneLessThan(String value) {
+            addCriterion("rec_phone <", value, "recPhone");
             return (Criteria) this;
         }
 
-        public Criteria andToLessThanOrEqualTo(String value) {
-            addCriterion("to <=", value, "to");
+        public Criteria andRecPhoneLessThanOrEqualTo(String value) {
+            addCriterion("rec_phone <=", value, "recPhone");
             return (Criteria) this;
         }
 
-        public Criteria andToLike(String value) {
-            addCriterion("to like", value, "to");
+        public Criteria andRecPhoneLike(String value) {
+            addCriterion("rec_phone like", value, "recPhone");
             return (Criteria) this;
         }
 
-        public Criteria andToNotLike(String value) {
-            addCriterion("to not like", value, "to");
+        public Criteria andRecPhoneNotLike(String value) {
+            addCriterion("rec_phone not like", value, "recPhone");
             return (Criteria) this;
         }
 
-        public Criteria andToIn(List<String> values) {
-            addCriterion("to in", values, "to");
+        public Criteria andRecPhoneIn(List<String> values) {
+            addCriterion("rec_phone in", values, "recPhone");
             return (Criteria) this;
         }
 
-        public Criteria andToNotIn(List<String> values) {
-            addCriterion("to not in", values, "to");
+        public Criteria andRecPhoneNotIn(List<String> values) {
+            addCriterion("rec_phone not in", values, "recPhone");
             return (Criteria) this;
         }
 
-        public Criteria andToBetween(String value1, String value2) {
-            addCriterion("to between", value1, value2, "to");
+        public Criteria andRecPhoneBetween(String value1, String value2) {
+            addCriterion("rec_phone between", value1, value2, "recPhone");
             return (Criteria) this;
         }
 
-        public Criteria andToNotBetween(String value1, String value2) {
-            addCriterion("to not between", value1, value2, "to");
+        public Criteria andRecPhoneNotBetween(String value1, String value2) {
+            addCriterion("rec_phone not between", value1, value2, "recPhone");
             return (Criteria) this;
         }
     }

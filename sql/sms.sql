@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `sms_msg`;
 CREATE TABLE `sms_msg` (
   `id` int(12) NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `send_phone_num` varchar(64) DEFAULT NULL COMMENT '发送号码',
-  `to` varchar(64) DEFAULT NULL COMMENT '接受号码',
+  `rec_phone` varchar(64) DEFAULT NULL COMMENT '接受号码',
   `context` varchar(255) DEFAULT NULL COMMENT '发送内容',
   `send_time` datetime NOT NULL COMMENT '发送时间',
   PRIMARY KEY (`id`)

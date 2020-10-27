@@ -11,7 +11,7 @@ public class SmsMsg {
 
     private Date sendTime;
 
-    private String to;
+    private String recPhone;
 
     public Integer getId() {
         return id;
@@ -45,11 +45,11 @@ public class SmsMsg {
         this.sendTime = sendTime;
     }
 
-    public String getTo() {
-        return to;
+    public String getRecPhone() {
+        return recPhone;
     }
 
-    public void setTo(String to) {
-        this.to = to == null ? null : to.trim();
+    public void setRecPhone(String recPhone) {
+        this.recPhone = recPhone == null ? null : recPhone.trim();
     }
 }
