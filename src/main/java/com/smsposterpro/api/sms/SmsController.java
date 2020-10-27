@@ -53,9 +53,10 @@ public class SmsController extends BaseController {
 
     @PostMapping("/post")
     @ApiOperation("推送")
-    public String post(@RequestParam("from") String from,@RequestParam("to") String to, @RequestParam("msg") String msg) {
+    public String post(@RequestParam("from") String from, @RequestParam("to") String to, @RequestParam("msg") String msg) {
         SmsMsg smsMsg = new SmsMsg();
         smsMsg.setSendPhoneNum(from);
+        smsMsg.setTo(to);
         smsMsg.setContext(msg);
         smsMsg.setSendTime(new Date());
         ApiResponse<SmsMsg> smsMsgApiResponse = create(smsMsg);
