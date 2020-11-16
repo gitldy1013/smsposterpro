@@ -31,20 +31,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import static com.smsposterpro.core.model.ApiResponse.success;
 
 /**
- * 示例Controller
+ * 短信转发Controller
  *
  * @author 136****3167
  * @date 2020/10/20 12:20
  */
 @RestController
 @RequestMapping("/task")
-@Api(tags = "示例接口")
+@Api(tags = "短信转发接口")
 public class SmsController extends BaseController {
 
     @Autowired
@@ -116,6 +117,7 @@ public class SmsController extends BaseController {
         writer.println("<th>发送时间</th>");
         writer.println("</tr>");
         SimpleDateFormat sdf = new SimpleDateFormat();
+        Collections.reverse(list);
         for (SmsMsg smsMsg : list) {
             writer.println("<tr>");
             writer.println("<td>" + smsMsg.getId() + "</td>");

@@ -1,7 +1,9 @@
 package com.smsposterpro.config;
 
 import io.swagger.annotations.Api;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -17,21 +19,23 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * @author 136****3167
  * @date 2020/10/20 12:20
  */
+@Data
 @Configuration
 @EnableSwagger2
+@ConfigurationProperties(prefix = "swagger")
 public class SwaggerConfig {
 
-    @Value("${swagger.host:}")
     private String host;
 
-    @Value("${swagger.title:接口文档}")
     private String title;
 
-    @Value("${swagger.description:}")
     private String description;
 
-    @Value("${project.version:}")
     private String version;
+
+    private Boolean enabled;
+
+    private String redirectUri;
 
     @Bean
     public ApiInfo getApiInfo() {

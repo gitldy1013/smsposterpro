@@ -21,7 +21,7 @@ public class SwaggerInterceptor implements HandlerInterceptor {
     @Value("${swagger.enabled:false}")
     private Boolean enabledSwagger;
 
-    @Value("${swagger.redirect-uri:/}")
+    @Value("${swagger.redirectUri:/}")
     private String redirectUri;
 
     @Override

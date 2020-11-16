@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 
@@ -26,7 +27,7 @@ public class Application {
         log.info("启动端口: {}", env.getProperty("server.port"));
         log.info("日志等级: {}", env.getProperty("logback.level"));
         log.info("日志Appender: {}", env.getProperty("logback.appender"));
-        log.info("Swagger: {}", Boolean.valueOf(env.getProperty("swagger.enabled")) ? "启用" : "禁用");
+        log.info("Swagger: {}", Boolean.parseBoolean(env.getProperty("swagger.enabled")) ? "启用" : "禁用");
         log.info("Startup complete ...");
         log.info("====================================================================");
     }
