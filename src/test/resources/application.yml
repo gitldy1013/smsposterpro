@@ -32,6 +32,10 @@ spring:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
+  mvc:
+    view:
+      prefix: classpath:/templates/
+      suffix: .html
 
 # MyBatis配置
 mybatis:

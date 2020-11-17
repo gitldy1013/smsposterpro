@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>本地爬虫</title>
+    <script src="../static/zyupload/js/jquery.min.js"></script>
+    <link rel="stylesheet" href="../static/zyupload/css/zyupload-1.0.0.min.css" type="text/css">
+    <script type="text/javascript" src="../static/zyupload/js/zyupload-1.0.0.min.js"></script>
+    <link href="../static/fancy/demo.css" rel="stylesheet" type="text/css">
+    <script src="../static/fancy/jquery.fancy-textbox.js" type="text/javascript"></script>
+    <link href="../static/fancy/font-awesome.css" rel="stylesheet" type="text/css">
+    <link href="../static/fancy/fancy-textbox.css" rel="stylesheet" type="text/css">
+    <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
+    <!--[if IE]>
+    <link rel="stylesheet" type="text/css" href="../static/fancy/fancy-textbox-ie.css"/>
+    <![endif]-->
+<body style="">
+<h1 style="text-align:center;">HTML本地文件爬虫解析器</h1>
+<div style="align-content: center;text-align: center;">
+    <div class="fancy-textbox-wrapper flip">
+        <input type="text" data-animation="flip" id="flag" data-icon="icon-ok"
+               data-mask="请输入需要开始筛选的数据" class="fancy-textbox masked"
+               style="text-indent: 45px;width: 550px;background-color: #00b7ee"/>
+        <i class="icon-ok"></i><br>
+        <strong>注意：爬取结果会从输入数据检索位置开始获取数据!如果不输入则检索全部信息。</strong>
+    </div>
+</div>
+<div style="align-content: center;text-align: center;">
+    <div id="zyupload" class="zyupload" style="width: 650px; height: 400px;">
+    </div>
+</div>
+<script type="text/javascript">
+    let $flag = $("#flag");
+    let url = "/upload";
+    $(function () {
+        doUpload();
+    });
+
+    function doUpload() {
+        // 初始化插件
+        $("#zyupload").zyUpload({
+            width: "650px",                 // 宽度
+            height: "400px",                 // 高度
+            itemWidth: "140px",                 // 文件项的宽度
+            itemHeight: "115px",                 // 文件项的高度
+            url: url,              // 上传文件的路径
+            fileType: ["html", "HTML"],// 上传文件的类型
+            fileSize: 51200000,                // 上传文件的大小
+            multiple: true,                    // 是否可以多个文件上传
+            dragDrop: true,                    // 是否可以拖动上传文件
+            tailor: true,                    // 是否可以裁剪图片
+            del: true,                    // 是否可以删除文件
+            finishDel: false,  				  // 是否在上传文件完成后删除预览
+            /* 外部获得的回调接口 */
+            onSelect: function (selectFiles, allFiles) {    // 选择文件的回调方法  selectFile:当前选中的文件  allFiles:还没上传的全部文件
+                console.info("当前选择了以下文件：");
+                console.info(selectFiles);
+            },
+            onDelete: function (file, files) {              // 删除一个文件的回调方法 file:当前删除的文件  files:删除之后的文件
+                console.info("当前删除了此文件：");
+                console.info(file.name);
+                files.delete(file);
+            },
+            onSuccess: function (file, response) {          // 文件上传成功的回调方法
+                console.info("此文件上传成功：");
+                console.info(file.name);
+                console.info("此文件上传到服务器地址：");
+                console.info(response);
+                $("#uploadInf").append("<h2>上传成功：</h2><pre>" + response + "</pre>");
+            },
+            onFailure: function (file, response) {          // 文件上传失败的回调方法
+                console.info("此文件上传失败：");
+                console.info(file.name);
+            },
+            onComplete: function (response) {           	  // 上传完成的回调方法
+                console.info("文件上传完成");
+                console.info(response);
+            }
+        });
+        $('input').ftext();
+        // $flag.bind("change", function () {
+        //     url = getUrl();
+        //     doUpload();
+        // });
+    }
+
+    function getUrl() {
+        return "/upload?flag=" + $flag.val();
+    }
+</script>
+</body>
+</html>

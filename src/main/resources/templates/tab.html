@@ -3,19 +3,19 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="table/css/bootstrap-table.min.css">
-    <link rel="stylesheet" href="table/css/bootstrap.min.css">
-    <script src="table/js/jquery.min.js"></script>
-    <script src="table/js/bootstrap.min.js"></script>
-    <script src="table/js/bootstrap-table.min.js"></script>
-    <script src="table/js/bootstrap-table-zh-CN.min.js"></script>
-    <script src="table/js/tableExport.js"></script>
-    <script src="table/js/bootstrap-table-export.js"></script>
+    <link rel="stylesheet" href="../static/table/css/bootstrap-table.min.css">
+    <link rel="stylesheet" href="../static/table/css/bootstrap.min.css">
+    <script src="../static/table/js/jquery.min.js"></script>
+    <script src="../static/table/js/bootstrap.min.js"></script>
+    <script src="../static/table/js/bootstrap-table.min.js"></script>
+    <script src="../static/table/js/bootstrap-table-zh-CN.min.js"></script>
+    <script src="../static/table/js/tableExport.js"></script>
+    <script src="../static/table/js/bootstrap-table-export.js"></script>
 <body>
 <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modalTable">
     获取验证码
 </button>
-<video controls autoplay src="http://localhost:8080/task/video"/>
+<!--<video controls autoplay src="/task/video"></video>-->
 <div id="modalTable" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -88,7 +88,7 @@
             title: "发送时间",
             align: "center",
             valign: "middle",
-            sortable:true
+            sortable: true
         }],
         formatNoMatches: function () {
             return '无符合条件的记录';
