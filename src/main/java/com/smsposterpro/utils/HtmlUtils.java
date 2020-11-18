@@ -15,24 +15,22 @@ import java.util.Iterator;
 
 @Slf4j
 public class HtmlUtils {
-    static boolean flagb = false;
-
     /* 使用jsoup解析html并转化为提取字符串*/
-    public static String html2Str(String html, String flag) {
+    public static boolean html2Str(String html, String flag, StringBuilder sb) {
         Document doc = Jsoup.parse(html);
         Elements span = doc.select("span");
-        boolean check = StringUtils.isNotBlank(flag) && span.size() > 0 && span.get(0).text().equals(flag);
-        if (check || StringUtils.isBlank(flag)) {
-            flagb = true;
+        boolean check = StringUtils.isNotBlank(flag) && span.size() > 0 && span.get(0).text().equals(flag) || StringUtils.isBlank(flag);
+        if (check) {
+            Iterator<Element> iterator = span.iterator();
+            StringBuilder sbsub = new StringBuilder();
+            while (iterator.hasNext()) {
+                Element next = iterator.next();
+                String text = next.text();
+                sbsub.append(text).append(System.getProperty("line.separator"));
+            }
+            sb.append(sbsub);
         }
-        Iterator<Element> iterator = span.iterator();
-        StringBuilder sb = new StringBuilder();
-        while (iterator.hasNext() && flagb) {
-            Element next = iterator.next();
-            String text = next.text();
-            sb.append(text).append(System.getProperty("line.separator"));
-        }
-        return sb.toString();
+        return check;
     }
 
     public static String readHtmlFileByPath(String path, String flag) {
@@ -48,7 +46,9 @@ public class HtmlUtils {
             BufferedReader bufferedreader = new BufferedReader(fr);
             String instring;
             while ((instring = bufferedreader.readLine()) != null) {
-                sb.append(html2Str(instring.trim(), flag));
+                if (html2Str(instring.trim(), flag, sb)) {
+                    flag = null;
+                }
             }
             return sb.toString();
         } catch (IOException e) {

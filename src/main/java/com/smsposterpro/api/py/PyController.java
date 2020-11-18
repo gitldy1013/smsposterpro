@@ -9,7 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,16 +46,24 @@ public class PyController extends BaseController {
         return "index";
     }
 
+    @PostMapping("/filter")
+    @ResponseBody
+    public String filter(String flag) {
+        if (StringUtils.isEmpty(flag)) {
+            flag = null;
+        }
+        File file = new File(TEMP_FILE_NAME);
+        String htmlFile = HtmlUtils.readHtmlFile(file, flag);
+        log.info(htmlFile);
+        return htmlFile;
+    }
+
     @ResponseBody
     @RequestMapping("/upload")
-    public String upload(MultipartFile file, String flag, HttpServletRequest request) throws IOException {
-        //获取文件的原始名
-        String filename = file.getOriginalFilename();
-        //根据相对路径获取绝对路径
-        assert filename != null;
+    public String upload(MultipartFile file, HttpServletRequest request) throws IOException {
         InputStream inputStream = file.getInputStream();
         File resourcesFile = ResourcesFileUtils.getResourcesFile(inputStream);
-        String htmlFile = HtmlUtils.readHtmlFile(resourcesFile, flag);
+        String htmlFile = HtmlUtils.readHtmlFile(resourcesFile, null);
         log.info(htmlFile);
         return htmlFile;
     }

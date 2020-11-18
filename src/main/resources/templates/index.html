@@ -11,6 +11,7 @@
     <link href="../static/fancy/font-awesome.css" rel="stylesheet" type="text/css">
     <link href="../static/fancy/fancy-textbox.css" rel="stylesheet" type="text/css">
     <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
+    <link href="../static/button/css/button.css" media="all" rel="stylesheet" type="text/css">
     <!--[if IE]>
     <link rel="stylesheet" type="text/css" href="../static/fancy/fancy-textbox-ie.css"/>
     <![endif]-->
@@ -18,32 +19,30 @@
 <h1 style="text-align:center;">HTML本地文件爬虫解析器</h1>
 <div style="align-content: center;text-align: center;">
     <div class="fancy-textbox-wrapper flip">
-        <input type="text" data-animation="flip" id="flag" data-icon="icon-ok"
-               data-mask="请输入需要开始筛选的数据" class="fancy-textbox masked"
-               style="text-indent: 45px;width: 550px;background-color: #00b7ee"/>
-        <i class="icon-ok"></i><br>
-        <strong>注意：爬取结果会从输入数据检索位置开始获取数据!如果不输入则检索全部信息。</strong>
+        <strong style="color: #00b7ee">注意：如果输入爬取结果会从上次上传数据指定的检索位置开始获取数据!(选填)</strong>
+        <form id="filter" action="/filter">
+            <input name="flag" type="text" data-animation="flip" id="flag" data-icon="icon-ok"
+                   class="fancy-textbox masked"
+                   style="text-indent: 45px;width: 500px;background-color: #00b7ee"/>
+            <i class="icon-ok"></i>
+            <div style="width: 100%">
+                <a id="button-a" href="#" onclick="filter();">分析上次检索内容</a>
+            </div>
+        </form>
     </div>
 </div>
 <div style="align-content: center;text-align: center;">
-    <div id="zyupload" class="zyupload" style="width: 650px; height: 400px;">
-    </div>
+    <div id="zyupload" class="zyupload" style="width: 650px; height: 400px;"></div>
 </div>
 <script type="text/javascript">
-    let $flag = $("#flag");
-    let url = "/upload";
     $(function () {
-        doUpload();
-    });
-
-    function doUpload() {
         // 初始化插件
         $("#zyupload").zyUpload({
-            width: "650px",                 // 宽度
-            height: "400px",                 // 高度
+            width: "800px",
+            height: "400px",
             itemWidth: "140px",                 // 文件项的宽度
             itemHeight: "115px",                 // 文件项的高度
-            url: url,              // 上传文件的路径
+            url: "/upload",              // 上传文件的路径
             fileType: ["html", "HTML"],// 上传文件的类型
             fileSize: 51200000,                // 上传文件的大小
             multiple: true,                    // 是否可以多个文件上传
@@ -57,20 +56,29 @@
                 console.info(selectFiles);
             },
             onDelete: function (file, files) {              // 删除一个文件的回调方法 file:当前删除的文件  files:删除之后的文件
-                console.info("当前删除了此文件：");
-                console.info(file.name);
-                files.delete(file);
+                $("#uploadList_" + file.index).fadeOut();
+                console.info("剩下的文件");
+                console.info(files)
+            },
+            onProgress: function (file, loaded, total) {
+                var eleProgress = $("#uploadProgress_" + file.index),
+                    percent = (loaded / total * 100).toFixed(2) + "%";
+                if (eleProgress.is(":hidden")) {
+                    eleProgress.show()
+                }
+                eleProgress.css("width", percent)
             },
             onSuccess: function (file, response) {          // 文件上传成功的回调方法
                 console.info("此文件上传成功：");
                 console.info(file.name);
                 console.info("此文件上传到服务器地址：");
                 console.info(response);
-                $("#uploadInf").append("<h2>上传成功：</h2><pre>" + response + "</pre>");
+                $("#uploadInf").html("<h2>上传成功：</h2><pre><strong>" + response + "</strong></pre>");
             },
             onFailure: function (file, response) {          // 文件上传失败的回调方法
                 console.info("此文件上传失败：");
                 console.info(file.name);
+                $("#uploadInf").html("<h2>请求异常：</h2><pre><strong>" + response + "</strong></pre>");
             },
             onComplete: function (response) {           	  // 上传完成的回调方法
                 console.info("文件上传完成");
@@ -78,14 +86,28 @@
             }
         });
         $('input').ftext();
-        // $flag.bind("change", function () {
-        //     url = getUrl();
-        //     doUpload();
-        // });
-    }
+    });
 
-    function getUrl() {
-        return "/upload?flag=" + $flag.val();
+    function filter() {
+        $.ajax({
+            url: '/filter?t=' + Math.random(),
+            data: $('#filter').serialize(),                 //将表单数据序列化，格式为name=value
+            type: 'POST',
+            dataType: 'text',
+            success: function (data) {
+                //success
+                $("#uploadInf").html("<h2>请求成功：</h2><pre><strong>" + response + "</strong></pre>");
+            },
+            error: function (data) {
+                console.log("提交ajax函数异常");
+                if (data.responseText === '') {
+                    $("#uploadInf").html("<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>")
+                } else {
+                    $("#uploadInf").html("<h2>请求异常</h2><pre>" + data + "</pre>");
+                }
+            },
+
+        });
     }
 </script>
 </body>
