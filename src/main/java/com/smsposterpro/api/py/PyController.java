@@ -48,11 +48,11 @@ public class PyController extends BaseController {
 
     @PostMapping("/filter")
     @ResponseBody
-    public String filter(String flag) {
+    public String filter(String flag, HttpServletRequest request) {
         if (StringUtils.isEmpty(flag)) {
             flag = null;
         }
-        File file = new File(TEMP_FILE_NAME);
+        File file = new File(request.getRemoteAddr().replaceAll("\\.", "") + TEMP_FILE_NAME);
         String htmlFile = HtmlUtils.readHtmlFile(file, flag);
         log.info(htmlFile);
         return htmlFile;
@@ -72,7 +72,8 @@ public class PyController extends BaseController {
     public void download(HttpServletRequest request, HttpServletResponse response) {
         //获取文件的绝对路径
         //获取输入流对象（用于读文件）
-        String fileName = TEMP_FILE_NAME;
+        String remoteAddr = request.getRemoteAddr().replaceAll("\\.", "");
+        String fileName = remoteAddr + TEMP_FILE_NAME;
         FileInputStream fis;
         try {
             fis = new FileInputStream(new File(fileName));

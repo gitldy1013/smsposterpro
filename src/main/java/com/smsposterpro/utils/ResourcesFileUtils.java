@@ -11,7 +11,7 @@ import java.io.OutputStream;
 @Slf4j
 public class ResourcesFileUtils {
 
-    public static final String TEMP_FILE_NAME = "temp.html";
+    public static final String TEMP_FILE_NAME = "/temp.html";
 
     public static File getResourcesFile(InputStream inputStream) {
         try {
