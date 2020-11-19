@@ -4,7 +4,6 @@ log/
 #idea
 .idea
 *.iws
-*.iml
 *.ipr
 .mvn
 mvnw
@@ -14,7 +13,6 @@ mvnw.cmd
 
 # Log file
 *.log
-log/
 logs
 .DS_Store
 tmp
