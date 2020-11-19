@@ -2,6 +2,7 @@ package com.smsposterpro.api.py;
 
 import com.smsposterpro.api.BaseController;
 import com.smsposterpro.service.sms.SmsMsgService;
+import com.smsposterpro.utils.CusAccessObjectUtil;
 import com.smsposterpro.utils.HtmlUtils;
 import com.smsposterpro.utils.ResourcesFileUtils;
 import io.swagger.annotations.Api;
@@ -56,7 +57,8 @@ public class PyController extends BaseController {
         }
         String htmlFile;
         try {
-            File file = new File("./" + TEMP_FILE_DIR + "/" + request.getRemoteAddr().replaceAll("\\.", "").replaceAll(":", "") + "/" + TEMP_FILE_NAME);
+            File file = new File("./" + TEMP_FILE_DIR + "/" + CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "") + "/" + TEMP_FILE_NAME);
+            log.info("获取到的文件路径：{}",file.getAbsolutePath());
             htmlFile = HtmlUtils.readHtmlFile(file, flag);
             log.info(htmlFile);
             return htmlFile;
@@ -72,7 +74,7 @@ public class PyController extends BaseController {
     @RequestMapping("/upload")
     public String upload(MultipartFile file, HttpServletRequest request) throws IOException {
         InputStream inputStream = file.getInputStream();
-        String[] directories = {TEMP_FILE_DIR, request.getRemoteAddr().replaceAll("\\.", "").replaceAll(":", "")};
+        String[] directories = {TEMP_FILE_DIR, CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "")};
         String rootName = new File(".").getAbsolutePath();
         File tempFile = createFileWithMultilevelDirectory(directories, TEMP_FILE_NAME, rootName);
         File resourcesFile = ResourcesFileUtils.getResourcesFile(inputStream, tempFile);
@@ -83,7 +85,7 @@ public class PyController extends BaseController {
 
     @RequestMapping("/download")
     public void download(HttpServletRequest request, HttpServletResponse response) {
-        String fileName = "./" + TEMP_FILE_DIR + "/" + request.getRemoteAddr().replaceAll("\\.", "").replaceAll(":", "") + "/" + TEMP_FILE_NAME;
+        String fileName = "./" + TEMP_FILE_DIR + "/" + CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "") + "/" + TEMP_FILE_NAME;
         FileInputStream fis;
         try {
             fis = new FileInputStream(new File(fileName));
