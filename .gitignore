@@ -22,3 +22,4 @@ tmp
 # Package Files #
 *.jar
 *.war
+/temp/00000001/temp.html
