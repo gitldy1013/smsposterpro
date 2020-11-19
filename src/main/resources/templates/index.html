@@ -96,15 +96,15 @@
             dataType: 'text',
             success: function (data) {
                 //success
-                $("#uploadInf").html("<h2>请求成功：</h2><pre><strong>" + data + "</strong></pre>");
+                if (data === '') {
+                    $("#uploadInf").html("<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>")
+                } else {
+                    $("#uploadInf").html("<h2>请求成功：</h2><pre><strong>" + data + "</strong></pre>");
+                }
             },
             error: function (data) {
                 console.log("提交ajax函数异常");
-                if (data.responseText === '') {
-                    $("#uploadInf").html("<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>")
-                } else {
-                    $("#uploadInf").html("<h2>请求异常</h2><pre><strong>" + data + "</strong></pre>");
-                }
+                $("#uploadInf").html("<h2>请求异常</h2><pre><strong>" + data + "</strong></pre>");
             },
 
         });

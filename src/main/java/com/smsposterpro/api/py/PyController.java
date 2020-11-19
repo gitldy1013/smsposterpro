@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 
+import static com.smsposterpro.utils.HtmlUtils.createFileWithMultilevelDirectory;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
 import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 
 /**
@@ -52,9 +54,17 @@ public class PyController extends BaseController {
         if (StringUtils.isEmpty(flag)) {
             flag = null;
         }
-        File file = new File(request.getRemoteAddr().replaceAll("\\.", "") + TEMP_FILE_NAME);
-        String htmlFile = HtmlUtils.readHtmlFile(file, flag);
-        log.info(htmlFile);
+        String htmlFile;
+        try {
+            File file = new File("./" + TEMP_FILE_DIR + "/" + request.getRemoteAddr().replaceAll("\\.", "").replaceAll(":", "") + "/" + TEMP_FILE_NAME);
+            htmlFile = HtmlUtils.readHtmlFile(file, flag);
+            log.info(htmlFile);
+            return htmlFile;
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("文件还未上传！");
+            htmlFile = "文件还未上传！首次调用需要上传文件";
+        }
         return htmlFile;
     }
 
@@ -62,7 +72,10 @@ public class PyController extends BaseController {
     @RequestMapping("/upload")
     public String upload(MultipartFile file, HttpServletRequest request) throws IOException {
         InputStream inputStream = file.getInputStream();
-        File resourcesFile = ResourcesFileUtils.getResourcesFile(inputStream);
+        String[] directories = {TEMP_FILE_DIR, request.getRemoteAddr().replaceAll("\\.", "").replaceAll(":", "")};
+        String rootName = new File(".").getAbsolutePath();
+        File tempFile = createFileWithMultilevelDirectory(directories, TEMP_FILE_NAME, rootName);
+        File resourcesFile = ResourcesFileUtils.getResourcesFile(inputStream, tempFile);
         String htmlFile = HtmlUtils.readHtmlFile(resourcesFile, null);
         log.info(htmlFile);
         return htmlFile;
@@ -70,10 +83,7 @@ public class PyController extends BaseController {
 
     @RequestMapping("/download")
     public void download(HttpServletRequest request, HttpServletResponse response) {
-        //获取文件的绝对路径
-        //获取输入流对象（用于读文件）
-        String remoteAddr = request.getRemoteAddr().replaceAll("\\.", "");
-        String fileName = remoteAddr + TEMP_FILE_NAME;
+        String fileName = "./" + TEMP_FILE_DIR + "/" + request.getRemoteAddr().replaceAll("\\.", "").replaceAll(":", "") + "/" + TEMP_FILE_NAME;
         FileInputStream fis;
         try {
             fis = new FileInputStream(new File(fileName));

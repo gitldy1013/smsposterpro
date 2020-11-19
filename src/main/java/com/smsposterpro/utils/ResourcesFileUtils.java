@@ -11,11 +11,12 @@ import java.io.OutputStream;
 @Slf4j
 public class ResourcesFileUtils {
 
-    public static final String TEMP_FILE_NAME = "/temp.html";
+    public static final String TEMP_FILE_NAME = "temp.html";
 
-    public static File getResourcesFile(InputStream inputStream) {
+    public static final String TEMP_FILE_DIR = "temp";
+
+    public static File getResourcesFile(InputStream inputStream, File file) {
         try {
-            File file = new File(TEMP_FILE_NAME);
             OutputStream os = new FileOutputStream(file);
             int len = 0;
             byte[] buffer = new byte[8192];
