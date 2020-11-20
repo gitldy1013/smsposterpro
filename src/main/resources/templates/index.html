@@ -71,7 +71,7 @@
                 eleProgress.css("width", percent)
             },
             onSuccess: function (file, response) {          // 文件上传成功的回调方法
-                if (jQuery.trim(data) === '') {
+                if (jQuery.trim(response) === '') {
                     $("#uploadInf").html("<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>");
                     indexSub = 0;
                 } else {
