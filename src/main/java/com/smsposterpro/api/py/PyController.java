@@ -125,6 +125,7 @@ public class PyController extends BaseController {
             } catch (IOException e) {
                 e.printStackTrace();
                 log.info("爬取网页信息异常", e);
+                return "爬取网页信息异常";
             } finally {
                 if (fw != null) {
                     try {
@@ -135,6 +136,9 @@ public class PyController extends BaseController {
                     }
                 }
             }
+        } else {
+            log.info("在线爬取网页失败,可能此网址已经设置防爬策略。返回响应码未：：{}", response.getStatusLine().getStatusCode());
+            return "在线爬取网页失败,可能此网址已经设置防爬策略。";
         }
         return getRes(null, request, "web");
     }
