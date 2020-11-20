@@ -153,29 +153,7 @@
     </dependencies>
 
     <build>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>2.8</version>
-            </extension>
-        </extensions>
-
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>wagon-maven-plugin</artifactId>
-                <version>1.0</version>
-                <configuration>
-                    <fromFile>target/smsposterpro-1.0.0-SNAPSHOT.jar</fromFile>
-                    <url><![CDATA[ ssh://root:class1013@101.200.86.90:22/usr/local/sms/ ]]></url>
-                    <commands>
-                        <command>sh /usr/local/sms/restart.sh</command>
-                    </commands>
-                    <!-- 显示运行命令的输出结果 -->
-                    <displayCommandOutputs>true</displayCommandOutputs>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
