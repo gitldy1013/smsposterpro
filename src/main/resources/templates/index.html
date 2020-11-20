@@ -79,7 +79,7 @@
                 let subDiv = ".uploadInfBar" + indexSub;
                 let subInfDiv = ".uploadInfSub" + indexSub;
                 $uploadInf.append('<div><div id="uploadInfBar'+indexSub+'" class="uploadInfBar'+indexSub+'" style="height: 20px;background-color: aqua;border-radius: 10px"><strong>↑↓</strong></div>'
-                    + "<div class='uploadInfSub" + indexSub + "'><h2>上传成功：</h2><pre><strong>" + data + "</strong></pre></div></div>");
+                    + "<div class='uploadInfSub" + indexSub + "'><h2>上传成功：</h2><pre><strong>" + response + "</strong></pre></div></div>");
                 $uploadInf.on("click", subDiv, function (e) {
                     $(subInfDiv).toggle();
                 });
