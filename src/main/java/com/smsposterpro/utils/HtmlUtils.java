@@ -9,7 +9,6 @@ import org.jsoup.select.Elements;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -18,9 +17,12 @@ import java.util.Iterator;
 @Slf4j
 public class HtmlUtils {
     /* 使用jsoup解析html并转化为提取字符串*/
-    public static boolean html2Str(String html, String flag, StringBuilder sb) {
+    public static boolean html2Str(String html, String flag, StringBuilder sb, String reg) {
+        if (StringUtils.isBlank(reg)) {
+            reg = "span";
+        }
         Document doc = Jsoup.parse(html);
-        Elements span = doc.select("span");
+        Elements span = doc.select(reg);
         boolean check = StringUtils.isNotBlank(flag) && span.size() > 0 && span.get(0).text().equals(flag) || StringUtils.isBlank(flag);
         if (check) {
             Iterator<Element> iterator = span.iterator();
@@ -36,11 +38,27 @@ public class HtmlUtils {
     }
 
     public static String readHtmlFileByPath(String path, String flag) {
+        return readHtmlFileByPath(path, flag, null);
+    }
+
+    public static String readHtmlFileByPath(String path, String flag, String reg) {
         File file = new File(path);
-        return readHtmlFile(file, flag);
+        return readHtmlFile(file, flag, reg);
     }
 
     public static String readHtmlFile(File file, String flag) {
+        return readHtmlFile(file, flag, null);
+    }
+
+    public static String readHtmlFile(String reg, File file) {
+        return readHtmlFile(file, null, reg);
+    }
+
+    public static String readHtmlFile(File file) {
+        return readHtmlFile(file, null, null);
+    }
+
+    public static String readHtmlFile(File file, String flag, String reg) {
         FileReader fr = null;
         try {
             StringBuilder sb = new StringBuilder();
@@ -48,7 +66,7 @@ public class HtmlUtils {
             BufferedReader bufferedreader = new BufferedReader(fr);
             String instring;
             while ((instring = bufferedreader.readLine()) != null) {
-                if (html2Str(instring.trim(), flag, sb)) {
+                if (html2Str(instring.trim(), flag, sb, reg)) {
                     flag = null;
                 }
             }

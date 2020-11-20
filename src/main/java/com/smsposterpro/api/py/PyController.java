@@ -1,19 +1,25 @@
 package com.smsposterpro.api.py;
 
 import com.smsposterpro.api.BaseController;
-import com.smsposterpro.service.sms.SmsMsgService;
 import com.smsposterpro.utils.CusAccessObjectUtil;
 import com.smsposterpro.utils.HtmlUtils;
 import com.smsposterpro.utils.ResourcesFileUtils;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,9 +28,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.util.regex.Pattern;
 
 import static com.smsposterpro.utils.HtmlUtils.createFileWithMultilevelDirectory;
 import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
@@ -41,33 +49,94 @@ import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 @Slf4j
 public class PyController extends BaseController {
 
-    @Autowired
-    private SmsMsgService userService;
-
     @GetMapping("/index")
     public String index() {
         return "index";
     }
 
-    @PostMapping("/filter")
-    @ResponseBody
-    public String filter(String flag, HttpServletRequest request) {
-        if (StringUtils.isEmpty(flag)) {
-            flag = null;
-        }
-        String htmlFile;
+    private String getRes(String param, HttpServletRequest request, String doAct) {
+        String htmlFile = null;
+        param = StringUtils.isEmpty(param) ? null : param;
+        File file = null;
         try {
-            File file = new File("./" + TEMP_FILE_DIR + "/" + CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "") + "/" + TEMP_FILE_NAME);
-            log.info("获取到的文件路径：{}",file.getAbsolutePath());
-            htmlFile = HtmlUtils.readHtmlFile(file, flag);
-            log.info(htmlFile);
-            return htmlFile;
+            file = new File("./" + TEMP_FILE_DIR + "/" + CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "") + "/" + TEMP_FILE_NAME);
+            log.info("获取到的文件路径：{}", file.getAbsolutePath());
         } catch (Exception e) {
             e.printStackTrace();
             log.info("文件还未上传！");
             htmlFile = "文件还未上传！首次调用需要上传文件";
         }
+        if (htmlFile == null) {
+            if ("filter".equals(doAct)) {
+                htmlFile = HtmlUtils.readHtmlFile(file, param);
+            } else if ("regcus".equals(doAct)) {
+                htmlFile = HtmlUtils.readHtmlFile(param, file);
+            } else {
+                htmlFile = HtmlUtils.readHtmlFile(file);
+            }
+        }
+        log.info(htmlFile);
         return htmlFile;
+    }
+
+    @PostMapping("/regcus")
+    @ResponseBody
+    public String regcus(String param, HttpServletRequest request) {
+        String doAct = "regcus";
+        return getRes(param, request, doAct);
+    }
+
+    @PostMapping("/filter")
+    @ResponseBody
+    public String filter(String param, HttpServletRequest request) {
+        String doAct = "filter";
+
+        return getRes(param, request, doAct);
+    }
+
+    @PostMapping("/webpy")
+    @ResponseBody
+    public String webpy(@RequestParam(name = "param", required = true) String param, HttpServletRequest request) {
+        String regex = "^([hH][tT]{2}[pP]:/*|[hH][tT]{2}[pP][sS]:/*|[fF][tT][pP]:/*)(([A-Za-z0-9-~]+).)+([A-Za-z0-9-~\\/])+(\\?{0,1}(([A-Za-z0-9-~]+\\={0,1})([A-Za-z0-9-~]*)\\&{0,1})*)$";
+        Pattern pattern = Pattern.compile(regex);
+        if (StringUtils.isEmpty(param) || !pattern.matcher(param).matches()) {
+            return "请输入有效爬取链接地址";
+        }
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpGet httpget = new HttpGet(param);
+        CloseableHttpResponse response = null;
+        try {
+            response = httpClient.execute(httpget);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert response != null;
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            HttpEntity httpEntity = response.getEntity();
+            FileWriter fw = null;
+            try {
+                String content = EntityUtils.toString(httpEntity, "UTF-8");
+                String[] directories = {TEMP_FILE_DIR, CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "")};
+                String rootName = new File(".").getAbsolutePath();
+                File tempFile = createFileWithMultilevelDirectory(directories, TEMP_FILE_NAME, rootName);
+                fw = new FileWriter(tempFile);
+                fw.write(content);
+                fw.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+                log.info("爬取网页信息异常", e);
+            } finally {
+                if (fw != null) {
+                    try {
+                        fw.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        log.info("关闭文件流失败", e);
+                    }
+                }
+            }
+        }
+        return getRes(null, request, "web");
     }
 
     @ResponseBody

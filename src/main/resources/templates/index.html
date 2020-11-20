@@ -19,14 +19,16 @@
 <h1 style="text-align:center;">HTML本地文件爬虫解析器</h1>
 <div style="align-content: center;text-align: center;">
     <div class="fancy-textbox-wrapper flip">
-        <strong style="color: #00b7ee">注意：如果输入爬取结果会从上次上传数据指定的检索位置开始获取数据!(选填)</strong>
-        <form id="filter" action="/filter">
-            <input name="flag" type="text" data-animation="flip" id="flag" data-icon="icon-ok"
+        <strong style="color: #00b7ee">注意：此处操作均会基于最后一次导入文件结果进行处理!(选填)</strong>
+        <form id="form" action="#">
+            <input name="param" type="text" data-animation="flip" id="param" data-icon="icon-ok"
                    class="fancy-textbox masked"
                    style="text-indent: 45px;width: 500px;background-color: #00b7ee"/>
             <i class="icon-ok"></i>
             <div style="width: 100%">
-                <a id="button-a" href="#" onclick="filter();">分析上次检索内容</a>
+                <a class="button-a" href="#" onclick="filter('filter');">分析检索内容</a>
+                <a class="button-a" href="#" onclick="filter('webpy');">爬取网页</a>
+                <a class="button-a" href="#" onclick="filter('regcus');">定义检索条件</a>
             </div>
         </form>
     </div>
@@ -73,7 +75,7 @@
                 console.info(file.name);
                 console.info("此文件上传到服务器地址：");
                 console.info(response);
-                $("#uploadInf").html("<h2>上传成功：</h2><pre><strong>" + response + "</strong></pre>");
+                $("#uploadInf").append("<h2>上传成功：</h2><pre><strong>" + response + "</strong></pre>");
             },
             onFailure: function (file, response) {          // 文件上传失败的回调方法
                 console.info("此文件上传失败：");
@@ -88,15 +90,14 @@
         $('input').ftext();
     });
 
-    function filter() {
+    function filter(str) {
         $.ajax({
-            url: '/filter?t=' + Math.random(),
-            data: $('#filter').serialize(),                 //将表单数据序列化，格式为name=value
+            url: '/' + str + '?t=' + Math.random(),
+            data: $('#form').serialize(),                 //将表单数据序列化，格式为name=value
             type: 'POST',
             dataType: 'text',
             success: function (data) {
-                //success
-                if (data === '') {
+                if (jQuery.trim(data) === '') {
                     $("#uploadInf").html("<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>")
                 } else {
                     $("#uploadInf").html("<h2>请求成功：</h2><pre><strong>" + data + "</strong></pre>");
