@@ -185,17 +185,6 @@
 
     <repositories>
         <repository>
-            <id>maven-leg</id>
-            <name>legMirror</name>
-            <url>http://leg.liudongyang.top:8081/repository/maven-releases/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
             <id>maven-aliyun</id>
             <name>aliyunMirror</name>
             <url>http://maven.aliyun.com/nexus/content/repositories/central</url>

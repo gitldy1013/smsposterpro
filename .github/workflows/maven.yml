@@ -45,7 +45,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: Package with Maven
-      run: mvn -B package assembly:single --file pom.xml -Dmaven.test.skip=true
+      run: mvn -B package pom.xml -Dmaven.test.skip=true
 
     - name: MV files
       run: |
