@@ -1,5 +1,6 @@
 package com.smsposterpro.utils;
 
+import com.smsposterpro.exception.AesException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -17,24 +18,28 @@ import java.util.Iterator;
 @Slf4j
 public class HtmlUtils {
     /* 使用jsoup解析html并转化为提取字符串*/
-    public static boolean html2Str(String html, String flag, StringBuilder sb, String reg) {
+    public static boolean html2Str(String html, String flag, StringBuilder sb, String reg) throws AesException {
         if (StringUtils.isBlank(reg)) {
             reg = "span";
         }
         Document doc = Jsoup.parse(html);
-        Elements span = doc.select(reg);
-        boolean check = StringUtils.isNotBlank(flag) && span.size() > 0 && span.get(0).text().equals(flag) || StringUtils.isBlank(flag);
-        if (check) {
-            Iterator<Element> iterator = span.iterator();
-            StringBuilder sbsub = new StringBuilder();
-            while (iterator.hasNext()) {
-                Element next = iterator.next();
-                String text = next.text();
-                sbsub.append(text).append(System.getProperty("line.separator"));
+        try {
+            Elements span = doc.select(reg);
+            boolean check = StringUtils.isNotBlank(flag) && span.size() > 0 && span.get(0).text().equals(flag) || StringUtils.isBlank(flag);
+            if (check) {
+                Iterator<Element> iterator = span.iterator();
+                StringBuilder sbsub = new StringBuilder();
+                while (iterator.hasNext()) {
+                    Element next = iterator.next();
+                    String text = next.text();
+                    sbsub.append(text).append(System.getProperty("line.separator"));
+                }
+                sb.append(sbsub);
             }
-            sb.append(sbsub);
+            return check;
+        } catch (Exception e) {
+            throw new AesException(AesException.errorReg);
         }
-        return check;
     }
 
     public static String readHtmlFileByPath(String path, String flag) {
@@ -74,10 +79,13 @@ public class HtmlUtils {
         } catch (IOException e) {
             log.error("读取数据异常", e);
             return "读取数据异常";
+        } catch (AesException e) {
+            return e.getMessage();
         } finally {
             try {
-                assert fr != null;
-                fr.close();
+                if (fr != null) {
+                    fr.close();
+                }
             } catch (IOException e) {
                 log.error("数据流关闭异常", e);
             }
