@@ -49,7 +49,7 @@ jobs:
 
     - name: MV files
       run: |
-        mv -f ./target/smsposterpro-${{steps.tag_main.outputs.value}}-jar-with-dependencies.jar smsposterpro.jar
+        mv -f ./target/smsposterpro-${{steps.tag_main.outputs.value}}.jar smsposterpro.jar
 
     - name: Create Release
       id: create_release
