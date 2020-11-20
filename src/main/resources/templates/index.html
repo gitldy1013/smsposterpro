@@ -71,20 +71,25 @@
                 eleProgress.css("width", percent)
             },
             onSuccess: function (file, response) {          // 文件上传成功的回调方法
-                console.info("此文件上传成功：");
-                console.info(file.name);
-                console.info("此文件上传到服务器地址：");
-                console.info(response);
-                let $uploadInf = $("#uploadInf");
-                let subDiv = ".uploadInfBar" + indexSub;
-                let subInfDiv = ".uploadInfSub" + indexSub;
-                $uploadInf.html('');
-                $uploadInf.append('<div><div id="uploadInfBar'+indexSub+'" class="uploadInfBar'+indexSub+'" style="height: 20px;background-color: aqua;border-radius: 10px"><strong>↑↓</strong></div>'
-                    + "<div class='uploadInfSub" + indexSub + "'><h2>上传成功：</h2><pre><strong>" + response + "</strong></pre></div></div>");
-                $uploadInf.on("click", subDiv, function (e) {
-                    $(subInfDiv).toggle();
-                });
-                indexSub = indexSub + 1;
+                if (jQuery.trim(data) === '') {
+                    $("#uploadInf").html("<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>");
+                    indexSub = 0;
+                } else {
+                    console.info("此文件上传成功：");
+                    console.info(file.name);
+                    console.info("此文件上传到服务器地址：");
+                    console.info(response);
+                    let $uploadInf = $("#uploadInf");
+                    let subDiv = ".uploadInfBar" + indexSub;
+                    let subInfDiv = ".uploadInfSub" + indexSub;
+                    $uploadInf.html('');
+                    $uploadInf.append('<div><div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="height: 20px;background-color: aqua;border-radius: 10px"><strong>↑↓</strong></div>'
+                        + "<div class='uploadInfSub" + indexSub + "'><h2>上传成功：</h2><pre><strong>" + response + "</strong></pre></div></div>");
+                    $uploadInf.on("click", subDiv, function (e) {
+                        $(subInfDiv).toggle();
+                    });
+                    indexSub = indexSub + 1;
+                }
             },
             onFailure: function (file, response) {          // 文件上传失败的回调方法
                 console.info("此文件上传失败：");
@@ -109,14 +114,14 @@
             dataType: 'text',
             success: function (data) {
                 if (jQuery.trim(data) === '') {
-                    $("#uploadInf").html("<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>")
+                    $("#uploadInf").html("<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>");
                     indexSub = 0;
                 } else {
                     let $uploadInf = $("#uploadInf");
                     let subDiv = ".uploadInfBar" + indexSub;
                     let subInfDiv = ".uploadInfSub" + indexSub;
                     $uploadInf.html('');
-                    $uploadInf.append('<div><div id="uploadInfBar'+indexSub+'" class="uploadInfBar'+indexSub+'" style="height: 20px;background-color: aqua;border-radius: 10px"><strong>↑↓</strong></div>'
+                    $uploadInf.append('<div><div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="height: 20px;background-color: aqua;border-radius: 10px"><strong>↑↓</strong></div>'
                         + "<div class='uploadInfSub" + indexSub + "'><h2>上传成功：</h2><pre><strong>" + data + "</strong></pre></div></div>");
                     $uploadInf.on("click", subDiv, function (e) {
                         $(subInfDiv).toggle();
