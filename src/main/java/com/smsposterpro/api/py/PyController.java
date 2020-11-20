@@ -97,7 +97,7 @@ public class PyController extends BaseController {
     @PostMapping("/webpy")
     @ResponseBody
     public String webpy(@RequestParam(name = "param", required = true) String param, HttpServletRequest request) {
-        String regex = "^([hH][tT]{2}[pP]:/*|[hH][tT]{2}[pP][sS]:/*|[fF][tT][pP]:/*)(([A-Za-z0-9-~]+).)+([A-Za-z0-9-~\\/])+(\\?{0,1}(([A-Za-z0-9-~]+\\={0,1})([A-Za-z0-9-~]*)\\&{0,1})*)$";
+        String regex = "(https?|HTTP)://[-\\w+&@#/%=~|?!:,.;]+[-\\w+&@#/%=~|]";
         Pattern pattern = Pattern.compile(regex);
         if (StringUtils.isEmpty(param) || !pattern.matcher(param).matches()) {
             return "请输入有效爬取链接地址";

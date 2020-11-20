@@ -15,7 +15,7 @@
     <!--[if IE]>
     <link rel="stylesheet" type="text/css" href="../static/fancy/fancy-textbox-ie.css"/>
     <![endif]-->
-<body style="">
+<body style="background-color: #beceeb">
 <h1 style="text-align:center;">HTML本地文件爬虫解析器</h1>
 <div style="align-content: center;text-align: center;">
     <div class="fancy-textbox-wrapper flip">
@@ -75,12 +75,21 @@
                 console.info(file.name);
                 console.info("此文件上传到服务器地址：");
                 console.info(response);
-                $("#uploadInf").append("<h2>上传成功：</h2><pre><strong>" + response + "</strong></pre>");
+                let $uploadInf = $("#uploadInf");
+                let subDiv = ".uploadInfBar" + indexSub;
+                let subInfDiv = ".uploadInfSub" + indexSub;
+                $uploadInf.append('<div><div id="uploadInfBar'+indexSub+'" class="uploadInfBar'+indexSub+'" style="height: 20px;background-color: aqua;border-radius: 10px"><strong>↑↓</strong></div>'
+                    + "<div class='uploadInfSub" + indexSub + "'><h2>上传成功：</h2><pre><strong>" + data + "</strong></pre></div></div>");
+                $uploadInf.on("click", subDiv, function (e) {
+                    $(subInfDiv).toggle();
+                });
+                indexSub = indexSub + 1;
             },
             onFailure: function (file, response) {          // 文件上传失败的回调方法
                 console.info("此文件上传失败：");
                 console.info(file.name);
                 $("#uploadInf").html("<h2>请求异常：</h2><pre><strong>" + response + "</strong></pre>");
+                indexSub = 0;
             },
             onComplete: function (response) {           	  // 上传完成的回调方法
                 console.info("文件上传完成");
@@ -89,6 +98,7 @@
         });
         $('input').ftext();
     });
+    let indexSub = 0;
 
     function filter(str) {
         $.ajax({
@@ -99,13 +109,23 @@
             success: function (data) {
                 if (jQuery.trim(data) === '') {
                     $("#uploadInf").html("<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>")
+                    indexSub = 0;
                 } else {
-                    $("#uploadInf").html("<h2>请求成功：</h2><pre><strong>" + data + "</strong></pre>");
+                    let $uploadInf = $("#uploadInf");
+                    let subDiv = ".uploadInfBar" + indexSub;
+                    let subInfDiv = ".uploadInfSub" + indexSub;
+                    $uploadInf.append('<div><div id="uploadInfBar'+indexSub+'" class="uploadInfBar'+indexSub+'" style="height: 20px;background-color: aqua;border-radius: 10px"><strong>↑↓</strong></div>'
+                        + "<div class='uploadInfSub" + indexSub + "'><h2>上传成功：</h2><pre><strong>" + data + "</strong></pre></div></div>");
+                    $uploadInf.on("click", subDiv, function (e) {
+                        $(subInfDiv).toggle();
+                    });
+                    indexSub = indexSub + 1;
                 }
             },
             error: function (data) {
                 console.log("提交ajax函数异常");
                 $("#uploadInf").html("<h2>请求异常</h2><pre><strong>" + data + "</strong></pre>");
+                indexSub = 0;
             },
 
         });
