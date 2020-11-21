@@ -1,0 +1,90 @@
+name: Publish And Deploy Demo # 自动部署的名称
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/release.json"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest # 运行环境，告诉它运行在什么环境
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    # 从release.json 读取相关信息
+    - name: Read tag_main
+      id: tag_main
+      uses: ashley-taylor/read-json-property-action@v1.0
+      with:
+        path: ./.github/release.json
+        property: tag_main
+
+    - name: Read tag_latest
+      id: tag_latest
+      uses: ashley-taylor/read-json-property-action@v1.0
+      with:
+        path: ./.github/release.json
+        property: tag_latest
+
+    - name: Read description
+      id: description
+      uses: juliangruber/read-file-action@v1
+      with:
+        path: ./.github/release.info
+
+    - name: Cache local Maven repository
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: Package with Maven
+      run: mvn package -Dmaven.test.skip=true
+
+    - name: MV files
+      run: |
+        mv -f ./target/smsposterpro-${{steps.tag_main.outputs.value}}.jar smsposterpro.jar
+        tar -zcvf smsposterpro.tgz smsposterpro.jar
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: V${{steps.tag_latest.outputs.value}}
+        release_name: smsposterpro-v${{steps.tag_latest.outputs.value}}
+        body: |
+          ${{steps.description.outputs.content}}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+        asset_path: ./smsposterpro.tgz # 要上传文件
+        asset_name: smsposterpro.tgz # 上传后的文件名
+        asset_content_type: application/x-tgz
+
+    - name: Deploy
+      uses: appleboy/ssh-action@master # 使用ssh链接服务器
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: | # 执行命令（运行到服务器）cd：要确保服务器有这个目录； wget：下载上一步的release到服务器； tar：解压； 安装依赖；启动服务
+          cd /usr/local/sms/
+         wget https://github.com/gitldy1013/smsposterpro/releases/download/V${{steps.tag_latest.outputs.value}}/smsposterpro.tgz -O smsposterpro.tgz
+         tar -zxvf smsposterpro.tgz
+          sh /usr/local/sms/restartweb.sh
