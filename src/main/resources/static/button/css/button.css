@@ -73,10 +73,11 @@
     overflow-x:hidden;
 }
 #two{
-
     float: right;
     position: relative;
     width: 50%;
     height: calc(100vh);
     overflow-y:auto;
+    overflow-x:hidden;
+    word-wrap:break-word;
 }
