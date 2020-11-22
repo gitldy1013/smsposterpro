@@ -16,27 +16,18 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.util.regex.Pattern;
 
 import static com.smsposterpro.utils.HtmlUtils.createFileWithMultilevelDirectory;
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
+import static com.smsposterpro.utils.ResourcesFileUtils.*;
 
 /**
  * 短信转发Controller
@@ -157,17 +148,18 @@ public class PyController extends BaseController {
     }
 
     @RequestMapping("/download")
-    public void download(HttpServletRequest request, HttpServletResponse response) {
-        String fileName = "./" + TEMP_FILE_DIR + "/" + CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "") + "/" + TEMP_FILE_NAME;
+    public void download(String text, HttpServletRequest request, HttpServletResponse response) {
+        String fileName = "./" + TEMP_FILE_DIR + "/" + CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "") + "/" + TEMP_EXP_FILE_NAME;
         FileInputStream fis;
         try {
+            FileCopyUtils.copy(text.replaceAll("/r/n",System.lineSeparator()), new FileWriter(new File(fileName)));
             fis = new FileInputStream(new File(fileName));
             //获取文件后缀（.txt）
             String extendFileName = fileName.substring(fileName.lastIndexOf('.'));
             //动态设置响应类型，根据前台传递文件类型设置响应类型
             response.setContentType(request.getSession().getServletContext().getMimeType(extendFileName));
             //设置响应头,attachment表示以附件的形式下载，inline表示在线打开
-            response.setHeader("content-disposition", "attachment;fileName=" + URLEncoder.encode(fileName, "UTF-8"));
+            response.setHeader("content-disposition", "attachment;fileName=" + URLEncoder.encode(TEMP_EXP_FILE_NAME, "UTF-8"));
             //获取输出流对象（用于写文件）
             ServletOutputStream os = response.getOutputStream();
             //下载文件,使用spring框架中的FileCopyUtils工具

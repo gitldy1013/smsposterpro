@@ -52,6 +52,7 @@
 <script type="text/javascript">
     let indexSub = 1;
     let time = 500;
+
     function doInf(data, file, title) {
         if (jQuery.trim(data) === '') {
             data = "<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>";
@@ -67,7 +68,9 @@
         }
         $uploadInf.append('<div>' +
             '<div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="font-family: 华文隶书;font-size: x-large;background-color: #00b7ee;text-align: center">'
-            + filename + '<a style="color: springgreen" href="#" onclick="checkInf(' + indexSub + ');">切换</a><a style="color: red" href="#" onclick="deleteInf(' + indexSub + ');">删除</a></div>'
+            + filename + '<a style="color: springgreen" href="#" onclick="checkInf(' + indexSub + ');">切换</a>' +
+            '<a style="color: red" href="#" onclick="deleteInf(' + indexSub + ');">删除</a>' +
+            '<a style="color: yellow" href="/download?text=' + data.replace(RegExp("\n", "g"), "/r/n") + '&t=' + Math.random() + '">导出</a></div>'
             + "<div style='display: none;' class='uploadInfSub" + indexSub + "'><pre><strong>" + data + "</strong></pre></div></div>");
         if (indexSub === 1 || file === undefined) {
             $(subInfDiv).toggle(1000);
