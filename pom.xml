@@ -153,6 +153,7 @@
     </dependencies>
 
     <build>
+        <finalName>smsposterpro</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
