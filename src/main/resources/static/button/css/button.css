@@ -2,7 +2,7 @@
     position: relative;
     padding: 10px 20px;
     margin: 0 45px;
-    color: #21ebff;
+    color: #00b7ee;
     text-decoration: none;
     font-size: 20px;
     text-transform: uppercase;
@@ -21,10 +21,6 @@
 
 .button-a:nth-child(1) {
     filter: hue-rotate(115deg);
-}
-
-.button-a:nth-child(3) {
-    filter: hue-rotate(270deg);
 }
 
 .button-a::before {

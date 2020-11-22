@@ -23,18 +23,19 @@
             <strong style="color: #00b7ee">注意：此处操作均会基于最后一次成功爬取结果进行处理!(选填)</strong>
             <form id="form" action="#">
                 <div style="align-content: center;text-align: center;width: calc(50vw)">
-                    <input name="filter" type="text" data-animation="flip" data-icon="icon-ok"
-                           class="fancy-textbox masked"
-                           style="text-indent: 45px;width: 300px;background-color: #00b7ee"/>
-                    <span><a class="button-a" style="color: springgreen" href="#" onclick="filter('filter');">分析检索内容</a></span></br>
-                    <input name="webpy" type="text" data-animation="flip" data-icon="icon-ok"
-                           class="fancy-textbox masked"
-                           style="text-indent: 45px;width: 300px;background-color: #00b7ee"/>
-                    <span><a class="button-a" style="color: red" href="#" onclick="filter('webpy');">在线爬取网页</a></span></br>
-                    <input name="regcus" type="text" data-animation="flip" data-icon="icon-ok"
-                           class="fancy-textbox masked"
-                           style="text-indent: 45px;width: 300px;background-color: #00b7ee"/>
-                    <span><a class="button-a" style="color: #00b7ee" href="#" onclick="filter('regcus');">定义检索条件</a></span></br>
+                    <input name="webpy" type="text" data-animation="flip"
+                           class="fancy-textbox masked" placeholder="请输入有效网址"
+                           style="text-indent: 45px;width: 300px;background-color: #FFE4C4"/>
+                    <a class="button-a" href="#" onclick="filter('webpy');"><span
+                            style="color: #0066ff">在线爬取网页</span></a></br>
+                    <input name="filter" type="text" data-animation="flip"
+                           class="fancy-textbox masked" placeholder="请输入索引位置"
+                           style="text-indent: 45px;width: 300px;background-color: #FFE4C4"/>
+                    <a class="button-a" href="#" onclick="filter('filter');"><span>分析检索内容</span></a></br>
+                    <input name="regcus" type="text" data-animation="flip"
+                           class="fancy-textbox masked" placeholder="请输入检索标签"
+                           style="text-indent: 45px;width: 300px;background-color: #FFE4C4	"/>
+                    <a class="button-a" href="#" onclick="filter('regcus');"><span>定义检索条件</span></a></br>
                 </div>
             </form>
         </div>
@@ -51,36 +52,29 @@
 
     function doInf(data, file) {
         if (jQuery.trim(data) === '') {
-            indexSub = 0;
-            $("#uploadInf").html("<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>");
+            data = "<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>";
         } else {
             let $uploadInf = $("#uploadInf");
             let subDiv = ".uploadInfBar" + indexSub;
             let subInfDiv = ".uploadInfSub" + indexSub;
             let filename = '';
             if (file !== undefined) {
-                if (indexSub === 0) {
-                    $uploadInf.html('');
-                    indexSub = 1;
-                }
                 filename = file.name;
-                $uploadInf.append('<div>' +
-                    '<div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="font-family: 华文隶书;font-size: x-large;background-color: #00b7ee;text-align: center">'
-                    + filename + '<a style="color: red" href="#" onclick="deleteinf('+indexSub+');">删除</a></div>'
-                    + "<div class='uploadInfSub" + indexSub + "'><pre><strong>" + data + "</strong></pre></div></div>");
-                indexSub = indexSub + 1;
             } else {
                 filename = '最终获取的文件结果';
-                indexSub = 0;
-                $uploadInf.html('<div>' +
-                    '<div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="font-family: 华文隶书;font-size: x-large;background-color: #00b7ee;text-align: center">'
-                    + filename + '<a style="color: red" href="#" onclick="deleteinf('+indexSub+');">删除</a></div>'
-                    + "<div class='uploadInfSub" + indexSub + "'><pre><strong>" + data + "</strong></pre></div></div>");
+            }
+            $uploadInf.append('<div>' +
+                '<div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="font-family: 华文隶书;font-size: x-large;background-color: #00b7ee;text-align: center">'
+                + filename + '<a style="color: red" href="#" onclick="deleteinf(' + indexSub + ');">删除</a></div>'
+                + "<div style='display: none;' class='uploadInfSub" + indexSub + "'><pre><strong>" + data + "</strong></pre></div></div>");
+            if(indexSub === 1 || file === undefined){
+                $(subInfDiv).toggle(1500);
             }
             $uploadInf.on("click", subDiv, function (e) {
                 // $(subInfDiv).slideToggle(1500);
                 $(subInfDiv).toggle(1500);
             });
+            indexSub = indexSub + 1;
         }
     }
 
@@ -98,7 +92,7 @@
     $(function () {
         // 初始化插件
         $("#zyupload").zyUpload({
-            width: "calc(50vw)",
+            width: "calc(45vw)",
             height: "100%",
             itemWidth: "140px",                 // 文件项的宽度
             itemHeight: "115px",                 // 文件项的高度
