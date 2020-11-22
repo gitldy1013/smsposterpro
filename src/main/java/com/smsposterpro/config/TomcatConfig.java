@@ -11,10 +11,23 @@ import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-//@Configuration
+@Configuration
 public class TomcatConfig {
 
     private int httpPort = 8080;
+
+    /**
+     * 配置转义字符,解决当请求路径中特殊字符，高版本tomcat解析失败的问题
+     */
+    @Bean
+    public ServletWebServerFactory webServerFactory() {
+        TomcatServletWebServerFactory fa = new TomcatServletWebServerFactory();
+        fa.addConnectorCustomizers(connector -> {
+            connector.setProperty("relaxedQueryChars", "(),/:;<=>?@[\\]{}");
+            connector.setProperty("rejectIllegalHeader", "false");
+        });
+        return fa;
+    }
 
     //@Bean
     public WebServerFactoryCustomizer<ConfigurableWebServerFactory> webServerFactoryCustomizer() {
