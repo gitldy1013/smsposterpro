@@ -72,7 +72,7 @@
             '<a style="color: red" href="#" onclick="deleteInf(' + indexSub + ');">删除</a>' +
             '<a style="color: yellow" href="/download?text=' + data.replace(RegExp("\n", "g"), "/r/n") + '&t=' + Math.random() + '">导出</a></div>'
             + "<div style='display: none;' class='uploadInfSub" + indexSub + "'><pre><strong>" + data + "</strong></pre></div></div>");
-        if (indexSub === 1 || file === undefined) {
+        if ($(".uploadInfSub" + (indexSub-1)).html() === undefined || file === undefined) {
             $(subInfDiv).toggle(1000);
         }
         // $uploadInf.on("click", subDiv, function (e) {
