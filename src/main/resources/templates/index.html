@@ -23,19 +23,21 @@
             <strong style="color: #00b7ee">注意：此处操作均会基于最后一次成功爬取结果进行处理!(选填)</strong>
             <form id="form" action="#">
                 <div style="align-content: center;text-align: center;width: calc(50vw)">
-                    <input name="webpy" type="text" data-animation="flip"
+                    <input id="webpy" name="webpy" type="text" data-animation="flip"
                            class="fancy-textbox masked" placeholder="请输入有效网址"
                            style="text-indent: 45px;width: 300px;background-color: #FFE4C4"/>
-                    <a class="button-a" href="#" onclick="filter('webpy');"><span
+                    <a class="button-a" href="#" onclick="filter('webpy',$('#webpy').val());"><span
                             style="color: #0066ff">在线爬取网页</span></a></br>
-                    <input name="filter" type="text" data-animation="flip"
+                    <input id="filter" name="filter" type="text" data-animation="flip"
                            class="fancy-textbox masked" placeholder="请输入索引位置"
                            style="text-indent: 45px;width: 300px;background-color: #FFE4C4"/>
-                    <a class="button-a" href="#" onclick="filter('filter');"><span>分析检索内容</span></a></br>
-                    <input name="regcus" type="text" data-animation="flip"
+                    <a class="button-a" href="#"
+                       onclick="filter('filter',$('#filter').val());"><span>分析检索内容</span></a></br>
+                    <input id="regcus" name="regcus" type="text" data-animation="flip"
                            class="fancy-textbox masked" placeholder="请输入检索标签"
                            style="text-indent: 45px;width: 300px;background-color: #FFE4C4	"/>
-                    <a class="button-a" href="#" onclick="filter('regcus');"><span>定义检索条件</span></a></br>
+                    <a class="button-a" href="#"
+                       onclick="filter('regcus',$('#regcus').val());"><span>定义检索条件</span></a></br>
                 </div>
             </form>
         </div>
@@ -49,44 +51,48 @@
 </div>
 <script type="text/javascript">
     let indexSub = 1;
-
-    function doInf(data, file) {
+    let time = 500;
+    function doInf(data, file, title) {
         if (jQuery.trim(data) === '') {
             data = "<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>";
-        } else {
-            let $uploadInf = $("#uploadInf");
-            let subDiv = ".uploadInfBar" + indexSub;
-            let subInfDiv = ".uploadInfSub" + indexSub;
-            let filename = '';
-            if (file !== undefined) {
-                filename = file.name;
-            } else {
-                filename = '最终获取的文件结果';
-            }
-            $uploadInf.append('<div>' +
-                '<div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="font-family: 华文隶书;font-size: x-large;background-color: #00b7ee;text-align: center">'
-                + filename + '<a style="color: red" href="#" onclick="deleteinf(' + indexSub + ');">删除</a></div>'
-                + "<div style='display: none;' class='uploadInfSub" + indexSub + "'><pre><strong>" + data + "</strong></pre></div></div>");
-            if(indexSub === 1 || file === undefined){
-                $(subInfDiv).toggle(1500);
-            }
-            $uploadInf.on("click", subDiv, function (e) {
-                // $(subInfDiv).slideToggle(1500);
-                $(subInfDiv).toggle(1500);
-            });
-            indexSub = indexSub + 1;
         }
+        let $uploadInf = $("#uploadInf");
+        let subDiv = ".uploadInfBar" + indexSub;
+        let subInfDiv = ".uploadInfSub" + indexSub;
+        let filename = '';
+        if (file !== undefined) {
+            filename = file.name;
+        } else {
+            filename = title;
+        }
+        $uploadInf.append('<div>' +
+            '<div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="font-family: 华文隶书;font-size: x-large;background-color: #00b7ee;text-align: center">'
+            + filename + '<a style="color: springgreen" href="#" onclick="checkInf(' + indexSub + ');">切换</a><a style="color: red" href="#" onclick="deleteInf(' + indexSub + ');">删除</a></div>'
+            + "<div style='display: none;' class='uploadInfSub" + indexSub + "'><pre><strong>" + data + "</strong></pre></div></div>");
+        if (indexSub === 1 || file === undefined) {
+            $(subInfDiv).toggle(1000);
+        }
+        // $uploadInf.on("click", subDiv, function (e) {
+        //     // $(subInfDiv).slideToggle(1500);
+        //     $(subInfDiv).toggle(1000);
+        // });
+        indexSub = indexSub + 1;
     }
 
-    function deleteinf(index) {
+    function checkInf(index) {
+        let subInfDiv = $(".uploadInfSub" + index);
+        subInfDiv.toggle(time);
+    }
+
+    function deleteInf(index) {
         let subDiv = $(".uploadInfBar" + index);
         let subInfDiv = $(".uploadInfSub" + index);
-        subInfDiv.hide(1500);
+        subInfDiv.hide(time);
         setTimeout(function () {
-            subDiv.hide(1500);
+            subDiv.hide(time);
             subInfDiv.remove();
             subDiv.remove();
-        }, 1500);
+        }, time);
     }
 
     $(function () {
@@ -135,18 +141,18 @@
         $('input').ftext();
     });
 
-    function filter(str) {
+    function filter(str, title) {
         $.ajax({
             url: '/' + str + '?t=' + Math.random(),
             data: $('#form').serialize(),                 //将表单数据序列化，格式为name=value
             type: 'POST',
             dataType: 'text',
             success: function (data) {
-                doInf(data);
+                doInf(data, undefined, title);
             },
             error: function (data) {
                 data = "<h2>请求异常</h2><pre><strong>" + data + "</strong></pre>";
-                doInf(data);
+                doInf(data, undefined, title);
             },
 
         });
