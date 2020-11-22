@@ -63,3 +63,19 @@
     height: 100%;
     transition-delay: 0s;
 }
+
+#one{
+    float: left;
+    width: 50%;
+    height: calc(100vh);
+    overflow-y:auto;
+    overflow-x:hidden;
+}
+#two{
+
+    float: right;
+    position: relative;
+    width: 50%;
+    height: calc(100vh);
+    overflow-y:auto;
+}
