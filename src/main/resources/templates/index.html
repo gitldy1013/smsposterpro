@@ -17,24 +17,24 @@
     <![endif]-->
 <body style="background-color: #f8f6ed;height: 100%">
 <div id="one">
-    <h1 style="text-align:center;">HTML本地文件爬虫解析器</h1>
+    <h1 style="text-align:center;">HTML爬虫解析器</h1>
     <div style="align-content: center;text-align: center;">
         <div class="fancy-textbox-wrapper flip">
             <strong style="color: #00b7ee">注意：此处操作均会基于最后一次成功爬取结果进行处理!(选填)</strong>
             <form id="form" action="#">
-                <div style="align-content: center;text-align: center;width: 100%">
+                <div style="align-content: center;text-align: center;width: calc(50vw)">
                     <input name="filter" type="text" data-animation="flip" data-icon="icon-ok"
                            class="fancy-textbox masked"
                            style="text-indent: 45px;width: 300px;background-color: #00b7ee"/>
-                    <a class="button-a" style="color: springgreen" href="#" onclick="filter('filter');">分析检索内容</a></br>
+                    <span><a class="button-a" style="color: springgreen" href="#" onclick="filter('filter');">分析检索内容</a></span></br>
                     <input name="webpy" type="text" data-animation="flip" data-icon="icon-ok"
                            class="fancy-textbox masked"
                            style="text-indent: 45px;width: 300px;background-color: #00b7ee"/>
-                    <a class="button-a" style="color: red" href="#" onclick="filter('webpy');">在线爬取网页</a></br>
+                    <span><a class="button-a" style="color: red" href="#" onclick="filter('webpy');">在线爬取网页</a></span></br>
                     <input name="regcus" type="text" data-animation="flip" data-icon="icon-ok"
                            class="fancy-textbox masked"
                            style="text-indent: 45px;width: 300px;background-color: #00b7ee"/>
-                    <a class="button-a" style="color: #00b7ee" href="#" onclick="filter('regcus');">定义检索条件</a></br>
+                    <span><a class="button-a" style="color: #00b7ee" href="#" onclick="filter('regcus');">定义检索条件</a></span></br>
                 </div>
             </form>
         </div>
@@ -98,6 +98,7 @@
     $(function () {
         // 初始化插件
         $("#zyupload").zyUpload({
+            width: "calc(50vw)",
             height: "100%",
             itemWidth: "140px",                 // 文件项的宽度
             itemHeight: "115px",                 // 文件项的高度

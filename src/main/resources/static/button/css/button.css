@@ -1,6 +1,6 @@
 .button-a {
     position: relative;
-    padding: 10px 30px;
+    padding: 10px 20px;
     margin: 0 45px;
     color: #21ebff;
     text-decoration: none;
@@ -8,6 +8,7 @@
     text-transform: uppercase;
     transition: 0.5s;
     overflow: hidden;
+    white-space:nowrap;
     -webkit-box-reflect: below 1px linear-gradient(transparent, #0003);
 }
 
