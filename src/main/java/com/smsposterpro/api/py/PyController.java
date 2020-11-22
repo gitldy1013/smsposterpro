@@ -81,22 +81,22 @@ public class PyController extends BaseController {
 
     @PostMapping("/regcus")
     @ResponseBody
-    public String regcus(String param, HttpServletRequest request) {
+    public String regcus(String regcus, HttpServletRequest request) {
         String doAct = "regcus";
-        return getRes(param, request, doAct);
+        return getRes(regcus, request, doAct);
     }
 
     @PostMapping("/filter")
     @ResponseBody
-    public String filter(String param, HttpServletRequest request) {
+    public String filter(String filter, HttpServletRequest request) {
         String doAct = "filter";
 
-        return getRes(param, request, doAct);
+        return getRes(filter, request, doAct);
     }
 
     @PostMapping("/webpy")
     @ResponseBody
-    public String webpy(@RequestParam(name = "param", required = true) String param, HttpServletRequest request) {
+    public String webpy(@RequestParam(name = "webpy", required = true) String param, HttpServletRequest request) {
         String regex = "(https?|HTTP)://[-\\w+&@#/%=~|?!:,.;]+[-\\w+&@#/%=~|]";
         Pattern pattern = Pattern.compile(regex);
         if (StringUtils.isEmpty(param) || !pattern.matcher(param).matches()) {

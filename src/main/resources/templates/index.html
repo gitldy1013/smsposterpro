@@ -21,14 +21,19 @@
     <div class="fancy-textbox-wrapper flip">
         <strong style="color: #00b7ee">注意：此处操作均会基于最后一次成功爬取结果进行处理!(选填)</strong>
         <form id="form" action="#">
-            <input name="param" type="text" data-animation="flip" id="param" data-icon="icon-ok"
-                   class="fancy-textbox masked"
-                   style="text-indent: 45px;width: 500px;background-color: #00b7ee"/>
-            <i class="icon-ok"></i>
-            <div style="width: 100%">
-                <a class="button-a" href="#" onclick="filter('filter');">分析检索内容</a>
-                <a class="button-a" href="#" onclick="filter('webpy');">爬取网页</a>
-                <a class="button-a" href="#" onclick="filter('regcus');">定义检索条件</a>
+            <div style="align-content: center;text-align: center;width: 100%">
+                <input name="filter" type="text" data-animation="flip" data-icon="icon-ok"
+                       class="fancy-textbox masked"
+                       style="text-indent: 45px;width: 400px;background-color: #00b7ee"/>
+                <a class="button-a" style="color: springgreen" href="#" onclick="filter('filter');">分析检索内容</a></br>
+                <input name="webpy" type="text" data-animation="flip" data-icon="icon-ok"
+                       class="fancy-textbox masked"
+                       style="text-indent: 45px;width: 400px;background-color: #00b7ee"/>
+                <a class="button-a" style="color: red" href="#" onclick="filter('webpy');">在线爬取网页</a></br>
+                <input name="regcus" type="text" data-animation="flip" data-icon="icon-ok"
+                       class="fancy-textbox masked"
+                       style="text-indent: 45px;width: 400px;background-color: #00b7ee"/>
+                <a class="button-a" style="color: #00b7ee" href="#" onclick="filter('regcus');">定义检索条件</a></br>
             </div>
         </form>
     </div>
@@ -37,6 +42,31 @@
     <div id="zyupload" class="zyupload" style="width: 650px; height: 400px;"></div>
 </div>
 <script type="text/javascript">
+    function doSuccess(data, file) {
+        if (jQuery.trim(data) === '') {
+            $("#uploadInf").html("<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>");
+            indexSub = 0;
+        } else {
+            let $uploadInf = $("#uploadInf");
+            let subDiv = ".uploadInfBar" + indexSub;
+            let subInfDiv = ".uploadInfSub" + indexSub;
+            let filename = '';
+            if (file !== undefined) {
+                filename = file.name;
+            }else {
+                filename = '最终获取的文件结果';
+            }
+            $uploadInf.append('<div>' +
+                '<div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="font-family: 华文隶书;font-size: x-large;background-color: #00b7ee;text-align: center">' + file.name + '</div>'
+                + "<div class='uploadInfSub" + indexSub + "'><pre><strong>" + data + "</strong></pre></div></div>");
+            $uploadInf.on("click", subDiv, function (e) {
+                // $(subInfDiv).slideToggle(1500);
+                $(subInfDiv).toggle(1500);
+            });
+            indexSub = indexSub + 1;
+        }
+    }
+
     $(function () {
         // 初始化插件
         $("#zyupload").zyUpload({
@@ -52,6 +82,7 @@
             tailor: true,                    // 是否可以裁剪图片
             del: true,                    // 是否可以删除文件
             finishDel: false,  				  // 是否在上传文件完成后删除预览
+            dataType: 'text',
             /* 外部获得的回调接口 */
             onSelect: function (selectFiles, allFiles) {    // 选择文件的回调方法  selectFile:当前选中的文件  allFiles:还没上传的全部文件
                 console.info("当前选择了以下文件：");
@@ -71,25 +102,7 @@
                 eleProgress.css("width", percent)
             },
             onSuccess: function (file, response) {          // 文件上传成功的回调方法
-                if (jQuery.trim(response) === '') {
-                    $("#uploadInf").html("<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>");
-                    indexSub = 0;
-                } else {
-                    console.info("此文件上传成功：");
-                    console.info(file.name);
-                    console.info("此文件上传到服务器地址：");
-                    console.info(response);
-                    let $uploadInf = $("#uploadInf");
-                    let subDiv = ".uploadInfBar" + indexSub;
-                    let subInfDiv = ".uploadInfSub" + indexSub;
-                    $uploadInf.html('');
-                    $uploadInf.append('<div><div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="height: 20px;background-color: #232321;border-radius: 10px"><strong>↑↓</strong></div>'
-                        + "<div class='uploadInfSub" + indexSub + "'><h2>上传成功：</h2><pre><strong>" + response + "</strong></pre></div></div>");
-                    $uploadInf.on("click", subDiv, function (e) {
-                        $(subInfDiv).toggle();
-                    });
-                    indexSub = indexSub + 1;
-                }
+                doSuccess(response, file);
             },
             onFailure: function (file, response) {          // 文件上传失败的回调方法
                 console.info("此文件上传失败：");
@@ -113,21 +126,7 @@
             type: 'POST',
             dataType: 'text',
             success: function (data) {
-                if (jQuery.trim(data) === '') {
-                    $("#uploadInf").html("<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>");
-                    indexSub = 0;
-                } else {
-                    let $uploadInf = $("#uploadInf");
-                    let subDiv = ".uploadInfBar" + indexSub;
-                    let subInfDiv = ".uploadInfSub" + indexSub;
-                    $uploadInf.html('');
-                    $uploadInf.append('<div><div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="height: 20px;background-color: #232321;border-radius: 10px"><strong>↑↓</strong></div>'
-                        + "<div class='uploadInfSub" + indexSub + "'><h2>上传成功：</h2><pre><strong>" + data + "</strong></pre></div></div>");
-                    $uploadInf.on("click", subDiv, function (e) {
-                        $(subInfDiv).toggle();
-                    });
-                    indexSub = indexSub + 1;
-                }
+                doSuccess(data);
             },
             error: function (data) {
                 console.log("提交ajax函数异常");
