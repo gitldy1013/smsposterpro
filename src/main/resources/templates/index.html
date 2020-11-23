@@ -12,12 +12,37 @@
     <link href="../static/fancy/fancy-textbox.css" rel="stylesheet" type="text/css">
     <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
     <link href="../static/button/css/button.css" media="all" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="../static/fonts/style.css">
     <!--[if IE]>
     <link rel="stylesheet" type="text/css" href="../static/fancy/fancy-textbox-ie.css"/>
     <![endif]-->
 <body style="background-color: #f8f6ed;height: 100%">
 <div id="one">
-    <h1 style="text-align:center;">HTML爬虫解析器</h1>
+    <div class="container">
+        <h3 id="font-effect" style="color: rgb(0, 0, 0); height: 40px; visibility: visible; display: block;"><span
+                style="opacity: 1; visibility: visible; position: absolute;">爬</span><span
+                style="opacity: 1; visibility: visible; position: absolute;">虫</span><span
+                style="opacity: 1; visibility: visible; position: absolute;">工</span><span
+                style="opacity: 1; visibility: visible; position: absolute;">具</span></h3>
+        <p id="font-effect-info" style="color: rgb(0, 0, 0); height: 40px; visibility: visible; display: block;"><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span><span
+                style="opacity: 1; visibility: visible; position: absolute;"></span></p>
+    </div>
     <div style="align-content: center;text-align: center;">
         <div class="fancy-textbox-wrapper flip">
             <strong style="color: #00b7ee">注意：此处操作均会基于最后一次成功爬取结果进行处理!(选填)</strong>
@@ -165,15 +190,24 @@
             type: 'POST',
             dataType: 'text',
             success: function (data) {
+                if(str === 'webpy'){
+                    title = decodeURIComponent(title);
+                }
                 doInf(data, undefined, title);
             },
             error: function (data) {
                 data = "<h2>请求异常</h2><pre><strong>" + data + "</strong></pre>";
+                if(str === 'webpy'){
+                    title = decodeURIComponent(title);
+                }
                 doInf(data, undefined, title);
             },
 
         });
     }
 </script>
+<script src="../static/fonts/jquery.easing.1.3.js"></script>
+<script src="../static/fonts/core_plugin.js"></script>
+<script src="../static/fonts/custom_effect.js"></script>
 </body>
 </html>

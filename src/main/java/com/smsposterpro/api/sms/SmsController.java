@@ -11,6 +11,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,7 +43,7 @@ import static com.smsposterpro.core.model.ApiResponse.success;
  * @author 136****3167
  * @date 2020/10/20 12:20
  */
-@RestController
+@Controller
 @RequestMapping("/task")
 @Api(tags = "短信转发接口")
 public class SmsController extends BaseController {
@@ -56,6 +56,7 @@ public class SmsController extends BaseController {
 
     @PostMapping("/post")
     @ApiOperation("推送")
+    @ResponseBody
     public String post(@RequestParam("from") String from, @RequestParam("to") String to, @RequestParam("msg") String msg) {
         SmsMsg smsMsg = new SmsMsg();
         smsMsg.setSendPhoneNum(from);
@@ -75,6 +76,7 @@ public class SmsController extends BaseController {
      */
     @PostMapping("/put")
     @ApiOperation("创建")
+    @ResponseBody
     public ApiResponse<SmsMsg> create(@RequestBody SmsMsg req) {
         return success(userService.create(req));
     }
@@ -87,6 +89,7 @@ public class SmsController extends BaseController {
      */
     @GetMapping("/{id}")
     @ApiOperation("根据ID查询")
+    @ResponseBody
     public ApiResponse<SmsMsg> finById(@PathVariable Integer id) {
         return success(userService.findById(id));
     }
@@ -99,13 +102,14 @@ public class SmsController extends BaseController {
      */
     @PostMapping("/list")
     @ApiOperation("分页查询")
+    @ResponseBody
     public ApiResponse<SmsMsg> findPage(@RequestBody PageWrap<SmsMsg> pageWrap) {
         return success(userService.findPage(pageWrap));
     }
 
-    @GetMapping("/")
+    @GetMapping("/old")
     @ApiOperation("查询")
-    public void list(HttpServletRequest req, HttpServletResponse res) throws IOException {
+    public void listOld(HttpServletRequest req, HttpServletResponse res) throws IOException {
         List<SmsMsg> list = userService.findList(new SmsMsg());
         res.setHeader("Content-Type", "text/html; charset=UTF-8");
         PrintWriter writer = res.getWriter();
@@ -130,6 +134,12 @@ public class SmsController extends BaseController {
         writer.close();
     }
 
+    @GetMapping("/")
+    @ApiOperation("查询")
+    public String list(HttpServletRequest req, HttpServletResponse res){
+        return "tab";
+    }
+
     @CrossOrigin(allowCredentials = "true")
     @GetMapping("/query")
     @ApiOperation("查询")
@@ -151,6 +161,7 @@ public class SmsController extends BaseController {
      */
     @PostMapping("/updateById")
     @ApiOperation("根据ID修改")
+    @ResponseBody
     public ApiResponse<SmsMsg> updateById(@RequestBody SmsMsg req) {
         userService.updateById(req);
         return success(null);
@@ -164,6 +175,7 @@ public class SmsController extends BaseController {
      */
     @GetMapping("/delete/{id}")
     @ApiOperation("根据ID删除")
+    @ResponseBody
     public ApiResponse<Integer> delete(@PathVariable Integer id) {
         userService.deleteById(id);
         return success(null);

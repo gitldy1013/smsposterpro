@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../static/table/css/bootstrap-table.min.css">
     <link rel="stylesheet" href="../static/table/css/bootstrap.min.css">
-    <script src="../static/table/js/jquery.min.js"></script>
+    <script src="../static/zyupload/js/jquery.min.js"></script>
     <script src="../static/table/js/bootstrap.min.js"></script>
     <script src="../static/table/js/bootstrap-table.min.js"></script>
     <script src="../static/table/js/bootstrap-table-zh-CN.min.js"></script>
@@ -37,7 +37,7 @@
                        data-id-field="id"
                        data-show-footer="true"
                        data-toggle="table"
-                       data-url="https://sms.liudongyang.top:334/task/query">
+                       data-url="https://sms.liudongyang.top/task/query">
                     <thead>
                     <tr>
                         <th data-field="id">序号ID</th>
@@ -55,11 +55,35 @@
     </div>
 </div>
 
+<table id="tablepre"
+       data-toolbar="#toolbar"
+       data-search="true"
+       data-show-refresh="true"
+       data-show-toggle="true"
+       data-show-columns="true"
+       data-show-export="true"
+       data-click-to-select="true"
+       data-minimum-count-columns="2"
+       data-show-pagination-switch="true"
+       data-id-field="id"
+       data-show-footer="true"
+       data-toggle="table"
+       data-url="https://sms.liudongyang.top/task/query">
+    <thead>
+    <tr>
+        <th data-field="id">序号ID</th>
+        <th data-field="sendPhoneNum">电话号码</th>
+        <th data-field="context">信息内容</th>
+        <th data-field="sendTime">发送时间</th>
+    </tr>
+    </thead>
+</table>
+
 <script>
     var $table = $('#table');
     $table.bootstrapTable({
         method: 'get',
-        url: "https://sms.liudongyang.top:334/task/query",
+        url: "https://sms.liudongyang.top/task/query",
         dataType: 'json',
         cache: false, //不使用缓存
         striped: true, //显示行间隔色
@@ -97,7 +121,44 @@
     $(function () {
         $('#modalTable').on('shown.bs.modal', function () {
             $table.bootstrapTable('resetView')
-        })
+        });
+        $('#tablepre').bootstrapTable({
+            method: 'get',
+            url: "https://sms.liudongyang.top/task/query",
+            dataType: 'json',
+            cache: false, //不使用缓存
+            striped: true, //显示行间隔色
+            pagination: true, //显示分页
+            pageSize: 5, //每页的行数
+            pageList: [5, 10, 20], //自定义每页的行数
+            search: true, //显示表格搜索
+            showRefresh: true, //刷新按钮
+            columns: [{
+                field: "id",
+                title: "序号ID",
+                align: "center",
+                valign: "middle"
+            }, {
+                field: "sendPhoneNum",
+                title: "电话号码",
+                align: "center",
+                valign: "middle"
+            }, {
+                field: "context",
+                title: "信息内容",
+                align: "center",
+                valign: "middle"
+            }, {
+                field: "sendTime",
+                title: "发送时间",
+                align: "center",
+                valign: "middle",
+                sortable: true
+            }],
+            formatNoMatches: function () {
+                return '无符合条件的记录';
+            }
+        });
     })
 </script>
 </body>
