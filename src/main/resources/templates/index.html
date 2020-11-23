@@ -53,6 +53,20 @@
     let indexSub = 1;
     let time = 500;
 
+    var DownLoadFile = function (options) {
+        var config = $.extend(true, {method: 'post'}, options);
+        var $iframe = $('<iframe id="down-file-iframe" />');
+        var $form = $('<form target="down-file-iframe" method="' + config.method + '" />');
+        $form.attr('action', config.url);
+        for (var key in config.jsondata) {
+            $form.append('<input type="hidden" name="' + key + '" value="' + config.jsondata[key] + '" />');
+        }
+        $iframe.append($form);
+        $(document.body).append($iframe);
+        $form[0].submit();
+        $iframe.remove();
+    };
+
     function doInf(data, file, title) {
         if (jQuery.trim(data) === '') {
             data = "<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>";
@@ -70,9 +84,9 @@
             '<div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="font-family: 华文隶书;font-size: x-large;background-color: #00b7ee;text-align: center">'
             + filename + '<a style="color: springgreen" href="#" onclick="checkInf(' + indexSub + ');">切换</a>' +
             '<a style="color: red" href="#" onclick="deleteInf(' + indexSub + ');">删除</a>' +
-            '<a style="color: yellow" href="/download?text=' + data.replace(RegExp("\n", "g"), "/r/n") + '&t=' + Math.random() + '">导出</a></div>'
+            '<a style="color: yellow" href="#" onclick="DownLoadFile({url: \'/download\', jsondata: { \'filename\':\'' + filename + '\',\'t\': \'' + Math.random() + '\'}});" >导出</a></div>'
             + "<div style='display: none;' class='uploadInfSub" + indexSub + "'><pre><strong>" + data + "</strong></pre></div></div>");
-        if ($(".uploadInfSub" + (indexSub-1)).html() === undefined || file === undefined) {
+        if ($(".uploadInfSub" + (indexSub - 1)).html() === undefined || file === undefined) {
             $(subInfDiv).toggle(1000);
         }
         // $uploadInf.on("click", subDiv, function (e) {

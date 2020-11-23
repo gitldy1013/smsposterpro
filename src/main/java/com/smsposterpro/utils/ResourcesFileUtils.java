@@ -12,7 +12,7 @@ import java.io.OutputStream;
 public class ResourcesFileUtils {
 
     public static final String TEMP_FILE_NAME = "temp.html";
-    public static final String TEMP_EXP_FILE_NAME = "结果导出.txt";
+    public static final String TEMP_EXP_FILE_NAME = "结果导出.html";
     public static final String TEMP_FILE_DIR = "temp";
 
     public static File getResourcesFile(InputStream inputStream, File file) {

@@ -7,7 +7,7 @@ import com.smsposterpro.dao.user.model.SmsMsg;
 import java.util.List;
 
 /**
- * 示例Service定义
+ * SMSService定义
  *
  * @author 136****3167
  * @date 2020/10/20 12:20
