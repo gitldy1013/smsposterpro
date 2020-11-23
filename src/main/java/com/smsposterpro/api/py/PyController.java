@@ -16,18 +16,28 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.regex.Pattern;
 
 import static com.smsposterpro.utils.HtmlUtils.createFileWithMultilevelDirectory;
-import static com.smsposterpro.utils.ResourcesFileUtils.*;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_EXP_FILE_NAME;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 
 /**
  * 短信转发Controller
@@ -67,8 +77,11 @@ public class PyController extends BaseController {
             }
         }
         log.info(htmlFile);
+        if (StringUtils.isEmpty(htmlFile)) {
+            htmlFile = "<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>";
+        }
         try {
-            FileCopyUtils.copy(htmlFile,new FileWriter(new File("./" + TEMP_FILE_DIR + "/" + CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "") + "/" +TEMP_EXP_FILE_NAME)));
+            FileCopyUtils.copy(htmlFile, new FileWriter(new File("./" + TEMP_FILE_DIR + "/" + CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "") + "/" + TEMP_EXP_FILE_NAME)));
         } catch (IOException e) {
             e.printStackTrace();
             log.error("文件保存出错.html");
@@ -149,14 +162,14 @@ public class PyController extends BaseController {
         File resourcesFile = ResourcesFileUtils.getResourcesFile(inputStream, tempFile);
         String htmlFile = HtmlUtils.readHtmlFile(resourcesFile, null);
         String fileName = "./" + TEMP_FILE_DIR + "/" + CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "") + "/" + file.getOriginalFilename();
-        FileCopyUtils.copy(htmlFile,new FileWriter(new File(fileName)));
+        FileCopyUtils.copy(htmlFile, new FileWriter(new File(fileName)));
         log.info(htmlFile);
         return htmlFile;
     }
 
     @RequestMapping("/download")
     public void download(String filename, HttpServletRequest request, HttpServletResponse response) {
-        filename = (StringUtils.isEmpty(filename))?TEMP_EXP_FILE_NAME:filename;
+        filename = (StringUtils.isEmpty(filename)) ? TEMP_EXP_FILE_NAME : filename;
         String fileName = "./" + TEMP_FILE_DIR + "/" + CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "") + "/" + filename;
         FileInputStream fis;
         try {

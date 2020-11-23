@@ -100,8 +100,10 @@
         let subDiv = ".uploadInfBar" + indexSub;
         let subInfDiv = ".uploadInfSub" + indexSub;
         let filename = '';
+        let expFileName = '';
         if (file !== undefined) {
             filename = file.name;
+            expFileName = filename;
         } else {
             filename = title;
         }
@@ -109,7 +111,7 @@
             '<div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="font-family: 华文隶书;font-size: x-large;background-color: #00b7ee;text-align: center">'
             + filename + '<a style="color: springgreen" href="#" onclick="checkInf(' + indexSub + ');">切换</a>' +
             '<a style="color: red" href="#" onclick="deleteInf(' + indexSub + ');">删除</a>' +
-            '<a style="color: yellow" href="#" onclick="DownLoadFile({url: \'/download\', jsondata: { \'filename\':\'' + filename + '\',\'t\': \'' + Math.random() + '\'}});" >导出</a></div>'
+            '<a style="color: yellow" href="#" onclick="DownLoadFile({url: \'/download\', jsondata: { \'filename\':\'' + expFileName + '\',\'t\': \'' + Math.random() + '\'}});" >导出</a></div>'
             + "<div style='display: none;' class='uploadInfSub" + indexSub + "'><pre><strong>" + data + "</strong></pre></div></div>");
         if ($(".uploadInfSub" + (indexSub - 1)).html() === undefined || file === undefined) {
             $(subInfDiv).toggle(1000);
