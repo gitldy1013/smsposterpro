@@ -65,7 +65,7 @@ public class PyController extends BaseController {
         } catch (Exception e) {
             e.printStackTrace();
             log.info("文件还未上传！");
-            htmlFile = "文件还未上传！首次调用需要上传文件";
+            htmlFile = "<h2>文件还未上传！首次调用需要上传文件</h2>";
         }
         if (htmlFile == null) {
             if ("filter".equals(doAct)) {
@@ -109,7 +109,7 @@ public class PyController extends BaseController {
         String regex = "(https?|HTTP)://[-\\w+&@#/%=~|?!:,.;]+[-\\w+&@#/%=~|]";
         Pattern pattern = Pattern.compile(regex);
         if (StringUtils.isEmpty(param) || !pattern.matcher(param).matches()) {
-            return "请输入有效爬取链接地址";
+            return "<h2>请输入有效爬取链接地址</h2>";
         }
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpget = new HttpGet(param);
@@ -134,7 +134,7 @@ public class PyController extends BaseController {
             } catch (IOException e) {
                 e.printStackTrace();
                 log.info("爬取网页信息异常", e);
-                return "爬取网页信息异常";
+                return "<h2>爬取网页信息异常</h2>";
             } finally {
                 if (fw != null) {
                     try {
@@ -147,7 +147,7 @@ public class PyController extends BaseController {
             }
         } else {
             log.info("在线爬取网页失败,可能此网址已经设置防爬策略。返回响应码未：：{}", response.getStatusLine().getStatusCode());
-            return "在线爬取网页失败,可能此网址已经设置防爬策略。";
+            return "<h2>在线爬取网页失败,可能此网址已经设置防爬策略。</h2>";
         }
         return getRes(null, request, "web");
     }
