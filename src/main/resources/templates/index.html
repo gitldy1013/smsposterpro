@@ -13,6 +13,7 @@
     <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
     <link href="../static/button/css/button.css" media="all" rel="stylesheet" type="text/css">
     <link rel="stylesheet" type="text/css" href="../static/fonts/style.css">
+    <link rel="stylesheet" type="text/css" href="../static/loaders/css/style.css">
     <!--[if IE]>
     <link rel="stylesheet" type="text/css" href="../static/fancy/fancy-textbox-ie.css"/>
     <![endif]-->
@@ -167,14 +168,19 @@
                 var eleProgress = $("#uploadProgress_" + file.index),
                     percent = (loaded / total * 100).toFixed(2) + "%";
                 if (eleProgress.is(":hidden")) {
-                    eleProgress.show()
+                    eleProgress.show();
+                    doload(parseInt(Math.random() * 6 + 1));
                 }
                 eleProgress.css("width", percent)
             },
             onSuccess: function (file, response) {          // 文件上传成功的回调方法
+                let $active = $('.active');
+                $active.removeClass();
                 doInf(response, file);
             },
             onFailure: function (file, response) {
+                let $active = $('.active');
+                $active.removeClass();
                 response = "<h2>请求异常：</h2><pre><strong>" + response + "</strong></pre>";
                 doInf(response, file);// 文件上传失败的回调方法
             },
@@ -192,14 +198,19 @@
             type: 'POST',
             dataType: 'text',
             success: function (data) {
-                if(str === 'webpy'){
+                let $active = $('.active');
+                $active.removeClass();
+                if (str === 'webpy') {
                     title = decodeURIComponent(title);
                 }
                 doInf(data, undefined, title);
             },
+            beforeSend: function(){
+                doload(parseInt(Math.random() * 6 + 1));
+            },
             error: function (data) {
                 data = "<h2>请求异常</h2><pre><strong>" + data + "</strong></pre>";
-                if(str === 'webpy'){
+                if (str === 'webpy') {
                     title = decodeURIComponent(title);
                 }
                 doInf(data, undefined, title);
@@ -207,9 +218,59 @@
 
         });
     }
+
+    function doload(thisid) {
+        let $loader = $('#spinners li[data-id="' + thisid + '"]');
+        $loader.addClass('active');
+    }
 </script>
+<div class="jq22-container">
+    <ul id="spinners">
+        <li class="" data-id="1">
+            <div id="preloader_1">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </li>
+        <li data-id="2">
+            <div id="preloader_2">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </li>
+        <li data-id="3">
+            <div id="preloader_3"></div>
+        </li>
+        <li data-id="4">
+            <div id="preloader_4">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </li>
+        <li data-id="5">
+            <div id="preloader5"></div>
+        </li>
+        <li data-id="6">
+            <div id="preloader6">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </li>
+    </ul>
+</div>
 <script src="../static/fonts/jquery.easing.1.3.js"></script>
 <script src="../static/fonts/core_plugin.js"></script>
 <script src="../static/fonts/custom_effect.js"></script>
+<script type="text/javascript" src="../static/loaders/js/js.js"></script>
 </body>
 </html>
