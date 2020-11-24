@@ -32,9 +32,11 @@ public class HtmlUtils {
                 while (iterator.hasNext()) {
                     Element next = iterator.next();
                     String text = next.text();
-                    sbsub.append(text).append(System.getProperty("line.separator"));
+                    sbsub.append(text.trim());
                 }
-                sb.append(sbsub);
+                if (StringUtils.isNotBlank(sbsub)) {
+                    sb.append(sbsub.append(System.getProperty("line.separator")));
+                }
             }
             return check;
         } catch (Exception e) {
@@ -80,7 +82,7 @@ public class HtmlUtils {
             log.error("读取数据异常", e);
             return "<h2>读取数据异常,当前还未上传有效文件！<h2>";
         } catch (AesException e) {
-            return "<h2>"+e.getMessage()+"</h2>";
+            return "<h2>" + e.getMessage() + "</h2>";
         } finally {
             try {
                 if (fr != null) {

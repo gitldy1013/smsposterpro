@@ -13,6 +13,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -103,9 +105,9 @@ public class PyController extends BaseController {
         return getRes(filter, request, doAct);
     }
 
-    @PostMapping("/webpy")
+    @PostMapping("/webpyold")
     @ResponseBody
-    public String webpy(@RequestParam(name = "webpy", required = true) String param, HttpServletRequest request) throws IOException {
+    public String webpyold(@RequestParam(name = "webpy", required = true) String param, HttpServletRequest request) throws IOException {
         String regex = "(https?|HTTP)://[-\\w+&@#/%=~|?!:,.;]+[-\\w+&@#/%=~|]";
         Pattern pattern = Pattern.compile(regex);
         if (StringUtils.isEmpty(param) || !pattern.matcher(param).matches()) {
@@ -122,33 +124,50 @@ public class PyController extends BaseController {
         assert response != null;
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             HttpEntity httpEntity = response.getEntity();
-            FileWriter fw = null;
-            try {
-                String content = EntityUtils.toString(httpEntity, "UTF-8");
-                String[] directories = {TEMP_FILE_DIR, CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "")};
-                String rootName = new File(".").getAbsolutePath();
-                File tempFile = createFileWithMultilevelDirectory(directories, TEMP_FILE_NAME, rootName);
-                fw = new FileWriter(tempFile);
-                fw.write(content);
-                fw.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-                log.info("爬取网页信息异常", e);
-                return "<h2>爬取网页信息异常</h2>";
-            } finally {
-                if (fw != null) {
-                    try {
-                        fw.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        log.info("关闭文件流失败", e);
-                    }
-                }
-            }
+            if (doSaveTempFile(request, EntityUtils.toString(httpEntity, "UTF-8"))) return "<h2>爬取网页信息异常</h2>";
         } else {
             log.info("在线爬取网页失败,可能此网址已经设置防爬策略。返回响应码未：：{}", response.getStatusLine().getStatusCode());
             return "<h2>在线爬取网页失败,可能此网址已经设置防爬策略。</h2>";
         }
+        return getRes(null, request, "web");
+    }
+
+    private boolean doSaveTempFile(HttpServletRequest request, String content) {
+        FileWriter fw = null;
+        try {
+            String[] directories = {TEMP_FILE_DIR, CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "")};
+            String rootName = new File(".").getAbsolutePath();
+            File tempFile = createFileWithMultilevelDirectory(directories, TEMP_FILE_NAME, rootName);
+            fw = new FileWriter(tempFile);
+            fw.write(content);
+            fw.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.info("爬取网页信息异常", e);
+            return true;
+        } finally {
+            if (fw != null) {
+                try {
+                    fw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    log.info("关闭文件流失败", e);
+                }
+            }
+        }
+        return false;
+    }
+
+    @PostMapping("/webpy")
+    @ResponseBody
+    public String webpy(@RequestParam(name = "webpy", required = true) String param, HttpServletRequest request) throws IOException {
+        String regex = "(https?|HTTP)://[-\\w+&@#/%=~|?!:,.;]+[-\\w+&@#/%=~|]";
+        Pattern pattern = Pattern.compile(regex);
+        if (StringUtils.isEmpty(param) || !pattern.matcher(param).matches()) {
+            return "<h2>请输入有效爬取链接地址</h2>";
+        }
+        Document document = Jsoup.connect(param).get();
+        doSaveTempFile(request, document.toString());
         return getRes(null, request, "web");
     }
 
