@@ -1,7 +1,9 @@
 package com.smsposterpro.api.py;
 
 import com.smsposterpro.api.BaseController;
+import com.smsposterpro.exception.AesException;
 import com.smsposterpro.utils.CusAccessObjectUtil;
+import com.smsposterpro.utils.FileUtils;
 import com.smsposterpro.utils.HtmlUtils;
 import com.smsposterpro.utils.ResourcesFileUtils;
 import io.swagger.annotations.Api;
@@ -34,6 +36,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 import static com.smsposterpro.utils.HtmlUtils.createFileWithMultilevelDirectory;
@@ -207,7 +210,48 @@ public class PyController extends BaseController {
             e.printStackTrace();
             log.info("获取文件异常", e);
         }
-
-
     }
+
+    @RequestMapping("/downloadZip")
+    public void downloadZip(HttpServletRequest request, HttpServletResponse response) {
+        String IpStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
+        String filePath = "./" + TEMP_FILE_DIR + "/" + IpStr;
+        FileInputStream fis;
+        //获取输出流对象（用于写文件）
+        ServletOutputStream os = null;
+        try {
+            os = response.getOutputStream();
+            FileUtils.fileToZip(filePath, filePath, IpStr);
+            String fileName = IpStr + ".zip";
+            fis = new FileInputStream(new File(filePath + "/" + fileName));
+            //获取文件后缀（.txt）
+            String extendFileName = fileName.substring(fileName.lastIndexOf('.'));
+            //动态设置响应类型，根据前台传递文件类型设置响应类型
+            response.setContentType(request.getSession().getServletContext().getMimeType(extendFileName));
+            //设置响应头,attachment表示以附件的形式下载，inline表示在线打开
+            response.setHeader("content-disposition", "attachment;fileName=" + URLEncoder.encode(fileName, "UTF-8"));
+            //下载文件,使用spring框架中的FileCopyUtils工具
+            FileCopyUtils.copy(fis, os);
+        } catch (AesException e) {
+            e.printStackTrace();
+            try {
+                response.setHeader("Content-Type", "text/html; charset=UTF-8");
+                FileCopyUtils.copy(e.getMessage().getBytes(StandardCharsets.UTF_8), os);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                log.info("信息数据写出异常", e);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.info("获取文件异常", e);
+            try {
+                response.setHeader("Content-Type", "text/html; charset=UTF-8");
+                FileCopyUtils.copy(e.getMessage().getBytes(StandardCharsets.UTF_8), os);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                log.info("信息数据写出异常", e);
+            }
+        }
+    }
+
 }

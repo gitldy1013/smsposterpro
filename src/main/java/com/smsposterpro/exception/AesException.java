@@ -19,9 +19,15 @@ public class AesException extends Exception {
 
     private int code;
 
+    private String msg;
+
     public AesException(int code) {
         super(getMessage(code));
         this.code = code;
+    }
+
+    public AesException(String msg) {
+        this.msg = msg;
     }
 
     private static String getMessage(int code) {
@@ -53,6 +59,10 @@ public class AesException extends Exception {
             default:
                 return "未定义异常";
         }
+    }
+
+    public String getMessage(){
+        return this.msg;
     }
 
     public int getCode() {

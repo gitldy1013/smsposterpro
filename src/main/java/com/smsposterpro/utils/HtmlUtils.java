@@ -37,7 +37,7 @@ public class HtmlUtils {
                 } else {
                     value = next.text().trim();
                 }
-                if (check || StringUtils.isBlank(flag) || (StringUtils.isNotBlank(flag) && value.equals(flag))) {
+                if ((check || StringUtils.isBlank(flag) || (StringUtils.isNotBlank(flag) && value.equals(flag))) && StringUtils.isNotEmpty(value)) {
                     sbsub.append(value).append(System.getProperty("line.separator"));
                     check = true;
                 }

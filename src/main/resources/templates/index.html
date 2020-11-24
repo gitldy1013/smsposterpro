@@ -64,6 +64,8 @@
                            style="text-indent: 45px;width: 300px;background-color: #FFE4C4	"/>
                     <a class="button-a" href="#"
                        onclick="filter('regcus',$('#regcus').val());"><span>定义检索条件</span></a></br>
+                    <a class="button-a" href="#"
+                       onclick="DownLoadFile({url: '/downloadZip', jsondata: {'t': '' + Math.random() + ''}});"><span>下载当前用户全部附件</span></a></br>
                 </div>
             </form>
         </div>
