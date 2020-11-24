@@ -108,7 +108,7 @@
                     case 15:
                         d ? (a = l, c = setInterval(ra, k)) : c = setInterval(sa, k)
                 } else {
-                    for (e = q; e--;) b[e].css({position: "relative", left: f[e], top: 0});
+                    for (e = q; e--;) b[e].css({left: f[e], top: 0});
                     switch (x) {
                         case 1:
                             d ? (a = l, c = setInterval(ta, k)) : c = setInterval(ua, k);
