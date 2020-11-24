@@ -2,6 +2,7 @@ package com.smsposterpro.config;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
+import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
@@ -27,6 +28,21 @@ public class TomcatConfig {
             connector.setProperty("rejectIllegalHeader", "false");
         });
         return fa;
+    }
+
+    /**
+     * 配置连接超时时间
+     */
+    @Bean
+    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> tomcatCustomizer() {
+        return (tomcat) -> tomcat.addConnectorCustomizers((connector) -> {
+            if (connector.getProtocolHandler() instanceof AbstractHttp11Protocol) {
+                AbstractHttp11Protocol<?> protocolHandler = (AbstractHttp11Protocol<?>) connector
+                        .getProtocolHandler();
+                protocolHandler.setDisableUploadTimeout(false);
+                protocolHandler.setConnectionUploadTimeout(5000);
+            }
+        });
     }
 
     //@Bean
