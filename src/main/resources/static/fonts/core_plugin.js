@@ -91,12 +91,10 @@
                         break;
                     case 12:
                         for (e = q; e--;) 0 === e % 2 ? b[e].css({
-                            position: "absolute",
-                            left: f[e] + Math.random() * n | 0,
+                                                        left: f[e] + Math.random() * n | 0,
                             top: Math.random() * -j | 0
                         }) : b[e].css({
-                            position: "absolute",
-                            left: f[e] + Math.random() * -n | 0,
+                                                        left: f[e] + Math.random() * -n | 0,
                             top: Math.random() * j | 0
                         });
                         c = setInterval(pa, k);
@@ -110,7 +108,7 @@
                     case 15:
                         d ? (a = l, c = setInterval(ra, k)) : c = setInterval(sa, k)
                 } else {
-                    for (e = q; e--;) b[e].css({position: "absolute", left: f[e], top: 0});
+                    for (e = q; e--;) b[e].css({position: "relative", left: f[e], top: 0});
                     switch (x) {
                         case 1:
                             d ? (a = l, c = setInterval(ta, k)) : c = setInterval(ua, k);
@@ -188,8 +186,7 @@
 
             function W() {
                 a < q ? (h && a === l && b[a].data("callback", m), b[a].css({
-                    position: "absolute",
-                    left: f[a] + n,
+                                        left: f[a] + n,
                     top: 0,
                     visibility: "visible"
                 }).animate({left: f[a], opacity: 1}, e, d, g), a++) : clearInterval(c)
@@ -197,8 +194,7 @@
 
             function V() {
                 -1 < a ? (h && 0 === a && b[a].data("callback", m), b[a].css({
-                    position: "absolute",
-                    left: f[a] - n,
+                                        left: f[a] - n,
                     top: 0,
                     visibility: "visible"
                 }).animate({left: f[a], opacity: 1}, e, d, g), a--) : clearInterval(c)
@@ -220,8 +216,7 @@
 
             function Y() {
                 a < q ? (h && a === l && b[a].data("callback", m), b[a].css({
-                    position: "absolute",
-                    left: f[a],
+                                        left: f[a],
                     top: -j,
                     visibility: "visible"
                 }).animate({top: 0, opacity: 1}, e, d, g), a++) : clearInterval(c)
@@ -229,8 +224,7 @@
 
             function X() {
                 -1 < a ? (h && 0 === a && b[a].data("callback", m), b[a].css({
-                    position: "absolute",
-                    left: f[a],
+                                        left: f[a],
                     top: -j,
                     visibility: "visible"
                 }).animate({top: 0, opacity: 1}, e, d, g), a--) : clearInterval(c)
@@ -252,8 +246,7 @@
 
             function $() {
                 a < q ? (h && a === l && b[a].data("callback", m), b[a].css({
-                    position: "absolute",
-                    left: f[a],
+                                        left: f[a],
                     top: j,
                     visibility: "visible"
                 }).animate({top: 0, opacity: 1}, e, d, g), a++) : clearInterval(c)
@@ -261,8 +254,7 @@
 
             function Z() {
                 -1 < a ? (h && 0 === a && b[a].data("callback", m), b[a].css({
-                    position: "absolute",
-                    left: f[a],
+                                        left: f[a],
                     top: j,
                     visibility: "visible"
                 }).animate({top: 0, opacity: 1}, e, d, g), a--) : clearInterval(c)
@@ -284,8 +276,7 @@
 
             function ba() {
                 a < q ? (h && a === l && b[a].data("callback", m), b[a].css({
-                    position: "absolute",
-                    left: f[a] + n,
+                                        left: f[a] + n,
                     top: -j,
                     visibility: "visible"
                 }).animate({top: 0, left: f[a], opacity: 1}, e, d, g), a++) : clearInterval(c)
@@ -293,8 +284,7 @@
 
             function aa() {
                 -1 < a ? (h && 0 === a && b[a].data("callback", m), b[a].css({
-                    position: "absolute",
-                    left: f[a] + n,
+                                        left: f[a] + n,
                     top: -j,
                     visibility: "visible"
                 }).animate({top: 0, left: f[a], opacity: 1}, e, d, g), a--) : clearInterval(c)
@@ -319,8 +309,7 @@
             function da() {
                 h && a === l && b[a].data("callback", m);
                 a < q ? (b[a].css({
-                    position: "absolute",
-                    left: f[a] + n,
+                                        left: f[a] + n,
                     top: j,
                     visibility: "visible"
                 }).animate({top: 0, left: f[a], opacity: 1}, e, d, g), a++) : clearInterval(c)
@@ -329,8 +318,7 @@
             function ca() {
                 h && 0 === a && b[a].data("callback", m);
                 -1 < a ? (b[a].css({
-                    position: "absolute",
-                    left: f[a] + n,
+                                        left: f[a] + n,
                     top: j,
                     visibility: "visible"
                 }).animate({top: 0, left: f[a], opacity: 1}, e, d, g), a--) : clearInterval(c)
@@ -348,8 +336,7 @@
 
             function fa() {
                 a < q ? (h && a === l && b[a].data("callback", m), b[a].css({
-                    position: "absolute",
-                    left: f[a] - n,
+                                        left: f[a] - n,
                     top: -j,
                     visibility: "visible"
                 }).animate({top: 0, left: f[a], opacity: 1}, e, d, g), a++) : clearInterval(c)
@@ -357,8 +344,7 @@
 
             function ea() {
                 -1 < a ? (h && 0 === a && b[a].data("callback", m), b[a].css({
-                    position: "absolute",
-                    left: f[a] - n,
+                                        left: f[a] - n,
                     top: -j,
                     visibility: "visible"
                 }).animate({top: 0, left: f[a], opacity: 1}, e, d, g), a--) : clearInterval(c)
@@ -383,8 +369,7 @@
             function ha() {
                 h && a === l && b[a].data("callback", m);
                 a < q ? (b[a].css({
-                    position: "absolute",
-                    left: f[a] - n,
+                                        left: f[a] - n,
                     top: j,
                     visibility: "visible"
                 }).animate({top: 0, left: f[a], opacity: 1}, e, d, g), a++) : clearInterval(c)
@@ -393,8 +378,7 @@
             function ga() {
                 h && 0 === a && b[a].data("callback", m);
                 -1 < a ? (b[a].css({
-                    position: "absolute",
-                    left: f[a] - n,
+                                        left: f[a] - n,
                     top: j,
                     visibility: "visible"
                 }).animate({top: 0, left: f[a], opacity: 1}, e, d, g), a--) : clearInterval(c)
@@ -412,13 +396,11 @@
 
             function ja() {
                 a < q ? (h && a === l && b[a].data("callback", m), 0 === a % 2 ? b[a].css({
-                    position: "absolute",
-                    left: f[a],
+                                        left: f[a],
                     top: j,
                     visibility: "visible"
                 }).animate({top: 0, opacity: 1}, e, d, g) : b[a].css({
-                    position: "absolute",
-                    left: f[a],
+                                        left: f[a],
                     top: -j,
                     visibility: "visible"
                 }).animate({top: 0, opacity: 1}, e, d, g), a++) : clearInterval(c)
@@ -426,13 +408,11 @@
 
             function ia() {
                 -1 < a ? (h && 0 === a && b[a].data("callback", m), 0 === a % 2 ? b[a].css({
-                    position: "absolute",
-                    left: f[a],
+                                        left: f[a],
                     top: j,
                     visibility: "visible"
                 }).animate({top: 0, opacity: 1}, e, d, g) : b[a].css({
-                    position: "absolute",
-                    left: f[a],
+                                        left: f[a],
                     top: -j,
                     visibility: "visible"
                 }).animate({top: 0, opacity: 1}, e, d, g), a--) : clearInterval(c)
@@ -454,13 +434,11 @@
 
             function la() {
                 a < q ? (h && a === l && b[a].data("callback", m), 0 === a % 2 ? b[a].css({
-                    position: "absolute",
-                    left: f[a] + n,
+                                        left: f[a] + n,
                     top: j,
                     visibility: "visible"
                 }).animate({left: f[a], top: 0, opacity: 1}, e, d, g) : b[a].css({
-                    position: "absolute",
-                    left: f[a] + n,
+                                        left: f[a] + n,
                     top: -j,
                     visibility: "visible"
                 }).animate({left: f[a], top: 0, opacity: 1}, e, d, g), a++) : clearInterval(c)
@@ -468,13 +446,11 @@
 
             function ka() {
                 -1 < a ? (h && 0 === a && b[a].data("callback", m), 0 === a % 2 ? b[a].css({
-                    position: "absolute",
-                    left: f[a] + n,
+                                        left: f[a] + n,
                     top: j,
                     visibility: "visible"
                 }).animate({left: f[a], top: 0, opacity: 1}, e, d, g) : b[a].css({
-                    position: "absolute",
-                    left: f[a] + n,
+                                        left: f[a] + n,
                     top: -j,
                     visibility: "visible"
                 }).animate({left: f[a], top: 0, opacity: 1}, e, d, g), a--) : clearInterval(c)
@@ -504,13 +480,11 @@
 
             function na() {
                 a < q ? (h && a === l && b[a].data("callback", m), 0 === a % 2 ? b[a].css({
-                    position: "absolute",
-                    left: f[a] - n,
+                                        left: f[a] - n,
                     top: j,
                     visibility: "visible"
                 }).animate({left: f[a], top: 0, opacity: 1}, e, d, g) : b[a].css({
-                    position: "absolute",
-                    left: f[a] - n,
+                                        left: f[a] - n,
                     top: -j,
                     visibility: "visible"
                 }).animate({left: f[a], top: 0, opacity: 1}, e, d, g), a++) : clearInterval(c)
@@ -518,13 +492,11 @@
 
             function ma() {
                 -1 < a ? (h && 0 === a && b[a].data("callback", m), 0 === a % 2 ? b[a].css({
-                    position: "absolute",
-                    left: f[a] - n,
+                                        left: f[a] - n,
                     top: j,
                     visibility: "visible"
                 }).animate({left: f[a], top: 0, opacity: 1}, e, d, g) : b[a].css({
-                    position: "absolute",
-                    left: f[a] - n,
+                                        left: f[a] - n,
                     top: -j,
                     visibility: "visible"
                 }).animate({left: f[a], top: 0, opacity: 1}, e, d, g), a--) : clearInterval(c)
@@ -554,13 +526,11 @@
 
             function oa() {
                 a < q ? (h && a === l && b[a].data("callback", m), 0 === a % 2 ? b[a].css({
-                    position: "absolute",
-                    left: f[a] + Math.random() * n | 0,
+                                        left: f[a] + Math.random() * n | 0,
                     top: Math.random() * -j | 0,
                     visibility: "visible"
                 }).animate({left: f[a], top: 0, opacity: 1}, e, d, g) : b[a].css({
-                    position: "absolute",
-                    left: f[a] + Math.random() * -n | 0,
+                                        left: f[a] + Math.random() * -n | 0,
                     top: Math.random() * j | 0,
                     visibility: "visible"
                 }).animate({left: f[a], top: 0, opacity: 1}, e, d, g), a++) : clearInterval(c)
@@ -603,8 +573,7 @@
 
             function R() {
                 a < q ? (h && a === l && b[a].data("callback", m), b[a].css({
-                    position: "absolute",
-                    left: f[a],
+                                        left: f[a],
                     top: 0,
                     visibility: "visible"
                 }).animate({opacity: 1}, e, d, g), a++) : clearInterval(c)
@@ -612,8 +581,7 @@
 
             function qa() {
                 -1 < a ? (h && 0 === a && b[a].data("callback", m), b[a].css({
-                    position: "absolute",
-                    left: f[a],
+                                        left: f[a],
                     top: 0,
                     visibility: "visible"
                 }).animate({opacity: 1}, e, d, g), a--) : clearInterval(c)
@@ -635,8 +603,7 @@
 
             function sa() {
                 a < q ? (h && a === l && b[a].data("callback", m), E = b[a].height(), b[a].css({
-                    position: "absolute",
-                    left: f[a],
+                                        left: f[a],
                     top: 0,
                     height: 0,
                     visibility: "visible"
@@ -645,8 +612,7 @@
 
             function ra() {
                 -1 < a ? (h && 0 === a && b[a].data("callback", m), E = b[a].height(), b[a].css({
-                    position: "absolute",
-                    left: f[a],
+                                        left: f[a],
                     top: 0,
                     height: 0,
                     visibility: "visible"

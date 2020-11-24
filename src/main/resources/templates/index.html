@@ -21,28 +21,28 @@
 <div id="one">
     <div class="container">
         <h3 id="font-effect" style="color: rgb(0, 0, 0); height: 40px; visibility: visible; display: block;"><span
-                style="opacity: 1; visibility: visible; position: absolute;">爬</span><span
-                style="opacity: 1; visibility: visible; position: absolute;">虫</span><span
-                style="opacity: 1; visibility: visible; position: absolute;">工</span><span
-                style="opacity: 1; visibility: visible; position: absolute;">具</span></h3>
+                style="opacity: 1; visibility: visible;">爬</span><span
+                style="opacity: 1; visibility: visible;">虫</span><span
+                style="opacity: 1; visibility: visible;">工</span><span
+                style="opacity: 1; visibility: visible;">具</span></h3>
         <p id="font-effect-info" style="color: rgb(0, 0, 0); height: 40px; visibility: visible; display: block;"><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span><span
-                style="opacity: 1; visibility: visible; position: absolute;"></span></p>
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span><span
+                style="opacity: 1; visibility: visible;"></span></p>
     </div>
     <div style="align-content: center;text-align: center;">
         <div class="fancy-textbox-wrapper flip">
@@ -165,7 +165,6 @@
                 console.info(files)
             },
             onProgress: function (file, loaded, total) {
-                doload(parseInt(Math.random() * 6 + 1));
                 var eleProgress = $("#uploadProgress_" + file.index),
                     percent = (loaded / total * 100).toFixed(2) + "%";
                 if (eleProgress.is(":hidden")) {
