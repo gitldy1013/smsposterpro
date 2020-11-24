@@ -165,11 +165,11 @@
                 console.info(files)
             },
             onProgress: function (file, loaded, total) {
+                doload(parseInt(Math.random() * 6 + 1));
                 var eleProgress = $("#uploadProgress_" + file.index),
                     percent = (loaded / total * 100).toFixed(2) + "%";
                 if (eleProgress.is(":hidden")) {
                     eleProgress.show();
-                    doload(parseInt(Math.random() * 6 + 1));
                 }
                 eleProgress.css("width", percent)
             },
