@@ -18,27 +18,34 @@ import java.util.Iterator;
 @Slf4j
 public class HtmlUtils {
     /* 使用jsoup解析html并转化为提取字符串*/
-    public static boolean html2Str(String html, String flag, StringBuilder sb, String reg) throws AesException {
+    public static String html2Str(String html, String flag, String reg, String attr) throws AesException {
+        StringBuilder sb = new StringBuilder();
         if (StringUtils.isBlank(reg)) {
             reg = "span";
         }
         Document doc = Jsoup.parse(html);
         try {
+            boolean check = false;
             Elements span = doc.select(reg);
-            boolean check = StringUtils.isNotBlank(flag) && span.size() > 0 && span.get(0).text().equals(flag) || StringUtils.isBlank(flag);
-            if (check) {
-                Iterator<Element> iterator = span.iterator();
-                StringBuilder sbsub = new StringBuilder();
-                while (iterator.hasNext()) {
-                    Element next = iterator.next();
-                    String text = next.text();
-                    sbsub.append(text.trim());
+            Iterator<Element> iterator = span.iterator();
+            StringBuilder sbsub = new StringBuilder();
+            while (iterator.hasNext()) {
+                Element next = iterator.next();
+                String value = null;
+                if (StringUtils.isNotEmpty(attr)) {
+                    value = next.attr(attr).trim();
+                } else {
+                    value = next.text().trim();
                 }
-                if (StringUtils.isNotBlank(sbsub)) {
-                    sb.append(sbsub.append(System.getProperty("line.separator")));
+                if (check || StringUtils.isBlank(flag) || (StringUtils.isNotBlank(flag) && value.equals(flag))) {
+                    sbsub.append(value).append(System.getProperty("line.separator"));
+                    check = true;
                 }
             }
-            return check;
+            if (StringUtils.isNotBlank(sbsub)) {
+                sb.append(sbsub);
+            }
+            return sb.toString();
         } catch (Exception e) {
             throw new AesException(AesException.errorReg);
         }
@@ -50,34 +57,45 @@ public class HtmlUtils {
 
     public static String readHtmlFileByPath(String path, String flag, String reg) {
         File file = new File(path);
-        return readHtmlFile(file, flag, reg);
+        return readHtmlFile(file, flag, reg, null);
     }
 
     public static String readHtmlFile(File file, String flag) {
-        return readHtmlFile(file, flag, null);
+        return readHtmlFile(file, flag, null, null);
     }
 
     public static String readHtmlFile(String reg, File file) {
-        return readHtmlFile(file, null, reg);
+        String selector = null;
+        String attr = null;
+        if (StringUtils.isNotEmpty(reg)) {
+            String[] split = reg.split("\\|");
+            if (split.length > 2) {
+                return "<h2>索引条件参数有误,请将条件选择器和属性选择器用\\|线分隔。</h2>";
+            } else if (split.length == 2) {
+                selector = split[0].trim();
+                attr = split[1].trim();
+            } else if (split.length == 1) {
+                selector = split[0].trim();
+            }
+        }
+        return readHtmlFile(file, null, selector, attr);
     }
 
     public static String readHtmlFile(File file) {
-        return readHtmlFile(file, null, null);
+        return readHtmlFile(file, null, null, null);
     }
 
-    public static String readHtmlFile(File file, String flag, String reg) {
+    public static String readHtmlFile(File file, String flag, String reg, String attr) {
         FileReader fr = null;
         try {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder subSb = new StringBuilder();
             fr = new FileReader(file);
             BufferedReader bufferedreader = new BufferedReader(fr);
             String instring;
             while ((instring = bufferedreader.readLine()) != null) {
-                if (html2Str(instring.trim(), flag, sb, reg)) {
-                    flag = null;
-                }
+                subSb.append(instring.trim());
             }
-            return sb.toString();
+            return html2Str(subSb.toString().trim(), flag, reg, attr);
         } catch (IOException e) {
             log.error("读取数据异常", e);
             return "<h2>读取数据异常,当前还未上传有效文件！<h2>";
