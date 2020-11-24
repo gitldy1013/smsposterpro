@@ -78,9 +78,9 @@ public class HtmlUtils {
             return sb.toString();
         } catch (IOException e) {
             log.error("读取数据异常", e);
-            return "读取数据异常";
+            return "<h2>读取数据异常,当前还未上传有效文件！<h2>";
         } catch (AesException e) {
-            return e.getMessage();
+            return "<h2>"+e.getMessage()+"</h2>";
         } finally {
             try {
                 if (fr != null) {
