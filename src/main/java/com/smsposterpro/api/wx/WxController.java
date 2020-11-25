@@ -51,7 +51,7 @@ public class WxController extends BaseController {
 
     /**
      * Bean初始化中的执行顺序：
-     *
+     * <p>
      * Constructor(构造方法) -> @Autowired(依赖注入) -> @PostConstruct(注释的方法)
      */
     @PostConstruct

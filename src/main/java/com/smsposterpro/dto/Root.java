@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class Root <T>{
+public class Root<T> {
     private int total;
 
     private int totalNotFiltered;

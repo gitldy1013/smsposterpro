@@ -2,7 +2,6 @@ package com.smsposterpro.config;
 
 import io.swagger.annotations.Api;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +15,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
  * Swagger配置
+ *
  * @author 136****3167
  * @date 2020/10/20 12:20
  */

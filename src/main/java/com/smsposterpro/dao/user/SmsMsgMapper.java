@@ -2,8 +2,9 @@ package com.smsposterpro.dao.user;
 
 import com.smsposterpro.dao.user.model.SmsMsg;
 import com.smsposterpro.dao.user.model.SmsMsgExample;
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface SmsMsgMapper {
     int countByExample(SmsMsgExample example);

@@ -23,7 +23,7 @@ public class FileUtils {
      * @return 压缩是否成功
      */
     public static boolean fileToZip(String sourceFilePath, String zipFilePath, String fileName) throws AesException {
-        boolean flag = false;
+        boolean flag;
         File sourceFile = new File(sourceFilePath);
         FileInputStream fis;
         FileOutputStream fos;
@@ -36,29 +36,29 @@ public class FileUtils {
         try {
             File zipFile = new File(zipFilePath + "/" + fileName + ".zip");
             if (zipFile.exists()) {
-                throw new AesException(zipFilePath + "目录下存在名字为:" + fileName + ".zip" + "打包文件.");
+                log.info(zipFilePath + "目录下存在名字为:" + fileName + ".zip" + "打包文件,此操作进行覆盖.");
+                zipFile.delete();
+            }
+            File[] sourceFiles = sourceFile.listFiles();
+            if (null == sourceFiles || sourceFiles.length < 1) {
+                throw new AesException("待压缩的文件目录：" + sourceFilePath + "里面不存在文件，无需压缩.");
             } else {
-                File[] sourceFiles = sourceFile.listFiles();
-                if (null == sourceFiles || sourceFiles.length < 1) {
-                    throw new AesException("待压缩的文件目录：" + sourceFilePath + "里面不存在文件，无需压缩.");
-                } else {
-                    fos = new FileOutputStream(zipFile);
-                    zos = new ZipOutputStream(new BufferedOutputStream(fos));
-                    byte[] bufs = new byte[1024 * 10];
-                    for (File file : sourceFiles) {
-                        //创建ZIP实体，并添加进压缩包
-                        ZipEntry zipEntry = new ZipEntry(file.getName());
-                        zos.putNextEntry(zipEntry);
-                        //读取待压缩的文件并写进压缩包里
-                        fis = new FileInputStream(file);
-                        bis = new BufferedInputStream(fis, 1024 * 10);
-                        int read = 0;
-                        while ((read = bis.read(bufs, 0, 1024 * 10)) != -1) {
-                            zos.write(bufs, 0, read);
-                        }
+                fos = new FileOutputStream(zipFile);
+                zos = new ZipOutputStream(new BufferedOutputStream(fos));
+                byte[] bufs = new byte[1024 * 10];
+                for (File file : sourceFiles) {
+                    //创建ZIP实体，并添加进压缩包
+                    ZipEntry zipEntry = new ZipEntry(file.getName());
+                    zos.putNextEntry(zipEntry);
+                    //读取待压缩的文件并写进压缩包里
+                    fis = new FileInputStream(file);
+                    bis = new BufferedInputStream(fis, 1024 * 10);
+                    int read = 0;
+                    while ((read = bis.read(bufs, 0, 1024 * 10)) != -1) {
+                        zos.write(bufs, 0, read);
                     }
-                    flag = true;
                 }
+                flag = true;
             }
         } catch (IOException e) {
             e.printStackTrace();

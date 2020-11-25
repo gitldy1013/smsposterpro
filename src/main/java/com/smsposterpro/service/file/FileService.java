@@ -1,11 +1,5 @@
 package com.smsposterpro.service.file;
 
-import com.smsposterpro.core.model.PageData;
-import com.smsposterpro.core.model.PageWrap;
-import com.smsposterpro.dao.user.model.SmsMsg;
-
-import java.util.List;
-
 /**
  * FileService定义
  *

@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * 分页对象
+ *
  * @author 136****3167
  * @date 2020/10/20 12:20
  */
@@ -30,7 +31,7 @@ public class PageData<T> implements Serializable {
         this.page = page;
         this.capacity = capacity;
     }
-  
+
     public static <T> PageData<T> from(PageInfo<T> pageInfo) {
         PageData<T> pageData = new PageData<>(pageInfo.getPageNum(), pageInfo.getPageSize());
         pageData.total = pageInfo.getTotal();
@@ -40,24 +41,26 @@ public class PageData<T> implements Serializable {
 
     /**
      * 处理异常页容量
+     *
      * @author 136****3167
      * @date 2020/10/20 12:20
      */
-    public int getCapacity () {
+    public int getCapacity() {
         return capacity <= 0 ? 10 : capacity;
     }
 
     /**
      * 计算总页码
+     *
      * @author 136****3167
      * @date 2020/10/20 12:20
      */
-    public long getPageCount(){
-        if(this.getTotal() % this.getCapacity() == 0){
-            long pc = this.getTotal()/this.getCapacity();
+    public long getPageCount() {
+        if (this.getTotal() % this.getCapacity() == 0) {
+            long pc = this.getTotal() / this.getCapacity();
             return pc == 0 ? 1 : pc;
         }
-        return this.getTotal()/this.getCapacity() + 1;
+        return this.getTotal() / this.getCapacity() + 1;
     }
 
 }

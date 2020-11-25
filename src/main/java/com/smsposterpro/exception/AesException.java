@@ -61,7 +61,7 @@ public class AesException extends Exception {
         }
     }
 
-    public String getMessage(){
+    public String getMessage() {
         return this.msg;
     }
 

@@ -136,7 +136,7 @@ public class SmsController extends BaseController {
 
     @GetMapping("/")
     @ApiOperation("查询")
-    public String list(HttpServletRequest req, HttpServletResponse res){
+    public String list(HttpServletRequest req, HttpServletResponse res) {
         return "tab";
     }
 

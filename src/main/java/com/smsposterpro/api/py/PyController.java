@@ -35,11 +35,15 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
+import java.util.LinkedHashSet;
 
 import static com.smsposterpro.utils.HtmlUtils.createFileWithMultilevelDirectory;
+import static com.smsposterpro.utils.HtmlUtils.doSaveTempFile;
+import static com.smsposterpro.utils.HtmlUtils.getRes;
+import static com.smsposterpro.utils.HtmlUtils.regUrl;
 import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_EXP_FILE_NAME;
 import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
 import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
@@ -60,62 +64,26 @@ public class PyController extends BaseController {
         return "index";
     }
 
-    private String getRes(String param, HttpServletRequest request, String doAct) {
-        String htmlFile = null;
-        param = StringUtils.isEmpty(param) ? null : param;
-        File file = null;
-        try {
-            file = new File("./" + TEMP_FILE_DIR + "/" + CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "") + "/" + TEMP_FILE_NAME);
-            log.info("获取到的文件路径：{}", file.getAbsolutePath());
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.info("文件还未上传！");
-            htmlFile = "<h2>文件还未上传！首次调用需要上传文件</h2>";
-        }
-        if (htmlFile == null) {
-            if ("filter".equals(doAct)) {
-                htmlFile = HtmlUtils.readHtmlFile(file, param);
-            } else if ("regcus".equals(doAct)) {
-                htmlFile = HtmlUtils.readHtmlFile(param, file);
-            } else {
-                htmlFile = HtmlUtils.readHtmlFile(file);
-            }
-        }
-        log.info(htmlFile);
-        if (StringUtils.isEmpty(htmlFile)) {
-            htmlFile = "<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>";
-        }
-        try {
-            FileCopyUtils.copy(htmlFile, new FileWriter(new File("./" + TEMP_FILE_DIR + "/" + CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "") + "/" + TEMP_EXP_FILE_NAME)));
-        } catch (IOException e) {
-            e.printStackTrace();
-            log.error("文件保存出错.html");
-        }
-        return htmlFile;
-    }
-
     @PostMapping("/regcus")
     @ResponseBody
     public String regcus(String regcus, HttpServletRequest request) {
         String doAct = "regcus";
-        return getRes(regcus, request, doAct);
+        String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
+        return getRes(regcus, IPStr, doAct);
     }
 
     @PostMapping("/filter")
     @ResponseBody
     public String filter(String filter, HttpServletRequest request) {
         String doAct = "filter";
-        return getRes(filter, request, doAct);
+        String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
+        return getRes(filter, IPStr, doAct);
     }
 
     @PostMapping("/webpyold")
     @ResponseBody
     public String webpyold(@RequestParam(name = "webpy", required = true) String param, HttpServletRequest request) throws IOException {
-        String regex = "(https?|HTTP)://[-\\w+&@#/%=~|?!:,.;]+[-\\w+&@#/%=~|]";
-        Pattern pattern = Pattern.compile(regex);
-        if (StringUtils.isEmpty(param) || !pattern.matcher(param).matches()) {
-            return "<h2>请输入有效爬取链接地址</h2>";
-        }
+        if (regUrl(param)) return "<h2>请输入有效爬取链接地址</h2>";
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpget = new HttpGet(param);
         CloseableHttpResponse response = null;
@@ -127,51 +95,32 @@ public class PyController extends BaseController {
         assert response != null;
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             HttpEntity httpEntity = response.getEntity();
-            if (doSaveTempFile(request, EntityUtils.toString(httpEntity, "UTF-8"))) return "<h2>爬取网页信息异常</h2>";
+            String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
+            if (doSaveTempFile(IPStr, EntityUtils.toString(httpEntity, "UTF-8"))) return "<h2>爬取网页信息异常</h2>";
         } else {
             log.info("在线爬取网页失败,可能此网址已经设置防爬策略。返回响应码未：：{}", response.getStatusLine().getStatusCode());
             return "<h2>在线爬取网页失败,可能此网址已经设置防爬策略。</h2>";
         }
-        return getRes(null, request, "web");
-    }
-
-    private boolean doSaveTempFile(HttpServletRequest request, String content) {
-        FileWriter fw = null;
-        try {
-            String[] directories = {TEMP_FILE_DIR, CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "")};
-            String rootName = new File(".").getAbsolutePath();
-            File tempFile = createFileWithMultilevelDirectory(directories, TEMP_FILE_NAME, rootName);
-            fw = new FileWriter(tempFile);
-            fw.write(content);
-            fw.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-            log.info("爬取网页信息异常", e);
-            return true;
-        } finally {
-            if (fw != null) {
-                try {
-                    fw.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    log.info("关闭文件流失败", e);
-                }
-            }
-        }
-        return false;
+        String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
+        return getRes(null, IPStr, "web");
     }
 
     @PostMapping("/webpy")
     @ResponseBody
     public String webpy(@RequestParam(name = "webpy", required = true) String param, HttpServletRequest request) throws IOException {
-        String regex = "(https?|HTTP)://[-\\w+&@#/%=~|?!:,.;]+[-\\w+&@#/%=~|]";
-        Pattern pattern = Pattern.compile(regex);
-        if (StringUtils.isEmpty(param) || !pattern.matcher(param).matches()) {
-            return "<h2>请输入有效爬取链接地址</h2>";
-        }
+        if (regUrl(param)) return "<h2>请输入有效爬取链接地址</h2>";
         Document document = Jsoup.connect(param).get();
-        doSaveTempFile(request, document.toString());
-        return getRes(null, request, "web");
+        String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
+        doSaveTempFile(IPStr, document.toString());
+        return getRes(null, IPStr, "web");
+    }
+
+    @PostMapping("/webpyAll")
+    @ResponseBody
+    public String webpyAll(@RequestParam(name = "webpyAll", required = true) String param, HttpServletRequest request) throws IOException {
+        if (regUrl(param)) return "<h2>请输入有效爬取链接地址</h2>";
+        String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
+        return HtmlUtils.getArticleURLs(IPStr, param, new LinkedHashSet<>());
     }
 
     @ResponseBody
@@ -213,7 +162,7 @@ public class PyController extends BaseController {
     }
 
     @RequestMapping("/downloadZip")
-    public void downloadZip(HttpServletRequest request, HttpServletResponse response) {
+    public void downloadZip(HttpServletRequest request, HttpServletResponse response, @RequestParam(name = "subPath", required = false) String subPath) {
         String IpStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
         String filePath = "./" + TEMP_FILE_DIR + "/" + IpStr;
         FileInputStream fis;
@@ -221,6 +170,12 @@ public class PyController extends BaseController {
         ServletOutputStream os = null;
         try {
             os = response.getOutputStream();
+            if (!StringUtils.isEmpty(subPath)) {
+                URL url = new URL(subPath);
+                String host = url.getHost().replaceAll("\\.", "");
+                filePath += "/" + host;
+                IpStr = host;
+            }
             FileUtils.fileToZip(filePath, filePath, IpStr);
             String fileName = IpStr + ".zip";
             fis = new FileInputStream(new File(filePath + "/" + fileName));

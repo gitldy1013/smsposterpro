@@ -5,6 +5,7 @@ import lombok.Data;
 
 /**
  * 接口返回对象
+ *
  * @author 136****3167
  * @date 2020/10/20 12:20
  */
@@ -20,6 +21,7 @@ public class ApiResponse<T> {
 
     /**
      * 请求成功
+     *
      * @author 136****3167
      * @date 2020/10/20 12:20
      */
@@ -29,6 +31,7 @@ public class ApiResponse<T> {
 
     /**
      * 请求成功
+     *
      * @author 136****3167
      * @date 2020/10/20 12:20
      */
@@ -38,6 +41,7 @@ public class ApiResponse<T> {
 
     /**
      * 请求失败
+     *
      * @author 136****3167
      * @date 2020/10/20 12:20
      */
@@ -47,6 +51,7 @@ public class ApiResponse<T> {
 
     /**
      * 请求失败
+     *
      * @author 136****3167
      * @date 2020/10/20 12:20
      */

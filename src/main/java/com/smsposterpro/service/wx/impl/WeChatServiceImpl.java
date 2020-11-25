@@ -55,7 +55,7 @@ public class WeChatServiceImpl implements WeChatService, ApplicationContextAware
     public AccessToken getToken() {
         //https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={0}&secret={1}
 
-        if (accessToken.getCurrentTime() == 0L || (System.currentTimeMillis() - accessToken.getCurrentTime()) >= (Long.parseLong(accessToken.getExpires_in())*1000)) {
+        if (accessToken.getCurrentTime() == 0L || (System.currentTimeMillis() - accessToken.getCurrentTime()) >= (Long.parseLong(accessToken.getExpires_in()) * 1000)) {
             accessToken = restTemplate.getForObject("https://api.weixin.qq.com/cgi-bin/token?appid=" + wxConfig.getAppid() + "&secret=" + wxConfig.getSecret() + "&grant_type=client_credential", AccessToken.class);
             assert accessToken != null;
         }

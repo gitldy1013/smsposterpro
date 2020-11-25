@@ -19,6 +19,7 @@ public class Subscribe implements Hander {
     //用户订阅
     @Autowired
     private SmsMsgService smsMsgService;
+
     @Override
     public Object hander(WeChatMessageBo msg) {
         WeChatMessageVo<NewItems> out = new WeChatMessageVo<>();
@@ -35,7 +36,7 @@ public class Subscribe implements Hander {
         ArrayList<NewItems> items = new ArrayList<>(4);
         //用户自定义数据
         List<SmsMsg> list = smsMsgService.findList(new SmsMsg());
-        list.stream().forEach(item->{
+        list.stream().forEach(item -> {
             NewItems newItems = new NewItems();
             newItems.setTitle(item.getRecPhone());
             newItems.setUrl(item.getSendPhoneNum());

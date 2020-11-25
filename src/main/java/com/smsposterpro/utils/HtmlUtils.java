@@ -7,13 +7,22 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.util.FileCopyUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_EXP_FILE_NAME;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 
 @Slf4j
 public class HtmlUtils {
@@ -153,5 +162,103 @@ public class HtmlUtils {
             root = directory;
         }
         return root;
+    }
+
+    public static boolean doSaveTempFile(String IPStr, String content) {
+        return doSaveFile(IPStr, content, null, TEMP_FILE_NAME);
+    }
+
+    public static boolean doSaveFile(String IPStr, String content, String doMain, String FileName) {
+        FileWriter fw = null;
+        String[] directories = null;
+        try {
+            if (StringUtils.isNotEmpty(doMain)) {
+                directories = new String[]{TEMP_FILE_DIR, IPStr, doMain};
+            } else {
+                directories = new String[]{TEMP_FILE_DIR, IPStr};
+            }
+            String rootName = new File(".").getAbsolutePath();
+            File tempFile = createFileWithMultilevelDirectory(directories, FileName, rootName);
+            fw = new FileWriter(tempFile);
+            fw.write(content);
+            fw.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.info("爬取网页信息异常", e);
+            return true;
+        } finally {
+            if (fw != null) {
+                try {
+                    fw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    log.info("关闭文件流失败", e);
+                }
+            }
+        }
+        return false;
+    }
+
+    public static String getRes(String param, String IPStr, String doAct) {
+        String htmlFile = null;
+        param = org.springframework.util.StringUtils.isEmpty(param) ? null : param;
+        File file = null;
+        try {
+            file = new File("./" + TEMP_FILE_DIR + "/" + IPStr + "/" + TEMP_FILE_NAME);
+            log.info("获取到的文件路径：{}", file.getAbsolutePath());
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("文件还未上传！");
+            htmlFile = "<h2>文件还未上传！首次调用需要上传文件</h2>";
+        }
+        if (htmlFile == null) {
+            if ("filter".equals(doAct)) {
+                htmlFile = HtmlUtils.readHtmlFile(file, param);
+            } else if ("regcus".equals(doAct)) {
+                htmlFile = HtmlUtils.readHtmlFile(param, file);
+            } else {
+                htmlFile = HtmlUtils.readHtmlFile(file);
+            }
+        }
+        log.info(htmlFile);
+        if (org.springframework.util.StringUtils.isEmpty(htmlFile)) {
+            htmlFile = "<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>";
+        }
+        try {
+            FileCopyUtils.copy(htmlFile, new FileWriter(new File("./" + TEMP_FILE_DIR + "/" + IPStr + "/" + TEMP_EXP_FILE_NAME)));
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.error("文件保存出错.html");
+        }
+        return htmlFile;
+    }
+
+    public static boolean regUrl(String param) {
+        String regex = "(https?|HTTP)://[-\\w+&@#/%=~|?!:,.;]+[-\\w+&@#/%=~|]";
+        Pattern pattern = Pattern.compile(regex);
+        return org.springframework.util.StringUtils.isEmpty(param) || !pattern.matcher(param).matches();
+    }
+
+    //爬取一个域名下所有url的文件内容
+    public static String getArticleURLs(String IPStr, String param, Set<String> hrefs) throws IOException {
+        if (!regUrl(param)) {
+            Document document = Jsoup.connect(param).get();
+            URL url = new URL(param);
+            Elements title = document.select("title");
+            String domain = url.getHost().replaceAll("\\.", "");
+            doSaveFile(IPStr, document.toString(), domain, (title != null ? title.text() : domain) + ".html");
+            Elements select = document.select("a");
+            for (Element sh : select) {
+                String href = sh.attr("href");
+                if (!regUrl(href)) {
+                    log.info(href);
+                    if (!hrefs.contains(href) && new URL(href).getHost().replaceAll("\\.", "").equals(domain)) {
+                        hrefs.add(href);
+                        getArticleURLs(IPStr, href, hrefs);
+                    }
+                }
+            }
+        }
+        return "<h2>网站爬取结果已经保存，请点击导出按钮下载</h2>";
     }
 }

@@ -54,6 +54,11 @@
                            style="text-indent: 45px;width: 300px;background-color: #FFE4C4"/>
                     <a class="button-a" href="#" onclick="filter('webpy',$('#webpy').val());"><span
                             style="color: #0066ff">在线爬取网页</span></a></br>
+                    <input id="webpyAll" name="webpyAll" type="text" data-animation="flip"
+                           class="fancy-textbox masked" placeholder="请输入有效网址"
+                           style="text-indent: 45px;width: 300px;background-color: #FFE4C4"/>
+                    <a class="button-a" href="#" onclick="filter('webpyAll',$('#webpyAll').val());"><span
+                            style="color: #0066ff">在线爬取网站</span></a></br>
                     <input id="filter" name="filter" type="text" data-animation="flip"
                            class="fancy-textbox masked" placeholder="请输入索引位置"
                            style="text-indent: 45px;width: 300px;background-color: #FFE4C4"/>
@@ -63,7 +68,7 @@
                            class="fancy-textbox masked" placeholder="请输入检索标签"
                            style="text-indent: 45px;width: 300px;background-color: #FFE4C4	"/>
                     <a class="button-a" href="#"
-                       onclick="filter('regcus',$('#regcus').val());"><span>定义检索条件</span></a></br></br></br>
+                       onclick="filter('regcus',$('#regcus').val());"><span>定义检索条件</span></a></br></br>
                     <a class="button-a" href="#"
                        onclick="DownLoadFile({url: '/downloadZip', jsondata: {'t': '' + Math.random() + ''}});"><span>下载当前用户全部附件</span></a></br>
                 </div>
@@ -95,7 +100,7 @@
         $iframe.remove();
     };
 
-    function doInf(data, file, title) {
+    function doInf(data, file, title, downStr) {
         if (jQuery.trim(data) === '') {
             data = "<h2>检查一下检索内容吧~没有找到符合的过滤数据呢!</h2>";
         }
@@ -114,7 +119,7 @@
             '<div id="uploadInfBar' + indexSub + '" class="uploadInfBar' + indexSub + '" style="font-family: 华文隶书;font-size: x-large;background-color: #00b7ee;text-align: center">'
             + filename + '<a style="color: springgreen" href="#" onclick="checkInf(' + indexSub + ');">切换</a>' +
             '<a style="color: red" href="#" onclick="deleteInf(' + indexSub + ');">删除</a>' +
-            '<a style="color: yellow" href="#" onclick="DownLoadFile({url: \'/download\', jsondata: { \'filename\':\'' + expFileName + '\',\'t\': \'' + Math.random() + '\'}});" >导出</a></div>'
+            '<a style="color: yellow" href="#" onclick="DownLoadFile({url: \'/' + downStr + '\', jsondata: { \'filename\':\'' + expFileName + '\',\'t\': \'' + Math.random() + '\'}});" >导出</a></div>'
             + "<div style='display: none;' class='uploadInfSub" + indexSub + "'><pre><strong>" + data + "</strong></pre></div></div>");
         if ($(".uploadInfSub" + (indexSub - 1)).html() === undefined || file === undefined) {
             $(subInfDiv).toggle(1000);
@@ -193,6 +198,7 @@
     });
 
     function filter(str, title) {
+        let downStr = "download";
         $.ajax({
             url: '/' + str + '?t=' + Math.random(),
             data: $('#form').serialize(),                 //将表单数据序列化，格式为name=value
@@ -201,26 +207,34 @@
             success: function (data) {
                 let $active = $('.active');
                 $active.removeClass();
-                if (str === 'webpy') {
+                if (str === 'webpy' || str === 'webpyAll') {
                     title = decodeURIComponent(title);
+                    if (str === 'webpyAll') {
+                        downStr = "downloadZip?subPath=" + title;
+                    }
                 }
-                doInf(data, undefined, title);
+                doInf(data, undefined, title, downStr);
             },
-            beforeSend: function(){
+            beforeSend: function () {
                 doload(parseInt(Math.random() * 6 + 1));
             },
             error: function (data) {
                 data = "<h2>请求异常</h2><pre><strong>" + data + "</strong></pre>";
-                if (str === 'webpy') {
+                if (str === 'webpy' || str === 'webpyAll') {
                     title = decodeURIComponent(title);
+                    if (str === 'webpyAll') {
+                        downStr = "downloadZip";
+                    }
                 }
-                doInf(data, undefined, title);
+                doInf(data, undefined, title, downStr);
             },
 
         });
     }
 
     function doload(thisid) {
+        let $active = $('.active');
+        $active.removeClass();
         let $loader = $('#spinners li[data-id="' + thisid + '"]');
         $loader.addClass('active');
     }

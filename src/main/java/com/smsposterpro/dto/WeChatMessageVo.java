@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @XmlRootElement(name = "xml")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WeChatMessageVo<T>{
+public class WeChatMessageVo<T> {
     // 发送方的账号
     protected String FromUserName;
     // 接收方的账号(OpenID)
