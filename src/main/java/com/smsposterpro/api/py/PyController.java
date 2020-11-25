@@ -20,33 +20,20 @@ import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 
-import static com.smsposterpro.utils.HtmlUtils.createFileWithMultilevelDirectory;
-import static com.smsposterpro.utils.HtmlUtils.doSaveTempFile;
-import static com.smsposterpro.utils.HtmlUtils.getRes;
-import static com.smsposterpro.utils.HtmlUtils.regUrl;
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_EXP_FILE_NAME;
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
+import static com.smsposterpro.utils.HtmlUtils.*;
+import static com.smsposterpro.utils.ResourcesFileUtils.*;
 
 /**
  * 短信转发Controller
@@ -118,9 +105,13 @@ public class PyController extends BaseController {
     @PostMapping("/webpyAll")
     @ResponseBody
     public String webpyAll(@RequestParam(name = "webpyAll", required = true) String param, HttpServletRequest request) throws IOException {
-        if (regUrl(param)) return "<h2>请输入有效爬取链接地址</h2>";
-        String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
-        return HtmlUtils.getArticleURLs(IPStr, param, new LinkedHashSet<>());
+        if (!regUrl(param)) {
+            String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
+            HtmlUtils.getArticleURLs(IPStr, param, new LinkedHashSet<>());
+            return "<h2>已开始爬取网站任务，请收到提示后点击导出按钮下载。</h2>";
+        } else {
+            return "<h2>请输入有效爬取链接地址</h2>";
+        }
     }
 
     @ResponseBody
