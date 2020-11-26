@@ -20,13 +20,21 @@ import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -34,8 +42,13 @@ import java.util.LinkedHashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.smsposterpro.utils.HtmlUtils.*;
-import static com.smsposterpro.utils.ResourcesFileUtils.*;
+import static com.smsposterpro.utils.HtmlUtils.createFileWithMultilevelDirectory;
+import static com.smsposterpro.utils.HtmlUtils.doSaveTempFile;
+import static com.smsposterpro.utils.HtmlUtils.getRes;
+import static com.smsposterpro.utils.HtmlUtils.regUrl;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_EXP_FILE_NAME;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 
 /**
  * 短信转发Controller
@@ -112,7 +125,12 @@ public class PyController extends BaseController {
         if (!regUrl(param)) {
             executor.execute(() -> {
                 String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
-                HtmlUtils.getArticleURLs(IPStr, param, new LinkedHashSet<>());
+                try {
+                    HtmlUtils.getArticleURLs(IPStr, param, new LinkedHashSet<>());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    log.error("爬取" + param + "页面出错！");
+                }
                 //发邮件TODO
             });
             return "<h2>已开始爬取网站任务，请收到提示后点击导出或下载全部附件按钮下载。</h2>";
@@ -173,6 +191,11 @@ public class PyController extends BaseController {
                 String host = url.getHost().replaceAll("\\.", "");
                 filePath += "/" + host;
                 IpStr = host;
+            }
+            File zipFile = new File(filePath + "/" + IpStr + ".zip");
+            if (zipFile.exists()) {
+                log.info(filePath + "目录下存在名字为:" + IpStr + ".zip" + "打包文件,此操作进行覆盖.");
+                zipFile.delete();
             }
             FileUtils.fileToZip(filePath, filePath, IpStr);
             String fileName = IpStr + ".zip";
