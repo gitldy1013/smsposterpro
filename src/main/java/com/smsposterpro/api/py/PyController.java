@@ -115,7 +115,7 @@ public class PyController extends BaseController {
                 HtmlUtils.getArticleURLs(IPStr, param, new LinkedHashSet<>());
                 //发邮件TODO
             });
-            return "<h2>已开始爬取网站任务，请收到提示后点击导出按钮下载。</h2>";
+            return "<h2>已开始爬取网站任务，请收到提示后点击导出或下载全部附件按钮下载。</h2>";
         } else {
             return "<h2>请输入有效爬取链接地址</h2>";
         }
