@@ -133,6 +133,7 @@ public class PyController extends BaseController {
                 try {
                     HtmlUtils.getArticleURLs(IPStr, param, new LinkedHashSet<>());
                     //发邮件TODO
+                    log.info("爬取任务："+param+"完成，开始发送邮件。");
                     mailService.sendSimpleMailMessge("1126176532@qq.com", "爬取任务完成通知", param + ",相关爬取任务已经完成</br>" +
                             "请点击连接<a href=\"https://sms.liudongyang.top//downloadZip?subPath=" + param + "\"></a>");
                 } catch (IOException e) {
