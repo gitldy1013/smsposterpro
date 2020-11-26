@@ -2,6 +2,7 @@ package com.smsposterpro.api.py;
 
 import com.smsposterpro.api.BaseController;
 import com.smsposterpro.exception.AesException;
+import com.smsposterpro.service.MailService;
 import com.smsposterpro.utils.CusAccessObjectUtil;
 import com.smsposterpro.utils.FileUtils;
 import com.smsposterpro.utils.HtmlUtils;
@@ -17,6 +18,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -62,6 +64,9 @@ import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 public class PyController extends BaseController {
 
     private static ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    @Autowired
+    private MailService mailService;
 
     @GetMapping("/index")
     public String index() {
@@ -127,11 +132,13 @@ public class PyController extends BaseController {
                 String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
                 try {
                     HtmlUtils.getArticleURLs(IPStr, param, new LinkedHashSet<>());
+                    //发邮件TODO
+                    mailService.sendSimpleMailMessge("1126176532@qq.com", "爬取任务完成通知", param + ",相关爬取任务已经完成</br>" +
+                            "请点击连接<a href=\"https://sms.liudongyang.top//downloadZip?subPath=" + param + "\"></a>");
                 } catch (IOException e) {
                     e.printStackTrace();
                     log.error("爬取" + param + "页面出错！");
                 }
-                //发邮件TODO
             });
             return "<h2>已开始爬取网站任务，请收到提示后点击导出或下载全部附件按钮下载。</h2>";
         } else {
