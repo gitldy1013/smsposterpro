@@ -292,192 +292,16 @@ public class HtmlUtils {
                 Elements script = document.getElementsByTag("script");
                 Elements img = document.getElementsByTag("img");
                 //爬取css和js文件
-                for (Element sl : link) {
-                    String href = sl.attr("href");
-                    log.info(href);
-                    if (StringUtils.isNotEmpty(href)) {
-                        boolean linkflag = href.endsWith("css");
-                        if (!href.startsWith("http") && linkflag) {
-                            String trimHref = href.replaceAll("^(\\.)*", "");
-                            if (!hrefs.contains(href)) {
-                                log.info(href);
-                                hrefs.add(href);
-                                try {
-                                    Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).ignoreContentType(true).execute();
-                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
-                                    sl.attr("href", orgin + trimHref);
-                                } catch (HttpStatusException e) {
-                                    try {
-                                        Connection.Response resultImageResponse = Jsoup.connect(protocol + trimHref).ignoreContentType(true).ignoreContentType(true).execute();
-                                        doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
-                                        sl.attr("href", protocol + trimHref);
-                                    } catch (HttpStatusException es) {
-                                        log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
-                                    } catch (Exception ex) {
-                                        log.error("爬取当前页面异常:{}", ex.getMessage(),ex);
-                                    }
-                                } catch (Exception e) {
-                                    log.error("爬取当前页面异常:{}", e.getMessage(),e);
-                                }
-                            }
-                        }
-                    }
-                }
+                downImgByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
+                downImgByAttr(IPStr, hrefs, orgin, protocol, domain, script, "src");
                 //img
-                for (Element sImg : link) {
-                    String href = sImg.attr("href");
-                    log.info(href);
-                    if (StringUtils.isNotEmpty(href)) {
-                        if (!href.startsWith("http")) {
-                            String trimHref = href.replaceAll("^(\\.)*", "");
-                            if (!hrefs.contains(href)) {
-                                log.info(href);
-                                hrefs.add(href);
-                                try {
-                                    Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).execute();
-                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
-                                    sImg.attr("href", orgin + trimHref);
-                                } catch (HttpStatusException e) {
-                                    try {
-                                        Connection.Response resultImageResponse = Jsoup.connect(protocol + trimHref).ignoreContentType(true).execute();
-                                        doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
-                                        sImg.attr("href", protocol + trimHref);
-                                    } catch (HttpStatusException es) {
-                                        log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
-                                    } catch (Exception ex) {
-                                        log.error("爬取当前页面异常:{}", ex.getMessage(),ex);
-                                    }
-                                } catch (Exception e) {
-                                    log.error("爬取当前页面异常:{}", e.getMessage(),e);
-                                }
-                            }
-                        }
-                    }
-                }
-                for (Element sImg : img) {
-                    String href = sImg.attr("src");
-                    log.info(href);
-                    if (StringUtils.isNotEmpty(href)) {
-                        if (!href.startsWith("http")) {
-                            String trimHref = href.replaceAll("^(\\.)*", "");
-                            if (!hrefs.contains(href)) {
-                                log.info(href);
-                                hrefs.add(href);
-                                try {
-                                    Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).execute();
-                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
-                                    sImg.attr("src", orgin + trimHref);
-                                } catch (HttpStatusException e) {
-                                    try {
-                                        Connection.Response resultImageResponse = Jsoup.connect(protocol + trimHref).ignoreContentType(true).execute();
-                                        doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
-                                        sImg.attr("src", protocol + trimHref);
-                                    } catch (HttpStatusException es) {
-                                        log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
-                                    } catch (Exception ex) {
-                                        log.error("爬取当前页面异常:{}", ex.getMessage(),ex);
-                                    }
-                                } catch (Exception e) {
-                                    log.error("爬取当前页面异常:{}", e.getMessage(),e);
-                                }
-                            }
-                        } else {
-                            String trimHref = href.substring(href.lastIndexOf("/"));
-                            sImg.attr("src", "./webimgs/" + trimHref);
-                            if (!hrefs.contains(href)) {
-                                log.info(href);
-                                hrefs.add(href);
-                                try {
-                                    Connection.Response resultImageResponse = Jsoup.connect(href).ignoreContentType(true).execute();
-                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + "/webimgs", getResName(href));
-                                    sImg.attr("src", "./webimgs/" + trimHref);
-                                } catch (HttpStatusException e) {
-                                    log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
-                                } catch (Exception e) {
-                                    log.error("爬取当前页面异常:{}", e.getMessage(),e);
-                                }
-                            }
-                        }
-                    }
-                }
-                for (Element sImg : img) {
-                    String href = sImg.attr("data-original");
-                    log.info(href);
-                    if (StringUtils.isNotEmpty(href)) {
-                        if (!href.startsWith("http")) {
-                            String trimHref = href.replaceAll("^(\\.)*", "");
-                            if (!hrefs.contains(href)) {
-                                log.info(href);
-                                hrefs.add(href);
-                                try {
-                                    Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).execute();
-                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
-                                    sImg.attr("data-original", orgin + trimHref);
-                                } catch (HttpStatusException e) {
-                                    try {
-                                        Connection.Response resultImageResponse = Jsoup.connect(protocol + trimHref).ignoreContentType(true).execute();
-                                        doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
-                                        sImg.attr("data-original", protocol + trimHref);
-                                    } catch (HttpStatusException es) {
-                                        log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
-                                    } catch (Exception ex) {
-                                        log.error("爬取当前页面异常:{}", ex.getMessage(),ex);
-                                    }
-                                } catch (Exception e) {
-                                    log.error("爬取当前页面异常:{}", e.getMessage(),e);
-                                }
-                            }
-                        } else {
-                            String trimHref = href.substring(href.lastIndexOf("/"));
-                            if (!hrefs.contains(href)) {
-                                log.info(href);
-                                hrefs.add(href);
-                                try {
-                                    Connection.Response resultImageResponse = Jsoup.connect(href).ignoreContentType(true).execute();
-                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + "/webimgs", getResName(href));
-                                    sImg.attr("data-original", "./webimgs/" + trimHref);
-                                } catch (HttpStatusException e) {
-                                    log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
-                                } catch (Exception ex) {
-                                    log.error("爬取当前页面异常:{}", ex.getMessage(),ex);
-                                }
-                            }
-                        }
-                    }
-                }
-                for (Element ss : script) {
-                    String href = ss.attr("src");
-                    log.info(href);
-                    boolean linkflag = getResPathNoParam(href).endsWith("js");
-                    if (!href.startsWith("http") && linkflag) {
-                        String trimHref = href.replaceAll("^(\\.)*", "");
-                        if (!hrefs.contains(href)) {
-                            hrefs.add(href);
-                            try {
-                                Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).ignoreContentType(true).execute();
-                                doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
-                                ss.attr("src", orgin + trimHref);
-                            } catch (HttpStatusException e) {
-                                try {
-                                    Connection.Response resultImageResponse = Jsoup.connect(protocol + trimHref).ignoreContentType(true).ignoreContentType(true).execute();
-                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
-                                    ss.attr("src", protocol + trimHref);
-                                } catch (HttpStatusException es) {
-                                    log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
-                                } catch (Exception ex) {
-                                    log.error("爬取当前页面异常:{}", ex.getMessage(),e);
-                                }
-                            } catch (Exception e) {
-                                log.error("爬取当前页面异常:{}", e.getMessage(),e);
-                            }
-                        }
-                    }
-                }
+                downImgByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
+                downImgByAttr(IPStr, hrefs, orgin, protocol, domain, img, "src");
+                downImgByAttr(IPStr, hrefs, orgin, protocol, domain, img, "data-original");
                 //爬取静态页面
                 //爬取标识
                 for (Element sh : select) {
                     String href = sh.attr("href");
-                    log.info(href);
                     if (!href.startsWith("http")) {
                         href = orgin + href;
                     }
@@ -485,14 +309,16 @@ public class HtmlUtils {
                         if (!(hrefs.contains(href))) {
                             hrefs.add(href);
                             try {
+                                log.info(href);
                                 getArticleURLs(IPStr, href, hrefs);
                                 sh.attr("href", href);
                             } catch (Exception e) {
                                 try {
+                                    log.info(protocol + sh.attr("href"));
                                     getArticleURLs(IPStr, protocol + sh.attr("href"), hrefs);
                                     sh.attr("href", protocol + sh.attr("href"));
                                 } catch (Exception ex) {
-                                    log.error("爬取当前页面异常:{}", ex.getMessage(),e);
+                                    log.error("爬取当前页面异常:{}", ex.getMessage(), e);
                                 }
                             }
                         }
@@ -505,9 +331,57 @@ public class HtmlUtils {
                     doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
                 }
             } catch (MalformedURLException e) {
-                log.error("无法解析的URL",e);
+                log.error("无法解析的URL", e);
             } catch (Exception e) {
-                log.error("爬取当前页面异常:{}", e.getMessage(),e);
+                log.error("爬取当前页面异常:{}", e.getMessage(), e);
+            }
+        }
+    }
+
+    private static void downImgByAttr(String IPStr, Set<String> hrefs, String orgin, String protocol, String domain, Elements img, String attr) {
+        for (Element sImg : img) {
+            String href = sImg.attr(attr);
+            if (StringUtils.isNotEmpty(href)) {
+                if (!href.startsWith("http")) {
+                    String trimHref = href.replaceAll("^(\\.)*", "");
+                    if (!hrefs.contains(href)) {
+                        hrefs.add(href);
+                        try {
+                            log.info(orgin + trimHref);
+                            Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).execute();
+                            doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
+                            sImg.attr(attr, orgin + trimHref);
+                        } catch (HttpStatusException e) {
+                            try {
+                                log.info(protocol + trimHref);
+                                Connection.Response resultImageResponse = Jsoup.connect(protocol + trimHref).ignoreContentType(true).execute();
+                                doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
+                                sImg.attr(attr, protocol + trimHref);
+                            } catch (HttpStatusException es) {
+                                log.error("爬取当前页面异常:{}", e.getStatusCode(), e);
+                            } catch (Exception ex) {
+                                log.error("爬取当前页面异常:{}", ex.getMessage(), ex);
+                            }
+                        } catch (Exception e) {
+                            log.error("爬取当前页面异常:{}", e.getMessage(), e);
+                        }
+                    }
+                } else {
+                    String trimHref = getResName(href);
+                    if (!hrefs.contains(href)) {
+                        hrefs.add(href);
+                        try {
+                            log.info(href);
+                            Connection.Response resultImageResponse = Jsoup.connect(getResPathNoParam(href)).ignoreContentType(true).execute();
+                            doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + "/webimgs", getResName(href));
+                            sImg.attr(attr, "./webimgs/" + trimHref);
+                        } catch (HttpStatusException e) {
+                            log.error("爬取当前页面异常:{}", e.getStatusCode(), e);
+                        } catch (Exception e) {
+                            log.error("爬取当前页面异常:{}", e.getMessage(), e);
+                        }
+                    }
+                }
             }
         }
     }
