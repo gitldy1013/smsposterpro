@@ -22,21 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -44,13 +36,8 @@ import java.util.LinkedHashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.smsposterpro.utils.HtmlUtils.createFileWithMultilevelDirectory;
-import static com.smsposterpro.utils.HtmlUtils.doSaveTempFile;
-import static com.smsposterpro.utils.HtmlUtils.getRes;
-import static com.smsposterpro.utils.HtmlUtils.regUrl;
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_EXP_FILE_NAME;
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
+import static com.smsposterpro.utils.HtmlUtils.*;
+import static com.smsposterpro.utils.ResourcesFileUtils.*;
 
 /**
  * 短信转发Controller
@@ -130,16 +117,11 @@ public class PyController extends BaseController {
         if (!regUrl(param)) {
             executor.execute(() -> {
                 String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
-                try {
-                    HtmlUtils.getArticleURLs(IPStr, param, new LinkedHashSet<>());
-                    //发邮件TODO
-                    log.info("爬取任务："+param+"完成，开始发送邮件。");
-                    mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", IPStr + "-相关爬取任务已经完成</br>" +
-                            "请点击连接:<a href='https://sms.liudongyang.top//downloadZip?subPath=" + param + "'>点击下载</a>");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    log.error("爬取" + param + "页面出错！");
-                }
+                HtmlUtils.getArticleURLs(IPStr, param, new LinkedHashSet<>());
+                //发邮件TODO
+                log.info("爬取任务：" + param + "完成，开始发送邮件。");
+                mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", IPStr + "-相关爬取任务已经完成</br>" +
+                        "请点击连接:<a href='https://sms.liudongyang.top//downloadZip?subPath=" + param + "'>点击下载</a>");
             });
             return "<h2>已开始爬取网站任务，请收到提示后点击导出或下载全部附件按钮下载。</h2>";
         } else {
