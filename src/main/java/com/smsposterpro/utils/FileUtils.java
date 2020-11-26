@@ -20,7 +20,6 @@ public class FileUtils {
      * @param sourceFilePath :待压缩的文件路径
      * @param zipFilePath    :压缩后存放路径
      * @param fileName       :压缩后文件的名称
-     * @return 压缩是否成功
      */
     public static void fileToZip(String sourceFilePath, String zipFilePath, String fileName) throws AesException {
         try {
