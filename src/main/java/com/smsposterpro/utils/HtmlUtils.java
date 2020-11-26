@@ -478,7 +478,6 @@ public class HtmlUtils {
                 }
                 //爬取静态页面
                 //爬取标识
-                boolean doSave = false;
                 for (Element sh : select) {
                     String href = sh.attr("href");
                     if (!href.startsWith("http")) {
@@ -491,12 +490,10 @@ public class HtmlUtils {
                             try {
                                 getArticleURLs(IPStr, href, hrefs);
                                 sh.attr("href", href);
-                                doSave = true;
                             } catch (HttpStatusException e) {
                                 try {
                                     getArticleURLs(IPStr, protocol + sh.attr("href"), hrefs);
                                     sh.attr("href", protocol + sh.attr("href"));
-                                    doSave = true;
                                 } catch (HttpStatusException es) {
                                     log.error("爬取当前页面异常:{}", e.getStatusCode());
                                 } catch (IOException ex) {
@@ -508,7 +505,8 @@ public class HtmlUtils {
                         }
                     }
                 }
-                if (!StringUtils.isEmpty(title.text()) && doSave) {
+                if (!StringUtils.isEmpty(title.text())) {
+                    log.info(param);
                     String s = domain + param.replace(orgin, "");
                     String hrefPath = s.substring(0, s.lastIndexOf("/"));
                     doSaveFile(IPStr, document.toString(), hrefPath, s.substring(s.lastIndexOf("/"), (!s.contains("?")) ? s.length() : s.indexOf("?")));
