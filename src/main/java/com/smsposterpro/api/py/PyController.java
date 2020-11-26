@@ -31,6 +31,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.smsposterpro.utils.HtmlUtils.*;
 import static com.smsposterpro.utils.ResourcesFileUtils.*;
@@ -45,6 +47,8 @@ import static com.smsposterpro.utils.ResourcesFileUtils.*;
 @Api(tags = "简单爬虫接口")
 @Slf4j
 public class PyController extends BaseController {
+
+    private static ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @GetMapping("/index")
     public String index() {
@@ -106,8 +110,11 @@ public class PyController extends BaseController {
     @ResponseBody
     public String webpyAll(@RequestParam(name = "webpyAll", required = true) String param, HttpServletRequest request) throws IOException {
         if (!regUrl(param)) {
-            String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
-            HtmlUtils.getArticleURLs(IPStr, param, new LinkedHashSet<>());
+            executor.execute(() -> {
+                String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
+                HtmlUtils.getArticleURLs(IPStr, param, new LinkedHashSet<>());
+                //发邮件TODO
+            });
             return "<h2>已开始爬取网站任务，请收到提示后点击导出按钮下载。</h2>";
         } else {
             return "<h2>请输入有效爬取链接地址</h2>";
