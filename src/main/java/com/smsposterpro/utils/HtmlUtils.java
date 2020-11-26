@@ -296,15 +296,21 @@ public class HtmlUtils {
                     boolean linkflag = href.endsWith("css");
                     if (!href.startsWith("http") && linkflag) {
                         String trimHref = href.replaceAll("^(\\.)*", "");
-                        sl.attr("href", "." + trimHref);
                         if (!hrefs.contains(href)) {
                             log.info(href);
                             hrefs.add(href);
                             try {
                                 Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).ignoreContentType(true).execute();
-                                doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/")));
+                                doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/"), (href.lastIndexOf("?") == -1) ? href.length() : href.lastIndexOf("?")));
+                                sl.attr("href", orgin + trimHref);
                             } catch (HttpStatusException e) {
-                                log.error("爬取当前页面异常:{}",e.getStatusCode());
+                                try {
+                                    Connection.Response resultImageResponse = Jsoup.connect("http:" + trimHref).ignoreContentType(true).ignoreContentType(true).execute();
+                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/"), (href.lastIndexOf("?") == -1) ? href.length() : href.lastIndexOf("?")));
+                                    sl.attr("href", "http:" + trimHref);
+                                } catch (HttpStatusException es) {
+                                    log.error("爬取当前页面异常:{}", e.getStatusCode());
+                                }
                             }
                         }
                     }
@@ -312,80 +318,96 @@ public class HtmlUtils {
                 //img
                 for (Element sImg : link) {
                     String href = sImg.attr("href");
-                    boolean linkflag = href.endsWith("png") || href.endsWith("jpg");
-                    if (!href.startsWith("http") && linkflag) {
+                    if (!href.startsWith("http")) {
                         String trimHref = href.replaceAll("^(\\.)*", "");
-                        sImg.attr("href", "." + trimHref);
                         if (!hrefs.contains(href)) {
                             log.info(href);
                             hrefs.add(href);
                             try {
                                 Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).execute();
-                                doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/")));
+                                doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/"), (href.lastIndexOf("?") == -1) ? href.length() : href.lastIndexOf("?")));
+                                sImg.attr("href", orgin + trimHref);
                             } catch (HttpStatusException e) {
-                                log.error("爬取当前页面异常:{}",e.getStatusCode());
+                                try {
+                                    Connection.Response resultImageResponse = Jsoup.connect("http:" + trimHref).ignoreContentType(true).execute();
+                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/"), (href.lastIndexOf("?") == -1) ? href.length() : href.lastIndexOf("?")));
+                                    sImg.attr("href", "http:" + trimHref);
+                                } catch (HttpStatusException es) {
+                                    log.error("爬取当前页面异常:{}", e.getStatusCode());
+                                }
                             }
                         }
                     }
                 }
                 for (Element sImg : img) {
                     String href = sImg.attr("src");
-                    boolean linkflag = href.endsWith("png") || href.endsWith("jpg");
-                    if (linkflag) {
-                        if (!href.startsWith("http")) {
-                            String trimHref = href.replaceAll("^(\\.)*", "");
-                            sImg.attr("src", "." + trimHref);
-                            if (!hrefs.contains(href)) {
-                                log.info(href);
-                                hrefs.add(href);
+                    if (!href.startsWith("http")) {
+                        String trimHref = href.replaceAll("^(\\.)*", "");
+                        if (!hrefs.contains(href)) {
+                            log.info(href);
+                            hrefs.add(href);
+                            try {
+                                Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).execute();
+                                doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/"), (href.lastIndexOf("?") == -1) ? href.length() : href.lastIndexOf("?")));
+                                sImg.attr("src", orgin + trimHref);
+                            } catch (HttpStatusException e) {
                                 try {
-                                    Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).execute();
-                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/")));
-                                } catch (HttpStatusException e) {
-                                    log.error("爬取当前页面异常:{}",e.getStatusCode());
+                                    Connection.Response resultImageResponse = Jsoup.connect("http:" + trimHref).ignoreContentType(true).execute();
+                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/"), (href.lastIndexOf("?") == -1) ? href.length() : href.lastIndexOf("?")));
+                                    sImg.attr("src", "http:" + trimHref);
+                                } catch (HttpStatusException es) {
+                                    log.error("爬取当前页面异常:{}", e.getStatusCode());
                                 }
                             }
-                        } else {
-                            if (!hrefs.contains(href)) {
-                                log.info(href);
-                                hrefs.add(href);
-                                try {
-                                    Connection.Response resultImageResponse = Jsoup.connect(href).ignoreContentType(true).execute();
-                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + "/webimgs", href.substring(href.lastIndexOf("/")));
-                                } catch (HttpStatusException e) {
-                                    log.error("爬取当前页面异常:{}",e.getStatusCode());
-                                }
+                        }
+                    } else {
+                        String trimHref = href.substring(href.lastIndexOf("/"));
+                        sImg.attr("src", "./webimgs/" + trimHref);
+                        if (!hrefs.contains(href)) {
+                            log.info(href);
+                            hrefs.add(href);
+                            try {
+                                Connection.Response resultImageResponse = Jsoup.connect(href).ignoreContentType(true).execute();
+                                doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + "/webimgs", href.substring(href.lastIndexOf("/")));
+                                sImg.attr("src", "./webimgs/" + trimHref);
+                            } catch (HttpStatusException e) {
+                                log.error("爬取当前页面异常:{}", e.getStatusCode());
                             }
                         }
                     }
                 }
                 for (Element sImg : img) {
                     String href = sImg.attr("data-original");
-                    boolean linkflag = href.endsWith("png") || href.endsWith("jpg");
-                    if (linkflag) {
-                        if (!href.startsWith("http")) {
-                            String trimHref = href.replaceAll("^(\\.)*", "");
-                            sImg.attr("data-original", "." + trimHref);
-                            if (!hrefs.contains(href)) {
-                                log.info(href);
-                                hrefs.add(href);
+                    if (!href.startsWith("http")) {
+                        String trimHref = href.replaceAll("^(\\.)*", "");
+                        if (!hrefs.contains(href)) {
+                            log.info(href);
+                            hrefs.add(href);
+                            try {
+                                Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).execute();
+                                doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/"), (href.lastIndexOf("?") == -1) ? href.length() : href.lastIndexOf("?")));
+                                sImg.attr("data-original", orgin + trimHref);
+                            } catch (HttpStatusException e) {
                                 try {
-                                    Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).execute();
-                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/")));
-                                } catch (HttpStatusException e) {
-                                    log.error("爬取当前页面异常:{}",e.getStatusCode());
+                                    Connection.Response resultImageResponse = Jsoup.connect("http:" + trimHref).ignoreContentType(true).execute();
+                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/"), (href.lastIndexOf("?") == -1) ? href.length() : href.lastIndexOf("?")));
+                                    sImg.attr("data-original", "http:" + trimHref);
+                                } catch (HttpStatusException es) {
+                                    log.error("爬取当前页面异常:{}", e.getStatusCode());
                                 }
                             }
-                        } else {
-                            if (!hrefs.contains(href)) {
-                                log.info(href);
-                                hrefs.add(href);
-                                try {
-                                    Connection.Response resultImageResponse = Jsoup.connect(href).ignoreContentType(true).execute();
-                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + "/webimgs", href.substring(href.lastIndexOf("/")));
-                                } catch (HttpStatusException e) {
-                                    log.error("爬取当前页面异常:{}",e.getStatusCode());
-                                }
+                        }
+                    } else {
+                        String trimHref = href.substring(href.lastIndexOf("/"));
+                        if (!hrefs.contains(href)) {
+                            log.info(href);
+                            hrefs.add(href);
+                            try {
+                                Connection.Response resultImageResponse = Jsoup.connect(href).ignoreContentType(true).execute();
+                                doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + "/webimgs", href.substring(href.lastIndexOf("/"), (href.lastIndexOf("?") == -1) ? href.length() : href.lastIndexOf("?")));
+                                sImg.attr("data-original", "./webimgs/" + trimHref);
+                            } catch (HttpStatusException e) {
+                                log.error("爬取当前页面异常:{}", e.getStatusCode());
                             }
                         }
                     }
@@ -395,36 +417,44 @@ public class HtmlUtils {
                     boolean linkflag = href.endsWith("js");
                     if (!href.startsWith("http") && linkflag) {
                         String trimHref = href.replaceAll("^(\\.)*", "");
-                        ss.attr("src", "." + trimHref);
                         if (!hrefs.contains(href)) {
                             log.info(href);
                             hrefs.add(href);
                             try {
                                 Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).ignoreContentType(true).execute();
-                                doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/")));
+                                doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/"), (href.lastIndexOf("?") == -1) ? href.length() : href.lastIndexOf("?")));
+                                ss.attr("src", orgin + trimHref);
                             } catch (HttpStatusException e) {
-                                e.printStackTrace();
-                                log.error("爬取当前页面异常");
+                                try {
+                                    Connection.Response resultImageResponse = Jsoup.connect("http:" + trimHref).ignoreContentType(true).ignoreContentType(true).execute();
+                                    doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + href.substring(0, href.lastIndexOf("/")).replaceAll("\\.", ""), href.substring(href.lastIndexOf("/"), (href.lastIndexOf("?") == -1) ? href.length() : href.lastIndexOf("?")));
+                                    ss.attr("src", "http:" + trimHref);
+                                } catch (HttpStatusException es) {
+                                    log.error("爬取当前页面异常:{}", e.getStatusCode());
+                                }
                             }
                         }
                     }
-                }
-                if (!StringUtils.isEmpty(title.text())) {
-                    doSaveFile(IPStr, document.toString(), domain, title.text().replaceAll("\\|", "") + ".html");
                 }
                 //爬取静态页面
                 for (Element sh : select) {
                     String href = sh.attr("href");
                     if (!href.startsWith("http")) {
                         href = orgin + href;
+                        sh.attr("href", "." + sh.attr("href"));
                     }
-                    if (!regUrl(href) && href.contains(param.substring(0, param.lastIndexOf("/")))) {
+                    if (!regUrl(href) && href.startsWith(param.substring(0, param.lastIndexOf("/")))) {
                         if (!hrefs.contains(href)) {
                             log.info(href);
                             hrefs.add(href);
                             getArticleURLs(IPStr, href, hrefs);
                         }
                     }
+                }
+                if (!StringUtils.isEmpty(title.text())) {
+                    String s = domain + param.replace(orgin, "");
+                    String hrefPath = s.substring(0, s.lastIndexOf("/"));
+                    doSaveFile(IPStr, document.toString(), hrefPath, s.substring(s.lastIndexOf("/"), (s.lastIndexOf("?") == -1) ? s.length() : s.lastIndexOf("?")));
                 }
             } catch (MalformedURLException e) {
                 e.printStackTrace();
