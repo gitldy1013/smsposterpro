@@ -312,12 +312,12 @@ public class HtmlUtils {
                                         doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
                                         sl.attr("href", protocol + trimHref);
                                     } catch (HttpStatusException es) {
-                                        log.error("爬取当前页面异常:{}", e.getStatusCode());
+                                        log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
                                     } catch (Exception ex) {
-                                        log.error("爬取当前页面异常:{}", ex.getMessage());
+                                        log.error("爬取当前页面异常:{}", ex.getMessage(),ex);
                                     }
                                 } catch (Exception e) {
-                                    log.error("爬取当前页面异常:{}", e.getMessage());
+                                    log.error("爬取当前页面异常:{}", e.getMessage(),e);
                                 }
                             }
                         }
@@ -343,12 +343,12 @@ public class HtmlUtils {
                                         doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
                                         sImg.attr("href", protocol + trimHref);
                                     } catch (HttpStatusException es) {
-                                        log.error("爬取当前页面异常:{}", e.getStatusCode());
+                                        log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
                                     } catch (Exception ex) {
-                                        log.error("爬取当前页面异常:{}", ex.getMessage());
+                                        log.error("爬取当前页面异常:{}", ex.getMessage(),ex);
                                     }
                                 } catch (Exception e) {
-                                    log.error("爬取当前页面异常:{}", e.getMessage());
+                                    log.error("爬取当前页面异常:{}", e.getMessage(),e);
                                 }
                             }
                         }
@@ -373,12 +373,12 @@ public class HtmlUtils {
                                         doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
                                         sImg.attr("src", protocol + trimHref);
                                     } catch (HttpStatusException es) {
-                                        log.error("爬取当前页面异常:{}", e.getStatusCode());
+                                        log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
                                     } catch (Exception ex) {
-                                        log.error("爬取当前页面异常:{}", ex.getMessage());
+                                        log.error("爬取当前页面异常:{}", ex.getMessage(),ex);
                                     }
                                 } catch (Exception e) {
-                                    log.error("爬取当前页面异常:{}", e.getMessage());
+                                    log.error("爬取当前页面异常:{}", e.getMessage(),e);
                                 }
                             }
                         } else {
@@ -392,9 +392,9 @@ public class HtmlUtils {
                                     doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + "/webimgs", getResName(href));
                                     sImg.attr("src", "./webimgs/" + trimHref);
                                 } catch (HttpStatusException e) {
-                                    log.error("爬取当前页面异常:{}", e.getStatusCode());
+                                    log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
                                 } catch (Exception e) {
-                                    log.error("爬取当前页面异常:{}", e.getMessage());
+                                    log.error("爬取当前页面异常:{}", e.getMessage(),e);
                                 }
                             }
                         }
@@ -419,12 +419,12 @@ public class HtmlUtils {
                                         doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
                                         sImg.attr("data-original", protocol + trimHref);
                                     } catch (HttpStatusException es) {
-                                        log.error("爬取当前页面异常:{}", e.getStatusCode());
+                                        log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
                                     } catch (Exception ex) {
-                                        log.error("爬取当前页面异常:{}", ex.getMessage());
+                                        log.error("爬取当前页面异常:{}", ex.getMessage(),ex);
                                     }
                                 } catch (Exception e) {
-                                    log.error("爬取当前页面异常:{}", e.getMessage());
+                                    log.error("爬取当前页面异常:{}", e.getMessage(),e);
                                 }
                             }
                         } else {
@@ -437,9 +437,9 @@ public class HtmlUtils {
                                     doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + "/webimgs", getResName(href));
                                     sImg.attr("data-original", "./webimgs/" + trimHref);
                                 } catch (HttpStatusException e) {
-                                    log.error("爬取当前页面异常:{}", e.getStatusCode());
+                                    log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
                                 } catch (Exception ex) {
-                                    log.error("爬取当前页面异常:{}", ex.getMessage());
+                                    log.error("爬取当前页面异常:{}", ex.getMessage(),ex);
                                 }
                             }
                         }
@@ -463,12 +463,12 @@ public class HtmlUtils {
                                     doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
                                     ss.attr("src", protocol + trimHref);
                                 } catch (HttpStatusException es) {
-                                    log.error("爬取当前页面异常:{}", e.getStatusCode());
+                                    log.error("爬取当前页面异常:{}", e.getStatusCode(),e);
                                 } catch (Exception ex) {
-                                    log.error("爬取当前页面异常:{}", ex.getMessage());
+                                    log.error("爬取当前页面异常:{}", ex.getMessage(),e);
                                 }
                             } catch (Exception e) {
-                                log.error("爬取当前页面异常:{}", e.getMessage());
+                                log.error("爬取当前页面异常:{}", e.getMessage(),e);
                             }
                         }
                     }
@@ -492,7 +492,7 @@ public class HtmlUtils {
                                     getArticleURLs(IPStr, protocol + sh.attr("href"), hrefs);
                                     sh.attr("href", protocol + sh.attr("href"));
                                 } catch (Exception ex) {
-                                    log.error("爬取当前页面异常:{}", ex.getMessage());
+                                    log.error("爬取当前页面异常:{}", ex.getMessage(),e);
                                 }
                             }
                         }
@@ -505,9 +505,9 @@ public class HtmlUtils {
                     doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
                 }
             } catch (MalformedURLException e) {
-                log.error("无法解析的URL");
+                log.error("无法解析的URL",e);
             } catch (Exception e) {
-                log.error("爬取当前页面异常:{}", e.getMessage());
+                log.error("爬取当前页面异常:{}", e.getMessage(),e);
             }
         }
     }
@@ -516,6 +516,9 @@ public class HtmlUtils {
         if (url.contains("?")) {
             url = url.substring(0, url.indexOf("?"));
         }
+        if (url.contains("#")) {
+            url = url.substring(0, url.indexOf("#"));
+        }
         return url.substring(url.lastIndexOf("/"));
     }
 
@@ -523,12 +526,18 @@ public class HtmlUtils {
         if (url.contains("?")) {
             url = url.substring(0, url.indexOf("?"));
         }
+        if (url.contains("#")) {
+            url = url.substring(0, url.indexOf("#"));
+        }
         return url.substring(0, url.lastIndexOf("/")).replaceAll("\\.", "");
     }
 
     public static String getResPathNoParam(String url) {
         if (url.contains("?")) {
             url = url.substring(0, url.indexOf("?"));
+        }
+        if (url.contains("#")) {
+            url = url.substring(0, url.indexOf("#"));
         }
         return url;
     }
