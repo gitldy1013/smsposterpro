@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
@@ -66,7 +67,7 @@ import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 public class PyController extends BaseController {
 
     private static ExecutorService executor = Executors.newSingleThreadExecutor();
-
+    RestTemplate restTemplate = new RestTemplate();
     @Autowired
     private MailService mailService;
 
@@ -137,10 +138,13 @@ public class PyController extends BaseController {
                 HtmlUtils.getArticleURLs(IPStr, param, hrefs);
                 long end = System.currentTimeMillis();
                 //发邮件TODO
-                log.info("爬取任务：" + param + "完成，开始发送邮件。");
-                mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", IPStr + "-相关爬取任务已经完成</br>" +
+                log.info("爬取任务：" + param + "完成，开始发送邮件；推送微信通知。");
+                String context = IPStr + "-相关爬取任务已经完成</br>" +
                         "本次总共爬取文件数量为：" + hrefs.size() + "个；总耗时" + getTime(end - start) + ";</br>" +
-                        "请点击连接:<a href='https://sms.liudongyang.top//downloadZip?subPath=" + param + "'>点击下载</a>");
+                        "请点击连接:<a href='https://sms.liudongyang.top//downloadZip?subPath=" + param + "'>点击下载</a>";
+                mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", context);
+                String forObject = restTemplate.getForObject("http://sc.ftqq.com/SCU125307T7c9f252f885c51edad0e59ea4a37a64f5faa5441b53e5.send?text=相关爬取任务已经完成&desp=" + context, String.class);
+                log.info("微信推送成功：{}", forObject);
             });
             return "<h2>已开始爬取网站任务，请收到提示后点击导出或下载全部附件按钮下载。</h2>";
         } else {

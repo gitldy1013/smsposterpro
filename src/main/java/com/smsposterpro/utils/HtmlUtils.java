@@ -12,14 +12,21 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.FileCopyUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static com.smsposterpro.utils.ResourcesFileUtils.*;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_EXP_FILE_NAME;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 
 @Slf4j
 public class HtmlUtils {
@@ -322,7 +329,8 @@ public class HtmlUtils {
                     log.info("保存html：" + param);
                     String s = domain + param.replace(orgin, "");
                     String hrefPath = s.substring(0, s.lastIndexOf("/"));
-                    doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
+                    String resName = getResName(s);
+                    doSaveFile(IPStr, document.toString(), hrefPath, ("/".equals(resName) || StringUtils.isEmpty(resName)) ? "/index.html" : resName);
                 }
             } catch (MalformedURLException e) {
                 log.error("无法解析的URL:{}", e.getMessage(), e);
@@ -335,7 +343,7 @@ public class HtmlUtils {
     private static void repyHtml(String IPStr, Set<String> hrefs, Element sh, String s) {
         if (!hrefs.contains(s)) {
             hrefs.add(s);
-            log.info("当前爬去资源路径：{}；爬去文件数量：{}。",s,hrefs.size());
+            log.info("当前爬去资源路径：{}；爬去文件数量：{}。", s, hrefs.size());
             getArticleURLs(IPStr, s, hrefs);
             sh.attr("href", s);
         }
@@ -377,7 +385,7 @@ public class HtmlUtils {
     private static void pySources(String IPStr, Set<String> hrefs, String orgin, String domain, String attr, Element sImg, String href, String trimHref, String s, String resPathDir) throws IOException {
         if (!hrefs.contains(s)) {
             hrefs.add(s);
-            log.info("当前爬去资源路径：{}；爬去文件数量：{}。",s,hrefs.size());
+            log.info("当前爬去资源路径：{}；爬去文件数量：{}。", s, hrefs.size());
             Connection.Response resultImageResponse = Jsoup.connect(s).ignoreContentType(true).execute();
             doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + resPathDir, getResName(href));
             sImg.attr(attr, orgin + trimHref);
