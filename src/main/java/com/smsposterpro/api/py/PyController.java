@@ -3,6 +3,7 @@ package com.smsposterpro.api.py;
 import com.smsposterpro.api.BaseController;
 import com.smsposterpro.exception.AesException;
 import com.smsposterpro.service.MailService;
+import com.smsposterpro.service.file.FileService;
 import com.smsposterpro.utils.CusAccessObjectUtil;
 import com.smsposterpro.utils.FileUtils;
 import com.smsposterpro.utils.HtmlUtils;
@@ -22,22 +23,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -46,14 +40,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.smsposterpro.utils.CommonUtils.getTime;
-import static com.smsposterpro.utils.HtmlUtils.createFileWithMultilevelDirectory;
-import static com.smsposterpro.utils.HtmlUtils.doSaveTempFile;
-import static com.smsposterpro.utils.HtmlUtils.getAlertMsg;
-import static com.smsposterpro.utils.HtmlUtils.getRes;
-import static com.smsposterpro.utils.HtmlUtils.regUrl;
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_EXP_FILE_NAME;
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
+import static com.smsposterpro.utils.HtmlUtils.*;
+import static com.smsposterpro.utils.ResourcesFileUtils.*;
 
 /**
  * 短信转发Controller
@@ -70,6 +58,8 @@ public class PyController extends BaseController {
     RestTemplate restTemplate = new RestTemplate();
     @Autowired
     private MailService mailService;
+    @Autowired
+    private FileService fileService;
 
     @GetMapping("/index")
     public String index() {
@@ -129,22 +119,46 @@ public class PyController extends BaseController {
 
     @PostMapping("/webpyAll")
     @ResponseBody
-    public String webpyAll(@RequestParam(name = "webpyAll", required = true) String param, HttpServletRequest request) throws IOException {
+    public String webpyAll(@RequestParam(name = "webpyAll", required = true) String param, HttpServletRequest request) {
         if (!regUrl(param)) {
             executor.execute(() -> {
-                String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
+                String IpStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
                 long start = System.currentTimeMillis();
+                //开始压缩文件
                 LinkedHashSet<String> hrefs = new LinkedHashSet<>();
-                HtmlUtils.getArticleURLs(IPStr, param, hrefs);
-                long end = System.currentTimeMillis();
-                //发邮件TODO
-                log.info("爬取任务：" + param + "完成，开始发送邮件；推送微信通知。");
-                String context = IPStr + "-相关爬取任务已经完成</br>" +
-                        "本次总共爬取文件数量为：" + hrefs.size() + "个；总耗时" + getTime(end - start) + ";</br>" +
-                        "请点击连接:<a href='https://sms.liudongyang.top//downloadZip?subPath=" + param + "'>点击下载</a>";
-                mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", context);
-                String forObject = restTemplate.getForObject("http://sc.ftqq.com/SCU125307T7c9f252f885c51edad0e59ea4a37a64f5faa5441b53e5.send?text=相关爬取任务已经完成&desp=" + context, String.class);
-                log.info("微信推送成功：{}", forObject);
+                String filePath = "./" + TEMP_FILE_DIR + "/" + IpStr;
+                if (!StringUtils.isEmpty(param)) {
+                    URL url;
+                    try {
+                        url = new URL(param);
+                        String host = url.getHost().replaceAll("\\.", "");
+                        filePath += "/" + host;
+                        fileService.deleteDir(filePath);
+                        //开始爬取文件
+                        HtmlUtils.getArticleURLs(IpStr, param, hrefs);
+                        IpStr = host;
+                    } catch (MalformedURLException e) {
+                        log.error("url参数异常！", e);
+                    }
+                }
+                try {
+                    File zipFile = new File(filePath + "/" + IpStr + ".zip");
+                    FileUtils.fileToZip(filePath, filePath, IpStr);
+                    long end = System.currentTimeMillis();
+                    //发邮件TODO
+                    log.info("爬取任务：" + param + "完成，开始发送邮件,推送微信消息。");
+                    String context = IpStr + "-相关爬取任务已经完成</br>" +
+                            "本次总共爬取文件数量为：" + hrefs.size() + "个；总耗时" + getTime(end - start) + ";</br>" +
+                            "请点击连接:<a href='https://sms.liudongyang.top//downloadZip?subPath=" + param + "'>点击下载</a>";
+                    //mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", context);
+                    //String forObject = restTemplate.getForObject("http://sc.ftqq.com/SCU125307T7c9f252f885c51edad0e59ea4a37a64f5faa5441b53e5.send?text=相关爬取任务已经完成&desp=" + context, String.class);
+                    //log.info("微信推送成功：{}", forObject);
+                } catch (AesException e) {
+                    log.info("压缩文件失败！", e);
+                    mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", IpStr + "-相关爬取任务压缩文件发生异常" + e.getMessage());
+                    String forObject = restTemplate.getForObject("http://sc.ftqq.com/SCU125307T7c9f252f885c51edad0e59ea4a37a64f5faa5441b53e5.send?text=相关爬取任务压缩文件发生异常&desp=失败原因：" + e.getMessage(), String.class);
+                    log.info("微信推送成功：{}", forObject);
+                }
             });
             return "<h2>已开始爬取网站任务，请收到提示后点击导出或下载全部附件按钮下载。</h2>";
         } else {
@@ -215,11 +229,9 @@ public class PyController extends BaseController {
                 IpStr = host;
             }
             File zipFile = new File(filePath + "/" + IpStr + ".zip");
-            if (zipFile.exists()) {
-                log.info(filePath + "目录下存在名字为:" + IpStr + ".zip" + "打包文件,此操作进行覆盖.");
-                zipFile.delete();
+            if (!zipFile.exists()) {
+                FileUtils.fileToZip(filePath, filePath, IpStr);
             }
-            FileUtils.fileToZip(filePath, filePath, IpStr);
             String fileName = IpStr + ".zip";
             fis = new FileInputStream(new File(filePath + "/" + fileName));
             //获取文件后缀（.txt）

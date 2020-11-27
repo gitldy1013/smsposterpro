@@ -12,21 +12,13 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.FileCopyUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.MalformedURLException;
+import java.io.*;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_EXP_FILE_NAME;
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
-import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
+import static com.smsposterpro.utils.ResourcesFileUtils.*;
 
 @Slf4j
 public class HtmlUtils {
@@ -292,12 +284,11 @@ public class HtmlUtils {
                 URL url = new URL(param);
                 String orgin = url.getProtocol() + "://" + url.getHost() + ((url.getPort() > 0) ? ":" + url.getPort() : "");
                 String protocol = url.getProtocol() + ":";
-                Elements title = document.select("title");
                 String domain = url.getHost().replaceAll("\\.", "");
-                Elements select = document.getElementsByTag("a");
-                Elements link = document.getElementsByTag("link");
-                Elements script = document.getElementsByTag("script");
-                Elements img = document.getElementsByTag("img");
+                Elements select = document.select("a");
+                Elements link = document.select("link");
+                Elements script = document.select("script");
+                Elements img = document.select("img");
                 //爬取css和js文件
                 downloadByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
                 downloadByAttr(IPStr, hrefs, orgin, protocol, domain, script, "src");
@@ -309,7 +300,11 @@ public class HtmlUtils {
                 for (Element sh : select) {
                     String href = sh.attr("href");
                     if (!href.startsWith("http")) {
-                        href = orgin + href.replaceAll("^(\\.)*", "");
+                        if (!href.contains("javascript")) {
+                            href = orgin + href.replaceAll("^(\\.)*", "");
+                        } else {
+                            continue;
+                        }
                     }
                     String resPathNoParam = getResPathNoParam(href);
                     if (!regUrl(href) && href.startsWith(getResPathNoParam(param)) && !orgin.equals(resPathNoParam)) {
@@ -323,42 +318,44 @@ public class HtmlUtils {
                                 log.error("爬取当前页面异常:{}", ex.getMessage(), e);
                             }
                         }
+                    } else {
+                        sh.attr("href", href);
                     }
                 }
-                if (!StringUtils.isEmpty(title.text())) {
-                    log.info("保存html：" + param);
-                    String s = domain + param.replace(orgin, "");
-                    String hrefPath = s.substring(0, s.lastIndexOf("/"));
-                    doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
-                }
-            } catch (MalformedURLException e) {
-                log.error("无法解析的URL:{}", e.getMessage(), e);
+                log.info("保存html：" + param);
+                String s = domain + param.replace(orgin, "");
+                String hrefPath = s.substring(0, s.lastIndexOf("/"));
+                doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
             } catch (Exception e) {
                 log.error("爬取当前页面异常:{}", e.getMessage(), e);
             }
         }
     }
 
-    private static void repyHtml(String IPStr, Set<String> hrefs, Element sh, String s) {
-        if (!hrefs.contains(s)) {
-            hrefs.add(s);
-            log.info("当前爬去资源路径：{}；爬去文件数量：{}。", s, hrefs.size());
-            getArticleURLs(IPStr, s, hrefs);
-            sh.attr("href", s);
+    private static void repyHtml(String IPStr, Set<String> hrefs, Element sh, String href) {
+        if (!hrefs.contains(href)) {
+            hrefs.add(href);
+            log.info("当前资源路径：{}；文件数量：{}。", href, hrefs.size());
+            getArticleURLs(IPStr, href, hrefs);
         }
+        log.info("资源：" + href);
+        sh.attr("href", href);
     }
 
     private static void downloadByAttr(String IPStr, Set<String> hrefs, String orgin, String protocol, String domain, Elements img, String attr) {
-        for (Element sImg : img) {
-            String href = sImg.attr(attr);
+        for (Element el : img) {
+            String href = el.attr(attr);
             if (StringUtils.isNotEmpty(href)) {
+                if (href.contains("javascript")) {
+                    continue;
+                }
                 if (!href.startsWith("http")) {
                     String trimHref = href.replaceAll("^(\\.)*", "");
                     try {
-                        pySources(IPStr, hrefs, orgin, domain, attr, sImg, href, trimHref, orgin + trimHref, getResPathDir(href));
+                        pySources(IPStr, hrefs, domain, attr, el, href, orgin + trimHref, getResPathDir(href));
                     } catch (HttpStatusException e) {
                         try {
-                            pySources(IPStr, hrefs, protocol, domain, attr, sImg, href, trimHref, protocol + trimHref, getResPathDir(href));
+                            pySources(IPStr, hrefs, domain, attr, el, href, protocol + trimHref, getResPathDir(href));
                         } catch (HttpStatusException es) {
                             log.error("爬取当前页面异常:{}", e.getStatusCode(), e);
                         } catch (Exception ex) {
@@ -368,9 +365,8 @@ public class HtmlUtils {
                         log.error("爬取当前页面异常:{}", e.getMessage(), e);
                     }
                 } else {
-                    String trimHref = getResName(href);
                     try {
-                        pySources(IPStr, hrefs, "./webimgs/", domain, attr, sImg, href, trimHref, getResPathNoParam(href), "/webimgs");
+                        pySources(IPStr, hrefs, domain, attr, el, href, getResPathNoParam(href), "/webimgs");
                     } catch (HttpStatusException e) {
                         log.error("爬取当前页面异常:{}", e.getStatusCode(), e);
                     } catch (Exception e) {
@@ -381,14 +377,15 @@ public class HtmlUtils {
         }
     }
 
-    private static void pySources(String IPStr, Set<String> hrefs, String orgin, String domain, String attr, Element sImg, String href, String trimHref, String s, String resPathDir) throws IOException {
+    private static void pySources(String IPStr, Set<String> hrefs, String domain, String attr, Element sImg, String href, String s, String resPathDir) throws IOException {
         if (!hrefs.contains(s)) {
             hrefs.add(s);
-            log.info("当前爬去资源路径：{}；爬去文件数量：{}。", s, hrefs.size());
+            log.info("当前资源路径：{}；文件数量：{}。", s, hrefs.size());
             Connection.Response resultImageResponse = Jsoup.connect(s).ignoreContentType(true).execute();
             doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + resPathDir, getResName(href));
-            sImg.attr(attr, orgin + trimHref);
         }
+        log.info("资源：" + s);
+        sImg.attr(attr, s);
     }
 
     public static String getResName(String url) {
@@ -421,10 +418,10 @@ public class HtmlUtils {
             url = url.substring(0, url.indexOf("#"));
         }
         if (url.contains("http://")) {
-            url = url.substring(url.indexOf("http://"));
+            url = url.substring(url.lastIndexOf("http://"));
         }
         if (url.contains("https://")) {
-            url = url.substring(url.indexOf("https://"));
+            url = url.substring(url.lastIndexOf("https://"));
         }
         return url;
     }
