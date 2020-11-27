@@ -329,8 +329,7 @@ public class HtmlUtils {
                     log.info("保存html：" + param);
                     String s = domain + param.replace(orgin, "");
                     String hrefPath = s.substring(0, s.lastIndexOf("/"));
-                    String resName = getResName(s);
-                    doSaveFile(IPStr, document.toString(), hrefPath, ("/".equals(resName) || StringUtils.isEmpty(resName)) ? "/index.html" : resName);
+                    doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
                 }
             } catch (MalformedURLException e) {
                 log.error("无法解析的URL:{}", e.getMessage(), e);
@@ -394,7 +393,14 @@ public class HtmlUtils {
 
     public static String getResName(String url) {
         url = filterUrl(url);
-        return url.substring(url.lastIndexOf("/"));
+        String resName = url.substring(url.lastIndexOf("/"));
+        if (("/".equals(resName) || StringUtils.isEmpty(resName))) {
+            resName = "index.html";
+        }
+        if (!resName.contains(".")) {
+            resName = resName + ".html";
+        }
+        return resName;
     }
 
     public static String getResPathDir(String url) {
