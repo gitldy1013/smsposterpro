@@ -292,12 +292,12 @@ public class HtmlUtils {
                 Elements script = document.getElementsByTag("script");
                 Elements img = document.getElementsByTag("img");
                 //爬取css和js文件
-                downImgByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
-                downImgByAttr(IPStr, hrefs, orgin, protocol, domain, script, "src");
+                downloadByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
+                downloadByAttr(IPStr, hrefs, orgin, protocol, domain, script, "src");
                 //img
-                downImgByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
-                downImgByAttr(IPStr, hrefs, orgin, protocol, domain, img, "src");
-                downImgByAttr(IPStr, hrefs, orgin, protocol, domain, img, "data-original");
+                downloadByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
+                downloadByAttr(IPStr, hrefs, orgin, protocol, domain, img, "src");
+                downloadByAttr(IPStr, hrefs, orgin, protocol, domain, img, "data-original");
                 //爬取静态页面
                 //爬取标识
                 for (Element sh : select) {
@@ -338,7 +338,7 @@ public class HtmlUtils {
         }
     }
 
-    private static void downImgByAttr(String IPStr, Set<String> hrefs, String orgin, String protocol, String domain, Elements img, String attr) {
+    private static void downloadByAttr(String IPStr, Set<String> hrefs, String orgin, String protocol, String domain, Elements img, String attr) {
         for (Element sImg : img) {
             String href = sImg.attr(attr);
             if (StringUtils.isNotEmpty(href)) {
