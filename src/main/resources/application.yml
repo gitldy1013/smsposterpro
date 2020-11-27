@@ -48,7 +48,7 @@ spring:
     default-encoding: utf-8
     # 用户名
     username: 13691363167@163.com
-    # 授权码，就是我们刚才准备工作获取的代码
+    # 授权码
     password: NQJGHBROTDHBMDXS
     # 其它参数
     properties:

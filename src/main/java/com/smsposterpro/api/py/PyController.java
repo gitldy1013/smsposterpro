@@ -22,13 +22,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -37,8 +45,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.smsposterpro.utils.CommonUtils.getTime;
-import static com.smsposterpro.utils.HtmlUtils.*;
-import static com.smsposterpro.utils.ResourcesFileUtils.*;
+import static com.smsposterpro.utils.HtmlUtils.createFileWithMultilevelDirectory;
+import static com.smsposterpro.utils.HtmlUtils.doSaveTempFile;
+import static com.smsposterpro.utils.HtmlUtils.getRes;
+import static com.smsposterpro.utils.HtmlUtils.regUrl;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_EXP_FILE_NAME;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 
 /**
  * 短信转发Controller
@@ -154,7 +167,10 @@ public class PyController extends BaseController {
         filename = (StringUtils.isEmpty(filename)) ? TEMP_EXP_FILE_NAME : filename;
         String fileName = "./" + TEMP_FILE_DIR + "/" + CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "") + "/" + filename;
         FileInputStream fis;
+        //获取输出流对象（用于写文件）
+        ServletOutputStream os = null;
         try {
+            os = response.getOutputStream();
             fis = new FileInputStream(new File(fileName));
             //获取文件后缀（.txt）
             String extendFileName = fileName.substring(fileName.lastIndexOf('.'));
@@ -162,13 +178,19 @@ public class PyController extends BaseController {
             response.setContentType(request.getSession().getServletContext().getMimeType(extendFileName));
             //设置响应头,attachment表示以附件的形式下载，inline表示在线打开
             response.setHeader("content-disposition", "attachment;fileName=" + URLEncoder.encode(filename, "UTF-8"));
-            //获取输出流对象（用于写文件）
-            ServletOutputStream os = response.getOutputStream();
             //下载文件,使用spring框架中的FileCopyUtils工具
             FileCopyUtils.copy(fis, os);
         } catch (IOException e) {
             e.printStackTrace();
             log.info("获取文件异常", e);
+            try {
+                response.setHeader("Content-Type", "text/html; charset=UTF-8");
+                response.setContentType("text/html; charset=utf-8");
+                FileCopyUtils.copy(getAlertMsg(e.getMessage()).getBytes(StandardCharsets.UTF_8), os != null ? os : response.getOutputStream());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                log.info("信息数据写出异常", e);
+            }
         }
     }
 
@@ -207,7 +229,8 @@ public class PyController extends BaseController {
             e.printStackTrace();
             try {
                 response.setHeader("Content-Type", "text/html; charset=UTF-8");
-                FileCopyUtils.copy(e.getMessage().getBytes(StandardCharsets.UTF_8), os);
+                response.setContentType("text/html; charset=utf-8");
+                FileCopyUtils.copy(getAlertMsg(e.getMessage()).getBytes(StandardCharsets.UTF_8), os);
             } catch (IOException ex) {
                 ex.printStackTrace();
                 log.info("信息数据写出异常", e);
@@ -217,12 +240,27 @@ public class PyController extends BaseController {
             log.info("获取文件异常", e);
             try {
                 response.setHeader("Content-Type", "text/html; charset=UTF-8");
-                FileCopyUtils.copy(e.getMessage().getBytes(StandardCharsets.UTF_8), os);
+                response.setContentType("text/html; charset=utf-8");
+                FileCopyUtils.copy(getAlertMsg(e.getMessage()).getBytes(StandardCharsets.UTF_8), os != null ? os : response.getOutputStream());
             } catch (IOException ex) {
                 ex.printStackTrace();
                 log.info("信息数据写出异常", e);
             }
         }
+    }
+
+    public String getAlertMsg(String msg) {
+        return "<script src=\"https://unpkg.com/sweetalert/dist/sweetalert.min.js\"></script>" +
+                "<link rel=\"icon\" type=\"image/x-icon\" href=\"../static/favicon.ico\">" +
+                "<script>" +
+                "window.onload = function (){" +
+                "swal(\"" + msg + "\")" +
+                ".then((value) => {" +
+                "  window.opener=null;" +
+                "  window.open('','_self');" +
+                "  window.close();" +
+                "});" +
+                "}</script>";
     }
 
 }
