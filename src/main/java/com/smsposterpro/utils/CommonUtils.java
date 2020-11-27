@@ -37,6 +37,13 @@ public class CommonUtils {
         }
     }
 
+    public static String getTime(long time) {
+        long hour = time / (60 * 60 * 1000);
+        long minute = (time - hour * 60 * 60 * 1000) / (60 * 1000);
+        long second = (time - hour * 60 * 60 * 1000 - minute * 60 * 1000) / 1000;
+        return (hour + "时" + minute + "分 " + second + "秒");
+    }
+
     public static void main(String[] args) throws Exception {
         String result = FindOCR("C:\\Users\\liudongyang\\Desktop\\smsposterpro\\file\\test.png", true);
         System.out.println(result);

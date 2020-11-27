@@ -298,43 +298,46 @@ public class HtmlUtils {
                 downloadByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
                 downloadByAttr(IPStr, hrefs, orgin, protocol, domain, img, "src");
                 downloadByAttr(IPStr, hrefs, orgin, protocol, domain, img, "data-original");
-                //爬取静态页面
-                //爬取标识
+                //递归爬取静态页面
                 for (Element sh : select) {
                     String href = sh.attr("href");
                     if (!href.startsWith("http")) {
-                        href = orgin + href;
+                        href = orgin + href.replaceAll("^(\\.)*", "");
                     }
-                    if (!regUrl(href) && href.startsWith(param.substring(0, param.lastIndexOf("/"))) && !orgin.equals(href.replaceAll("#", ""))) {
-                        if (!(hrefs.contains(href))) {
-                            hrefs.add(href);
+                    String resPathNoParam = getResPathNoParam(href);
+                    if (!regUrl(href) && href.startsWith(getResPathNoParam(param)) && !orgin.equals(resPathNoParam)) {
+                        try {
+                            repyHtml(IPStr, hrefs, sh, resPathNoParam);
+                        } catch (Exception e) {
                             try {
-                                log.info(href);
-                                getArticleURLs(IPStr, href, hrefs);
-                                sh.attr("href", href);
-                            } catch (Exception e) {
-                                try {
-                                    log.info(protocol + sh.attr("href"));
-                                    getArticleURLs(IPStr, protocol + sh.attr("href"), hrefs);
-                                    sh.attr("href", protocol + sh.attr("href"));
-                                } catch (Exception ex) {
-                                    log.error("爬取当前页面异常:{}", ex.getMessage(), e);
-                                }
+                                String s = protocol + getResPathNoParam(sh.attr("href"));
+                                repyHtml(IPStr, hrefs, sh, s);
+                            } catch (Exception ex) {
+                                log.error("爬取当前页面异常:{}", ex.getMessage(), e);
                             }
                         }
                     }
                 }
                 if (!StringUtils.isEmpty(title.text())) {
-                    log.info(param);
+                    log.info("保存html：" + param);
                     String s = domain + param.replace(orgin, "");
                     String hrefPath = s.substring(0, s.lastIndexOf("/"));
                     doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
                 }
             } catch (MalformedURLException e) {
-                log.error("无法解析的URL", e);
+                log.error("无法解析的URL:{}", e.getMessage(), e);
             } catch (Exception e) {
                 log.error("爬取当前页面异常:{}", e.getMessage(), e);
             }
+        }
+    }
+
+    private static void repyHtml(String IPStr, Set<String> hrefs, Element sh, String s) {
+        if (!hrefs.contains(s)) {
+            hrefs.add(s);
+            log.info("当前爬去资源路径：{}；爬去文件数量：{}。",s,hrefs.size());
+            getArticleURLs(IPStr, s, hrefs);
+            sh.attr("href", s);
         }
     }
 
@@ -344,74 +347,70 @@ public class HtmlUtils {
             if (StringUtils.isNotEmpty(href)) {
                 if (!href.startsWith("http")) {
                     String trimHref = href.replaceAll("^(\\.)*", "");
-                    if (!hrefs.contains(href)) {
-                        hrefs.add(href);
+                    try {
+                        pySources(IPStr, hrefs, orgin, domain, attr, sImg, href, trimHref, orgin + trimHref, getResPathDir(href));
+                    } catch (HttpStatusException e) {
                         try {
-                            log.info(orgin + trimHref);
-                            Connection.Response resultImageResponse = Jsoup.connect(orgin + trimHref).ignoreContentType(true).execute();
-                            doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
-                            sImg.attr(attr, orgin + trimHref);
-                        } catch (HttpStatusException e) {
-                            try {
-                                log.info(protocol + trimHref);
-                                Connection.Response resultImageResponse = Jsoup.connect(protocol + trimHref).ignoreContentType(true).execute();
-                                doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + getResPathDir(href), getResName(href));
-                                sImg.attr(attr, protocol + trimHref);
-                            } catch (HttpStatusException es) {
-                                log.error("爬取当前页面异常:{}", e.getStatusCode(), e);
-                            } catch (Exception ex) {
-                                log.error("爬取当前页面异常:{}", ex.getMessage(), ex);
-                            }
-                        } catch (Exception e) {
-                            log.error("爬取当前页面异常:{}", e.getMessage(), e);
+                            pySources(IPStr, hrefs, protocol, domain, attr, sImg, href, trimHref, protocol + trimHref, getResPathDir(href));
+                        } catch (HttpStatusException es) {
+                            log.error("爬取当前页面异常:{}", e.getStatusCode(), e);
+                        } catch (Exception ex) {
+                            log.error("爬取当前页面异常:{}", ex.getMessage(), ex);
                         }
+                    } catch (Exception e) {
+                        log.error("爬取当前页面异常:{}", e.getMessage(), e);
                     }
                 } else {
                     String trimHref = getResName(href);
-                    if (!hrefs.contains(href)) {
-                        hrefs.add(href);
-                        try {
-                            log.info(href);
-                            Connection.Response resultImageResponse = Jsoup.connect(getResPathNoParam(href)).ignoreContentType(true).execute();
-                            doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + "/webimgs", getResName(href));
-                            sImg.attr(attr, "./webimgs/" + trimHref);
-                        } catch (HttpStatusException e) {
-                            log.error("爬取当前页面异常:{}", e.getStatusCode(), e);
-                        } catch (Exception e) {
-                            log.error("爬取当前页面异常:{}", e.getMessage(), e);
-                        }
+                    try {
+                        pySources(IPStr, hrefs, "./webimgs/", domain, attr, sImg, href, trimHref, getResPathNoParam(href), "/webimgs");
+                    } catch (HttpStatusException e) {
+                        log.error("爬取当前页面异常:{}", e.getStatusCode(), e);
+                    } catch (Exception e) {
+                        log.error("爬取当前页面异常:{}", e.getMessage(), e);
                     }
                 }
             }
         }
     }
 
+    private static void pySources(String IPStr, Set<String> hrefs, String orgin, String domain, String attr, Element sImg, String href, String trimHref, String s, String resPathDir) throws IOException {
+        if (!hrefs.contains(s)) {
+            hrefs.add(s);
+            log.info("当前爬去资源路径：{}；爬去文件数量：{}。",s,hrefs.size());
+            Connection.Response resultImageResponse = Jsoup.connect(s).ignoreContentType(true).execute();
+            doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + resPathDir, getResName(href));
+            sImg.attr(attr, orgin + trimHref);
+        }
+    }
+
     public static String getResName(String url) {
-        if (url.contains("?")) {
-            url = url.substring(0, url.indexOf("?"));
-        }
-        if (url.contains("#")) {
-            url = url.substring(0, url.indexOf("#"));
-        }
+        url = filterUrl(url);
         return url.substring(url.lastIndexOf("/"));
     }
 
     public static String getResPathDir(String url) {
-        if (url.contains("?")) {
-            url = url.substring(0, url.indexOf("?"));
-        }
-        if (url.contains("#")) {
-            url = url.substring(0, url.indexOf("#"));
-        }
+        url = filterUrl(url);
         return url.substring(0, url.lastIndexOf("/")).replaceAll("\\.", "");
     }
 
     public static String getResPathNoParam(String url) {
+        url = filterUrl(url);
+        return url;
+    }
+
+    private static String filterUrl(String url) {
         if (url.contains("?")) {
             url = url.substring(0, url.indexOf("?"));
         }
         if (url.contains("#")) {
             url = url.substring(0, url.indexOf("#"));
+        }
+        if (url.contains("http://")) {
+            url = url.substring(url.indexOf("http://"));
+        }
+        if (url.contains("https://")) {
+            url = url.substring(url.indexOf("https://"));
         }
         return url;
     }

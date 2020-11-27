@@ -36,6 +36,7 @@ import java.util.LinkedHashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.smsposterpro.utils.CommonUtils.getTime;
 import static com.smsposterpro.utils.HtmlUtils.*;
 import static com.smsposterpro.utils.ResourcesFileUtils.*;
 
@@ -117,10 +118,14 @@ public class PyController extends BaseController {
         if (!regUrl(param)) {
             executor.execute(() -> {
                 String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
-                HtmlUtils.getArticleURLs(IPStr, param, new LinkedHashSet<>());
+                long start = System.currentTimeMillis();
+                LinkedHashSet<String> hrefs = new LinkedHashSet<>();
+                HtmlUtils.getArticleURLs(IPStr, param, hrefs);
+                long end = System.currentTimeMillis();
                 //发邮件TODO
                 log.info("爬取任务：" + param + "完成，开始发送邮件。");
                 mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", IPStr + "-相关爬取任务已经完成</br>" +
+                        "本次总共爬取文件数量为：" + hrefs.size() + "个；总耗时" + getTime(end - start) + ";</br>" +
                         "请点击连接:<a href='https://sms.liudongyang.top//downloadZip?subPath=" + param + "'>点击下载</a>");
             });
             return "<h2>已开始爬取网站任务，请收到提示后点击导出或下载全部附件按钮下载。</h2>";
