@@ -277,7 +277,7 @@ public class HtmlUtils {
     }
 
     //爬取一个域名下所有url的文件内容
-    public static void getArticleURLs(String IPStr, String param, Set<String> hrefs) {
+    public static void getArticleURLs(String IPStr, String param, Set<String> hrefs, String local) {
         if (!regUrl(param)) {
             try {
                 Document document = Jsoup.connect(param).get();
@@ -307,13 +307,13 @@ public class HtmlUtils {
                         }
                     }
                     String resPathNoParam = getResPathNoParam(href);
-                    if (!regUrl(href) && href.startsWith(getResPathNoParam(param)) && !orgin.equals(resPathNoParam)) {
+                    if (!regUrl(href) && href.startsWith(orgin + local) && !orgin.equals(resPathNoParam)) {
                         try {
-                            repyHtml(IPStr, hrefs, sh, resPathNoParam);
+                            repyHtml(IPStr, hrefs, sh, resPathNoParam, local);
                         } catch (Exception e) {
                             try {
                                 String s = protocol + getResPathNoParam(sh.attr("href"));
-                                repyHtml(IPStr, hrefs, sh, s);
+                                repyHtml(IPStr, hrefs, sh, s, local);
                             } catch (Exception ex) {
                                 log.error("爬取当前页面异常:{}", ex.getMessage(), e);
                             }
@@ -332,13 +332,12 @@ public class HtmlUtils {
         }
     }
 
-    private static void repyHtml(String IPStr, Set<String> hrefs, Element sh, String href) {
+    private static void repyHtml(String IPStr, Set<String> hrefs, Element sh, String href, String local) {
         if (!hrefs.contains(href)) {
             hrefs.add(href);
             log.info("当前资源路径：{}；文件数量：{}。", href, hrefs.size());
-            getArticleURLs(IPStr, href, hrefs);
+            getArticleURLs(IPStr, href, hrefs, local);
         }
-        log.info("资源：" + href);
         sh.attr("href", href);
     }
 
@@ -352,10 +351,10 @@ public class HtmlUtils {
                 if (!href.startsWith("http")) {
                     String trimHref = href.replaceAll("^(\\.)*", "");
                     try {
-                        pySources(IPStr, hrefs, domain, attr, el, href, orgin + trimHref, getResPathDir(href));
+                        pySources(IPStr, hrefs, domain, attr, el, href, orgin + trimHref, getResPathDir(href), orgin);
                     } catch (HttpStatusException e) {
                         try {
-                            pySources(IPStr, hrefs, domain, attr, el, href, protocol + trimHref, getResPathDir(href));
+                            pySources(IPStr, hrefs, domain, attr, el, href, protocol + trimHref, getResPathDir(href), orgin);
                         } catch (HttpStatusException es) {
                             log.error("爬取当前页面异常:{}", e.getStatusCode(), e);
                         } catch (Exception ex) {
@@ -366,7 +365,7 @@ public class HtmlUtils {
                     }
                 } else {
                     try {
-                        pySources(IPStr, hrefs, domain, attr, el, href, getResPathNoParam(href), "/webimgs");
+                        pySources(IPStr, hrefs, domain, attr, el, href, getResPathNoParam(href), "/webimgs", orgin);
                     } catch (HttpStatusException e) {
                         log.error("爬取当前页面异常:{}", e.getStatusCode(), e);
                     } catch (Exception e) {
@@ -377,14 +376,13 @@ public class HtmlUtils {
         }
     }
 
-    private static void pySources(String IPStr, Set<String> hrefs, String domain, String attr, Element sImg, String href, String s, String resPathDir) throws IOException {
+    private static void pySources(String IPStr, Set<String> hrefs, String domain, String attr, Element sImg, String href, String s, String resPathDir, String orgin) throws IOException {
         if (!hrefs.contains(s)) {
             hrefs.add(s);
             log.info("当前资源路径：{}；文件数量：{}。", s, hrefs.size());
             Connection.Response resultImageResponse = Jsoup.connect(s).ignoreContentType(true).execute();
             doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + resPathDir, getResName(href));
         }
-        log.info("资源：" + s);
         sImg.attr(attr, s);
     }
 
@@ -417,11 +415,8 @@ public class HtmlUtils {
         if (url.contains("#")) {
             url = url.substring(0, url.indexOf("#"));
         }
-        if (url.contains("http://")) {
-            url = url.substring(url.lastIndexOf("http://"));
-        }
-        if (url.contains("https://")) {
-            url = url.substring(url.lastIndexOf("https://"));
+        if (url.endsWith("/")) {
+            url = url.substring(0, url.lastIndexOf("/"));
         }
         return url;
     }

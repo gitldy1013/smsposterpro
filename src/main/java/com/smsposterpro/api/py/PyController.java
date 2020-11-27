@@ -135,7 +135,8 @@ public class PyController extends BaseController {
                         filePath += "/" + host;
                         fileService.deleteDir(filePath);
                         //开始爬取文件
-                        HtmlUtils.getArticleURLs(IpStr, param, hrefs);
+                        String resPathNoParamPath = getResPathNoParam(url.getPath());
+                        HtmlUtils.getArticleURLs(IpStr, param, hrefs, resPathNoParamPath.substring(0, resPathNoParamPath.lastIndexOf("/")));
                         IpStr = host;
                     } catch (MalformedURLException e) {
                         log.error("url参数异常！", e);
