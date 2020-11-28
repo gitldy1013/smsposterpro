@@ -1,9 +1,7 @@
 package com.smsposterpro.cron;
 
-import com.smsposterpro.service.file.FileService;
-import com.smsposterpro.service.file.impl.FileServiceImpl;
+import com.smsposterpro.utils.FileUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,12 +16,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ScheduledTask {
 
-    @Autowired
-    private FileService fileService;
-
     @Scheduled(cron = "0 0 23 ? * *")
     public void deleteTask() {
-        fileService.deleteDir(FileServiceImpl.DELETEDIRSTR);
+        FileUtils.deleteDir(FileUtils.DELETEDIRSTR,".mp4");
     }
 
 }

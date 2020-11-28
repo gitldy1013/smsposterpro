@@ -2,18 +2,49 @@ package com.smsposterpro.utils;
 
 import com.smsposterpro.exception.AesException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
+
 @Slf4j
 public class FileUtils {
+    public static final String DELETEDIRSTR = "./" + TEMP_FILE_DIR;
+
+    /**
+     * @Author: dyliu
+     * @Description: 删除指定目录下所有文件 可指定类型保存
+     * @Date: 14:00 2020/11/28
+     * @Param: [dir, flag]
+     * @return: void
+     **/
+    public static void deleteDir(String dir, String flag) {
+        File file = new File(dir);
+        deleteDir(file, flag);
+    }
+
+    public static void deleteDir(File file, String flag) {
+        boolean delete;
+        if (file.isDirectory()) {
+            /*递归删除目录中的子目录下*/
+            Arrays.stream(Objects.requireNonNull(file.listFiles())).forEach(child -> deleteDir(child, flag));
+            delete = file.delete();
+            log.info("删除目录: {}", delete);
+        } else {
+            if (!(StringUtils.isNotEmpty(flag) && file.getName().endsWith(flag))) {
+                delete = file.delete();
+                log.info("删除文件: {}", delete);
+            } else {
+                log.info("此为视频文件：{}", file.getName());
+            }
+        }
+    }
+
     /**
      * 将存放在sourceFilePath目录下的源文件，打包成fileName名称的zip文件，并存放到zipFilePath路径下
      *

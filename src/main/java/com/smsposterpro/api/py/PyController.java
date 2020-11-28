@@ -3,7 +3,6 @@ package com.smsposterpro.api.py;
 import com.smsposterpro.api.BaseController;
 import com.smsposterpro.exception.AesException;
 import com.smsposterpro.service.MailService;
-import com.smsposterpro.service.file.FileService;
 import com.smsposterpro.utils.CusAccessObjectUtil;
 import com.smsposterpro.utils.FileUtils;
 import com.smsposterpro.utils.HtmlUtils;
@@ -58,8 +57,6 @@ public class PyController extends BaseController {
     RestTemplate restTemplate = new RestTemplate();
     @Autowired
     private MailService mailService;
-    @Autowired
-    private FileService fileService;
 
     @GetMapping("/index")
     public String index() {
@@ -133,7 +130,7 @@ public class PyController extends BaseController {
                         url = new URL(param);
                         String host = url.getHost().replaceAll("\\.", "");
                         filePath += "/" + host;
-                        fileService.deleteDir(filePath);
+                        FileUtils.deleteDir(filePath, ".mp4");
                         //开始爬取文件
                         String resPathNoParamPath = getResPathNoParam(url.getPath());
                         HtmlUtils.getArticleURLs(IpStr, param, hrefs, resPathNoParamPath.substring(0, resPathNoParamPath.lastIndexOf("/")));
