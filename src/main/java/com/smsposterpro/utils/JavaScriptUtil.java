@@ -1,5 +1,7 @@
 package com.smsposterpro.utils;
 
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
+
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -8,8 +10,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,14 +27,16 @@ public class JavaScriptUtil {
     public static void main(String[] args) throws ScriptException {
         //('9 8=[];8.0("3.d.1");8.0("3.l.1");8.0("3.j.1");8.0("3.i.1");8.0("3.h.1");8.0("3.g.1");8.0("3.f.1");8.0("3.e.1");9 n=8[4.b(4.a()*8.c)],7=[];7.0("3.d.1");7.0("3.l.1");7.0("3.j.1");7.0("3.i.1");7.0("3.h.1");7.0("3.g.1");7.0("3.f.1");7.0("3.e.1");9 t=7[4.b(4.a()*7.c)],6=[];6.0("3.d.1");6.0("3.l.1");6.0("3.j.1");6.0("3.i.1");6.0("3.h.1");6.0("3.g.1");6.0("3.f.1");6.0("3.e.1");9 p=6[4.b(4.a()*6.c)],5=[];5.0("3.d.1");5.0("3.l.1");5.0("3.j.1");5.0("3.i.1");5.0("3.h.1");5.0("3.g.1");5.0("3.f.1");5.0("3.e.1");9 o=5[4.b(4.a()*5.c)],m=[];m.0("q-r.1");9 s=m[4.b(4.a()*m.c)],k=[];k.0("2.u.1");9 v=k[4.b(4.a()*k.c)];', 32, 32, 'push|com||m3u8|Math|ipp4|ipp3|ipp2|ipp1|var|random|floor|length|40cdn|34cdn|63cdn|48cdn|47cdn|46cdn|44cdn|ipp6|41cdn|ipp5|CN1|CN4|CN3|dadi|bo|CN5|CN2|ddyunbo|CN6'.split('|'), 0, {}))
         HashMap<String, Object> params = new HashMap<>();
-        params.put("p", "9 8=[];8.0(\"3.d.1\");8.0(\"3.l.1\");8.0(\"3.j.1\");8.0(\"3.i.1\");8.0(\"3.h.1\");8.0(\"3.g.1\");8.0(\"3.f.1\");8.0(\"3.e.1\");9 n=8[4.b(4.a()*8.c)],7=[];7.0(\"3.d.1\");7.0(\"3.l.1\");7.0(\"3.j.1\");7.0(\"3.i.1\");7.0(\"3.h.1\");7.0(\"3.g.1\");7.0(\"3.f.1\");7.0(\"3.e.1\");9 t=7[4.b(4.a()*7.c)],6=[];6.0(\"3.d.1\");6.0(\"3.l.1\");6.0(\"3.j.1\");6.0(\"3.i.1\");6.0(\"3.h.1\");6.0(\"3.g.1\");6.0(\"3.f.1\");6.0(\"3.e.1\");9 p=6[4.b(4.a()*6.c)],5=[];5.0(\"3.d.1\");5.0(\"3.l.1\");5.0(\"3.j.1\");5.0(\"3.i.1\");5.0(\"3.h.1\");5.0(\"3.g.1\");5.0(\"3.f.1\");5.0(\"3.e.1\");9 o=5[4.b(4.a()*5.c)],m=[];m.0(\"q-r.1\");9 s=m[4.b(4.a()*m.c)],k=[];k.0(\"2.u.1\");9 v=k[4.b(4.a()*k.c)];");
-        params.put("a", 32);
-        params.put("c", 32);
-        params.put("e", 0);
-        params.put("r", new ArrayList<>());
-        params.put("k", "push|com||m3u8|Math|ipp4|ipp3|ipp2|ipp1|var|random|floor|length|40cdn|34cdn|63cdn|48cdn|47cdn|46cdn|44cdn|ipp6|41cdn|ipp5|CN1|CN4|CN3|dadi|bo|CN5|CN2|ddyunbo|CN6".split("|"));
-        String res = jsCalculate(new File("E:\\smsposterpro\\src\\main\\java\\com\\smsposterpro\\utils\\Cn.js"), "getCn", params);
-        System.out.println(res);
+//        params.put("p", "9 8=[];8.0(\"3.d.1\");8.0(\"3.l.1\");8.0(\"3.j.1\");8.0(\"3.i.1\");8.0(\"3.h.1\");8.0(\"3.g.1\");8.0(\"3.f.1\");8.0(\"3.e.1\");9 n=8[4.b(4.a()*8.c)],7=[];7.0(\"3.d.1\");7.0(\"3.l.1\");7.0(\"3.j.1\");7.0(\"3.i.1\");7.0(\"3.h.1\");7.0(\"3.g.1\");7.0(\"3.f.1\");7.0(\"3.e.1\");9 t=7[4.b(4.a()*7.c)],6=[];6.0(\"3.d.1\");6.0(\"3.l.1\");6.0(\"3.j.1\");6.0(\"3.i.1\");6.0(\"3.h.1\");6.0(\"3.g.1\");6.0(\"3.f.1\");6.0(\"3.e.1\");9 p=6[4.b(4.a()*6.c)],5=[];5.0(\"3.d.1\");5.0(\"3.l.1\");5.0(\"3.j.1\");5.0(\"3.i.1\");5.0(\"3.h.1\");5.0(\"3.g.1\");5.0(\"3.f.1\");5.0(\"3.e.1\");9 o=5[4.b(4.a()*5.c)],m=[];m.0(\"q-r.1\");9 s=m[4.b(4.a()*m.c)],k=[];k.0(\"2.u.1\");9 v=k[4.b(4.a()*k.c)];");
+//        params.put("a", 32);
+//        params.put("c", 32);
+//        params.put("k", "push|com||m3u8|Math|ipp4|ipp3|ipp2|ipp1|var|random|floor|length|40cdn|34cdn|63cdn|48cdn|47cdn|46cdn|44cdn|ipp6|41cdn|ipp5|CN1|CN4|CN3|dadi|bo|CN5|CN2|ddyunbo|CN6".split("|"));
+//        params.put("e", 0);
+//        params.put("r", new ArrayList<>());
+        ScriptObjectMirror res = (ScriptObjectMirror) jsCalculate(new File("E:\\smsposterpro\\src\\main\\java\\com\\smsposterpro\\utils\\Cn.js"), "CN", params);
+        for (String key : res.keySet()) {
+            System.out.println(key + ":" + res.get(key));
+        }
     }
 
     /**
@@ -94,19 +101,16 @@ public class JavaScriptUtil {
         return res;
     }
 
-    public static String jsCalculate(File jsFile, String functionName,
+    public static Object jsCalculate(File jsFile, String functionName,
                                      Map<String, Object> params) throws ScriptException {
-        String res = null;
+        Object res = null;
         ScriptEngine engine = getScriptEngine(params);
         try (Stream<String> lines = Files.lines(Paths.get(jsFile.getPath()))) {
             String content = lines.collect(Collectors.joining(System.lineSeparator()));
             engine.eval(content);
             if (engine instanceof Invocable) {
                 Invocable invoke = (Invocable) engine;
-                Object eval = invoke.invokeFunction(functionName, params);
-                if (eval != null) {
-                    res = eval.toString();
-                }
+                res = invoke.invokeFunction(functionName, params);
             }
         } catch (IOException | NoSuchMethodException e) {
             e.printStackTrace();
