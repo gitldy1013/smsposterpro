@@ -7,30 +7,32 @@
  *     4.复制脚本到浏览器console,键入enter键开始执行脚本（可通过F12或设置菜单开发者模式唤出控制台）
  *     5.可刷新页面停止执行脚本
  */
-
+//启动抢单
 let down = document.getElementsByClassName("anticon-caret-down")[4];
 down.click();
 const price = 37;
-setInterval(function () {
+const max = 90000;
+const min = 10000;
+let flag = false;
+let s1 = setInterval(function () {
         let button = document.getElementsByClassName("refresh-button")[0];
         const cls = document.getElementsByClassName("ant-modal-close")[0];
-        const textContent = document.getElementsByClassName("ant-table-column-sort")[0];
-        const value = textContent.getElementsByTagName("div")[0].innerText.replace("%","");
-        if (cls !== undefined || value < price) {
+        if (cls !== undefined || !flag) {
+            console.log('循环抢单');
             button.click();
         }
     },
     4000);
 
-setInterval(function () {
+let s2 = setInterval(function () {
         let operator = document.getElementsByClassName("operate-button")[0];
         const blur = document.getElementsByClassName("ant-spin-blur")[0];
+        //实际应用将cls变量替换即可 const cls = document.getElementsByClassName("receive-btn")[0];
         const cls = document.getElementsByClassName("ant-modal-close")[0];
         const textContent = document.getElementsByClassName("ant-table-column-sort")[0];
-        const value = textContent.getElementsByTagName("div")[0].innerText.replace("%","");
-        console.log(value);
-        //实际应用将cls变量替换即可 const cls = document.getElementsByClassName("receive-btn")[0];
-        if (blur === undefined && cls === undefined && value >= price) {
+        const value = textContent.getElementsByTagName("div")[0].innerText.replace("%", "");
+        flag = (value >= price);
+        if (blur === undefined && cls === undefined && flag) {
             operator.click();
         }
         if (cls !== undefined) {
@@ -39,3 +41,13 @@ setInterval(function () {
         }
     },
     1000);
+
+//停止枪单
+let s = s1;
+if (s2 > s1) {
+    s = s2;
+    for (var i = 1; i <= s; i++) {
+        clearInterval(i);
+    }
+}
+
