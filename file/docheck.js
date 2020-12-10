@@ -1,0 +1,26 @@
+/**
+ * 企企大厅抢单脚本
+ */
+setInterval(function () {
+        let button = document.getElementsByClassName("refresh-button")[0];
+        const cls = document.getElementsByClassName("ant-modal-close")[0];
+        if (cls !== undefined) {
+            button.click();
+        }
+    },
+    4000);
+
+setInterval(function () {
+        let operator = document.getElementsByClassName("operate-button")[0];
+        const blur = document.getElementsByClassName("ant-spin-blur")[0];
+        const cls = document.getElementsByClassName("ant-modal-close")[0];
+        //实际应用将cls变量替换即可 const cls = document.getElementsByClassName("receive-btn")[0];
+        if (blur === undefined && cls === undefined) {
+            operator.click();
+        }
+        if (cls !== undefined) {
+            cls.click();
+            console.log('已抢单');
+        }
+    },
+    1000);
