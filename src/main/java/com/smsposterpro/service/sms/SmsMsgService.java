@@ -2,7 +2,7 @@ package com.smsposterpro.service.sms;
 
 import com.smsposterpro.core.model.PageData;
 import com.smsposterpro.core.model.PageWrap;
-import com.smsposterpro.dao.user.model.SmsMsg;
+import com.smsposterpro.dao.model.SmsMsg;
 
 import java.util.List;
 

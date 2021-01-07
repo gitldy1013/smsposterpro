@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.smsposterpro.dao.user.SmsMsgMapper" >
-  <resultMap id="BaseResultMap" type="com.smsposterpro.dao.user.model.SmsMsg" >
+<mapper namespace="com.smsposterpro.dao.SmsMsgMapper" >
+  <resultMap id="BaseResultMap" type="com.smsposterpro.dao.model.SmsMsg" >
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="send_phone_num" property="sendPhoneNum" jdbcType="VARCHAR" />
     <result column="context" property="context" jdbcType="VARCHAR" />
@@ -69,7 +69,7 @@
   <sql id="Base_Column_List" >
     id, send_phone_num, context, send_time, rec_phone
   </sql>
-  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.smsposterpro.dao.user.model.SmsMsgExample" >
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.smsposterpro.dao.model.SmsMsgExample" >
     select
     <if test="distinct" >
       distinct
@@ -84,7 +84,7 @@
     </if>
   </select>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from sms_msg
     where id = #{id,jdbcType=INTEGER}
@@ -93,22 +93,22 @@
     delete from sms_msg
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <delete id="deleteByExample" parameterType="com.smsposterpro.dao.user.model.SmsMsgExample" >
+  <delete id="deleteByExample" parameterType="com.smsposterpro.dao.model.SmsMsgExample" >
     delete from sms_msg
     <if test="_parameter != null" >
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.smsposterpro.dao.user.model.SmsMsg" >
+  <insert id="insert" parameterType="com.smsposterpro.dao.model.SmsMsg" >
     <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into sms_msg (send_phone_num, context, send_time, 
+    insert into sms_msg (send_phone_num, context, send_time,
       rec_phone)
-    values (#{sendPhoneNum,jdbcType=VARCHAR}, #{context,jdbcType=VARCHAR}, #{sendTime,jdbcType=TIMESTAMP}, 
+    values (#{sendPhoneNum,jdbcType=VARCHAR}, #{context,jdbcType=VARCHAR}, #{sendTime,jdbcType=TIMESTAMP},
       #{recPhone,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.smsposterpro.dao.user.model.SmsMsg" >
+  <insert id="insertSelective" parameterType="com.smsposterpro.dao.model.SmsMsg" >
     <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
@@ -142,7 +142,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.smsposterpro.dao.user.model.SmsMsgExample" resultType="java.lang.Integer" >
+  <select id="countByExample" parameterType="com.smsposterpro.dao.model.SmsMsgExample" resultType="java.lang.Integer" >
     select count(*) from sms_msg
     <if test="_parameter != null" >
       <include refid="Example_Where_Clause" />
@@ -182,7 +182,7 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.smsposterpro.dao.user.model.SmsMsg" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.smsposterpro.dao.model.SmsMsg" >
     update sms_msg
     <set >
       <if test="sendPhoneNum != null" >
@@ -200,7 +200,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.smsposterpro.dao.user.model.SmsMsg" >
+  <update id="updateByPrimaryKey" parameterType="com.smsposterpro.dao.model.SmsMsg" >
     update sms_msg
     set send_phone_num = #{sendPhoneNum,jdbcType=VARCHAR},
       context = #{context,jdbcType=VARCHAR},

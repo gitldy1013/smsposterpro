@@ -1,7 +1,7 @@
 package com.smsposterpro.handler.wx.impl;
 
 import com.smsposterpro.annotation.Hkey;
-import com.smsposterpro.dao.user.model.SmsMsg;
+import com.smsposterpro.dao.model.SmsMsg;
 import com.smsposterpro.dto.NewItems;
 import com.smsposterpro.dto.WeChatMessageBo;
 import com.smsposterpro.dto.WeChatMessageVo;

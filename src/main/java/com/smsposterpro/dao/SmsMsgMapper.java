@@ -1,7 +1,7 @@
-package com.smsposterpro.dao.user;
+package com.smsposterpro.dao;
 
-import com.smsposterpro.dao.user.model.SmsMsg;
-import com.smsposterpro.dao.user.model.SmsMsgExample;
+import com.smsposterpro.dao.model.SmsMsg;
+import com.smsposterpro.dao.model.SmsMsgExample;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

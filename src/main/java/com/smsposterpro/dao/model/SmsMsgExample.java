@@ -1,4 +1,4 @@
-package com.smsposterpro.dao.user.model;
+package com.smsposterpro.dao.model;
 
 import java.util.ArrayList;
 import java.util.Date;

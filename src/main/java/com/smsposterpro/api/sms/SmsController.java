@@ -3,7 +3,7 @@ package com.smsposterpro.api.sms;
 import com.smsposterpro.api.BaseController;
 import com.smsposterpro.core.model.ApiResponse;
 import com.smsposterpro.core.model.PageWrap;
-import com.smsposterpro.dao.user.model.SmsMsg;
+import com.smsposterpro.dao.model.SmsMsg;
 import com.smsposterpro.dto.Root;
 import com.smsposterpro.handler.NonStaticResourceHttpRequestHandler;
 import com.smsposterpro.service.sms.SmsMsgService;
