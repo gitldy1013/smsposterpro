@@ -130,9 +130,12 @@ public class PyController extends BaseController {
                         url = new URL(param);
                         String host = url.getHost().replaceAll("\\.", "");
                         filePath += "/" + host;
-                        FileUtils.deleteDir(filePath, ".mp4");
+                        FileUtils.deleteDir(filePath, "mp4", "jpg", "jpeg", "png");
                         //开始爬取文件
                         String resPathNoParamPath = getResPathNoParam(url.getPath());
+                        if(resPathNoParamPath.length()==0){
+                            resPathNoParamPath = "/";
+                        }
                         HtmlUtils.getArticleURLs(IpStr, param, hrefs, resPathNoParamPath.substring(0, resPathNoParamPath.lastIndexOf("/")));
                         IpStr = host;
                     } catch (MalformedURLException e) {

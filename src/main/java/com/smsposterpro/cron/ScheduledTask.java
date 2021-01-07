@@ -18,7 +18,7 @@ public class ScheduledTask {
 
     @Scheduled(cron = "0 0 23 ? * *")
     public void deleteTask() {
-        FileUtils.deleteDir(FileUtils.DELETEDIRSTR,".mp4");
+        FileUtils.deleteDir(FileUtils.DELETEDIRSTR, "mp4", "jpg", "jpeg", "png");
     }
 
 }

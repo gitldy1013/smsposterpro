@@ -2,9 +2,13 @@ package com.smsposterpro.utils;
 
 import com.smsposterpro.exception.AesException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
@@ -16,6 +20,10 @@ import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
 public class FileUtils {
     public static final String DELETEDIRSTR = "./" + TEMP_FILE_DIR;
 
+    public static void main(String[] args) {
+        FileUtils.deleteDir(FileUtils.DELETEDIRSTR, "mp4", "jpg", "jpeg", "png");
+    }
+
     /**
      * @Author: dyliu
      * @Description: 删除指定目录下所有文件 可指定类型保存
@@ -23,24 +31,31 @@ public class FileUtils {
      * @Param: [dir, flag]
      * @return: void
      **/
-    public static void deleteDir(String dir, String flag) {
+    public static void deleteDir(String dir, String... flag) {
         File file = new File(dir);
         deleteDir(file, flag);
     }
 
-    public static void deleteDir(File file, String flag) {
+    /**
+     * flag为保留文件的类型列表数组
+     *
+     * @param file
+     * @param flag
+     */
+    public static void deleteDir(File file, String... flag) {
         boolean delete;
         if (file.isDirectory()) {
             /*递归删除目录中的子目录下*/
             Arrays.stream(Objects.requireNonNull(file.listFiles())).forEach(child -> deleteDir(child, flag));
             delete = file.delete();
-            log.info("删除目录: {}", delete);
-        } else {
-            if (!(StringUtils.isNotEmpty(flag) && file.getName().endsWith(flag))) {
+            log.info("删除空目录: {}", delete);
+        }
+        if (file.isFile()) {
+            if (!(flag != null && flag.length > 0 && file.getName().contains(".") && Arrays.asList(flag).contains(file.getName().substring(file.getName().lastIndexOf(".") + 1)))) {
                 delete = file.delete();
                 log.info("删除文件: {}", delete);
             } else {
-                log.info("此为视频文件：{}", file.getName());
+                log.info("此为视频或图片资源文件文件：{}", file.getName());
             }
         }
     }

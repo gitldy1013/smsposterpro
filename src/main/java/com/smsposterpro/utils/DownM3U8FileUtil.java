@@ -70,7 +70,7 @@ public class DownM3U8FileUtil {
         assert files != null;
         for (File f : files) {
             if (f.isDirectory()) {
-                FileUtils.deleteDir(f, ".mp4");
+                FileUtils.deleteDir(f, ".mp4",".jpg",".jpeg","png");
             }
         }
     }
