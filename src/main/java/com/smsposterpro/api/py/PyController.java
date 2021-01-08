@@ -43,7 +43,7 @@ import static com.smsposterpro.utils.HtmlUtils.*;
 import static com.smsposterpro.utils.ResourcesFileUtils.*;
 
 /**
- * 短信转发Controller
+ * 简单爬虫接口Controller
  *
  * @author 136****3167
  * @date 2020/10/20 12:20
@@ -156,9 +156,9 @@ public class PyController extends BaseController {
                     //log.info("微信推送成功：{}", forObject);
                 } catch (AesException e) {
                     log.info("压缩文件失败！", e);
-                    mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", IpStr + "-相关爬取任务压缩文件发生异常" + e.getMessage());
-                    String forObject = restTemplate.getForObject("http://sc.ftqq.com/SCU125307T7c9f252f885c51edad0e59ea4a37a64f5faa5441b53e5.send?text=相关爬取任务压缩文件发生异常&desp=失败原因：" + e.getMessage(), String.class);
-                    log.info("微信推送成功：{}", forObject);
+                    //mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", IpStr + "-相关爬取任务压缩文件发生异常" + e.getMessage());
+                    //String forObject = restTemplate.getForObject("http://sc.ftqq.com/SCU125307T7c9f252f885c51edad0e59ea4a37a64f5faa5441b53e5.send?text=相关爬取任务压缩文件发生异常&desp=失败原因：" + e.getMessage(), String.class);
+                    //log.info("微信推送成功：{}", forObject);
                 }
             });
             return "<h2>已开始爬取网站任务，请收到提示后点击导出或下载全部附件按钮下载。</h2>";

@@ -33,7 +33,7 @@ public class JavaScriptUtil {
 //        params.put("k", "push|com||m3u8|Math|ipp4|ipp3|ipp2|ipp1|var|random|floor|length|40cdn|34cdn|63cdn|48cdn|47cdn|46cdn|44cdn|ipp6|41cdn|ipp5|CN1|CN4|CN3|dadi|bo|CN5|CN2|ddyunbo|CN6".split("|"));
 //        params.put("e", 0);
 //        params.put("r", new ArrayList<>());
-        ScriptObjectMirror res = (ScriptObjectMirror) jsCalculate(new File("E:\\smsposterpro\\src\\main\\java\\com\\smsposterpro\\utils\\Cn.js"), "CN", params);
+        ScriptObjectMirror res = (ScriptObjectMirror) jsCalculate(new File("C:\\Users\\liudongyang\\Desktop\\smsposterpro\\src\\main\\resources\\static\\Cn.js"), "CN", params);
         for (String key : res.keySet()) {
             System.out.println(key + ":" + res.get(key));
         }

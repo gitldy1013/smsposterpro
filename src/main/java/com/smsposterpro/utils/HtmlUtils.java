@@ -293,12 +293,12 @@ public class HtmlUtils {
                 Elements img = document.select("img");
                 Elements source = document.select("source");
                 //爬取css和js文件
-                downloadByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
-                downloadByAttr(IPStr, hrefs, orgin, protocol, domain, script, "src");
+                //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
+                //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, script, "src");
                 //img
-                downloadByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
-                downloadByAttr(IPStr, hrefs, orgin, protocol, domain, img, "src");
-                downloadByAttr(IPStr, hrefs, orgin, protocol, domain, img, "data-original");
+                //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
+                //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, img, "src");
+                //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, img, "data-original");
                 //下载视频
                 downloadByAttr(IPStr, hrefs, orgin, protocol, domain, script, "type");
                 downloadByAttr(IPStr, hrefs, orgin, protocol, domain, source, "src");
@@ -403,6 +403,8 @@ public class HtmlUtils {
                 } catch (Exception e) {
                     log.error("连接无效: {}", s, e);
                 }
+            }else {
+                log.info("已经爬取过此地址：{}",s);
             }
         }
     }
@@ -411,8 +413,8 @@ public class HtmlUtils {
         if (!hrefs.contains(s)) {
             hrefs.add(s);
             log.info("路径：{}；数量：{}。", s, hrefs.size());
-            Connection.Response resultImageResponse = Jsoup.connect(s).ignoreContentType(true).execute();
-            doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + resPathDir, getResName(href));
+            Connection.Response resultImageResponse = Jsoup.connect(s).ignoreContentType(true).timeout(10000).execute();
+            boolean b = doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + resPathDir, getResName(href));
         }
         element.attr(attr, s);
     }
