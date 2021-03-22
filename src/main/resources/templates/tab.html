@@ -41,7 +41,7 @@
                        data-toggle="table"
                        data-sort-name="sendTime"
                        data-sort-order="desc"
-                       data-url="https://sms.liudongyang.top/task/query">
+                       data-url="/task/query">
                     <thead>
                     <tr>
                         <th data-field="id">序号ID</th>
@@ -73,7 +73,7 @@
        data-toggle="table"
        data-sort-name="sendTime"
        data-sort-order="desc"
-       data-url="https://sms.liudongyang.top/task/query">
+       data-url="/task/query">
     <thead>
     <tr>
         <th data-field="id">序号ID</th>
@@ -88,7 +88,7 @@
     var $table = $('#table');
     $table.bootstrapTable({
         method: 'get',
-        url: "https://sms.liudongyang.top/task/query",
+        url: "/task/query",
         dataType: 'json',
         cache: false, //不使用缓存
         striped: true, //显示行间隔色
@@ -138,7 +138,7 @@
         });
         $('#tablepre').bootstrapTable({
             method: 'get',
-            url: "https://sms.liudongyang.top/task/query",
+            url: "/task/query",
             dataType: 'json',
             cache: false, //不使用缓存
             striped: true, //显示行间隔色
