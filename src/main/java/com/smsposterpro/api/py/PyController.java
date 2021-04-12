@@ -63,11 +63,6 @@ public class PyController extends BaseController {
         return "index";
     }
 
-    @GetMapping("/love")
-    public String love() {
-        return "love";
-    }
-
     @PostMapping("/regcus")
     @ResponseBody
     public String regcus(String regcus, HttpServletRequest request) {
