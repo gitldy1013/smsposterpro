@@ -12,14 +12,21 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.FileCopyUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.smsposterpro.utils.ResourcesFileUtils.*;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_EXP_FILE_NAME;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
+import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 import static java.util.regex.Pattern.compile;
 
 @Slf4j
@@ -328,10 +335,10 @@ public class HtmlUtils {
                         sh.attr("href", href);
                     }
                 }
-                log.info("保存html：" + param);
-                String s = domain + param.replace(orgin, "");
-                String hrefPath = s.substring(0, s.lastIndexOf("/"));
-                doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
+                //log.info("保存html：" + param);
+                //String s = domain + param.replace(orgin, "");
+                //String hrefPath = s.substring(0, s.lastIndexOf("/"));
+                //doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
             } catch (Exception e) {
                 log.error("爬取当前页面异常:{}", e.getMessage(), e);
             }
@@ -394,7 +401,8 @@ public class HtmlUtils {
         Pattern pattern = compile("(http).*(.m3u8)");
         Matcher ma = pattern.matcher(href);
         while (ma.find()) {
-            String s = ma.group();
+            //判断连接地址是否加密
+            String s = JavaScriptUtil.getUrl(ma.group());
             if (!hrefs.contains(s)) {
                 hrefs.add(s);
                 String title = el.parent().select("title").html();
@@ -403,8 +411,8 @@ public class HtmlUtils {
                 } catch (Exception e) {
                     log.error("连接无效: {}", s, e);
                 }
-            }else {
-                log.info("已经爬取过此地址：{}",s);
+            } else {
+                log.info("已经爬取过此地址：{}", s);
             }
         }
     }
@@ -441,7 +449,7 @@ public class HtmlUtils {
         return url;
     }
 
-    private static String filterUrl(String url) {
+    public static String filterUrl(String url) {
         if (url.contains("?")) {
             url = url.substring(0, url.indexOf("?"));
         }

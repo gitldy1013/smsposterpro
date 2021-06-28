@@ -60,7 +60,7 @@ public class DownM3U8FileUtil {
             if (end > videoUrlList.size()) {
                 end = videoUrlList.size() - 1;
             }
-            new downLoadNode(videoUrlList, i, end, keyFileMap, orgin, rootPath).start();
+            new downLoadNode(videoUrlList, i, end, keyFileMap, indexPath.substring(0, indexPath.lastIndexOf("/") + 1), rootPath).start();
         }
         //等待下载并合成文件
         while (keyFileMap.size() < videoUrlList.size()) {
@@ -134,8 +134,9 @@ public class DownM3U8FileUtil {
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setDoInput(true);
             httpURLConnection.setUseCaches(false);
-            httpURLConnection.setConnectTimeout(30000);
-            httpURLConnection.setReadTimeout(30000);
+            httpURLConnection.setConnectTimeout(300000);
+            httpURLConnection.setReadTimeout(300000);
+            httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
             BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), StandardCharsets.UTF_8));
             StringBuilder content = new StringBuilder();
             String line;
@@ -182,7 +183,7 @@ public class DownM3U8FileUtil {
             try {
                 for (int i = start; i <= end; i++) {
                     String urlpath = list.get(i);
-                    URL url = new URL(preUrlPath + urlpath);
+                    URL url = new URL(preUrlPath + "/" + urlpath);
                     //下载资源
                     HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
                     httpURLConnection.setRequestMethod("GET");
@@ -191,6 +192,7 @@ public class DownM3U8FileUtil {
                     httpURLConnection.setUseCaches(false);
                     httpURLConnection.setConnectTimeout(30000);
                     httpURLConnection.setReadTimeout(30000);
+                    httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
                     DataInputStream dataInputStream = new DataInputStream(httpURLConnection.getInputStream());
                     String fileOutPath = fileRootPath + urlpath;
                     String rootPath = new File(".").getAbsolutePath();

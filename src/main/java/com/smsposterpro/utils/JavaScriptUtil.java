@@ -7,6 +7,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -26,17 +27,22 @@ import java.util.stream.Stream;
 public class JavaScriptUtil {
     public static void main(String[] args) throws ScriptException {
         //('9 8=[];8.0("3.d.1");8.0("3.l.1");8.0("3.j.1");8.0("3.i.1");8.0("3.h.1");8.0("3.g.1");8.0("3.f.1");8.0("3.e.1");9 n=8[4.b(4.a()*8.c)],7=[];7.0("3.d.1");7.0("3.l.1");7.0("3.j.1");7.0("3.i.1");7.0("3.h.1");7.0("3.g.1");7.0("3.f.1");7.0("3.e.1");9 t=7[4.b(4.a()*7.c)],6=[];6.0("3.d.1");6.0("3.l.1");6.0("3.j.1");6.0("3.i.1");6.0("3.h.1");6.0("3.g.1");6.0("3.f.1");6.0("3.e.1");9 p=6[4.b(4.a()*6.c)],5=[];5.0("3.d.1");5.0("3.l.1");5.0("3.j.1");5.0("3.i.1");5.0("3.h.1");5.0("3.g.1");5.0("3.f.1");5.0("3.e.1");9 o=5[4.b(4.a()*5.c)],m=[];m.0("q-r.1");9 s=m[4.b(4.a()*m.c)],k=[];k.0("2.u.1");9 v=k[4.b(4.a()*k.c)];', 32, 32, 'push|com||m3u8|Math|ipp4|ipp3|ipp2|ipp1|var|random|floor|length|40cdn|34cdn|63cdn|48cdn|47cdn|46cdn|44cdn|ipp6|41cdn|ipp5|CN1|CN4|CN3|dadi|bo|CN5|CN2|ddyunbo|CN6'.split('|'), 0, {}))
-        HashMap<String, Object> params = new HashMap<>();
+//        HashMap<String, Object> params = new HashMap<>();
 //        params.put("p", "9 8=[];8.0(\"3.d.1\");8.0(\"3.l.1\");8.0(\"3.j.1\");8.0(\"3.i.1\");8.0(\"3.h.1\");8.0(\"3.g.1\");8.0(\"3.f.1\");8.0(\"3.e.1\");9 n=8[4.b(4.a()*8.c)],7=[];7.0(\"3.d.1\");7.0(\"3.l.1\");7.0(\"3.j.1\");7.0(\"3.i.1\");7.0(\"3.h.1\");7.0(\"3.g.1\");7.0(\"3.f.1\");7.0(\"3.e.1\");9 t=7[4.b(4.a()*7.c)],6=[];6.0(\"3.d.1\");6.0(\"3.l.1\");6.0(\"3.j.1\");6.0(\"3.i.1\");6.0(\"3.h.1\");6.0(\"3.g.1\");6.0(\"3.f.1\");6.0(\"3.e.1\");9 p=6[4.b(4.a()*6.c)],5=[];5.0(\"3.d.1\");5.0(\"3.l.1\");5.0(\"3.j.1\");5.0(\"3.i.1\");5.0(\"3.h.1\");5.0(\"3.g.1\");5.0(\"3.f.1\");5.0(\"3.e.1\");9 o=5[4.b(4.a()*5.c)],m=[];m.0(\"q-r.1\");9 s=m[4.b(4.a()*m.c)],k=[];k.0(\"2.u.1\");9 v=k[4.b(4.a()*k.c)];");
 //        params.put("a", 32);
 //        params.put("c", 32);
 //        params.put("k", "push|com||m3u8|Math|ipp4|ipp3|ipp2|ipp1|var|random|floor|length|40cdn|34cdn|63cdn|48cdn|47cdn|46cdn|44cdn|ipp6|41cdn|ipp5|CN1|CN4|CN3|dadi|bo|CN5|CN2|ddyunbo|CN6".split("|"));
 //        params.put("e", 0);
 //        params.put("r", new ArrayList<>());
-        ScriptObjectMirror res = (ScriptObjectMirror) jsCalculate(new File("C:\\Users\\liudongyang\\Desktop\\smsposterpro\\src\\main\\resources\\static\\Cn.js"), "CN", params);
-        for (String key : res.keySet()) {
-            System.out.println(key + ":" + res.get(key));
-        }
+//        ScriptObjectMirror res = (ScriptObjectMirror) jsCalculate(new File(JavaScriptUtil.class.getResource("/static/Cn.js").getPath()),
+//                "CN", params);
+//        for (String key : res.keySet()) {
+//            System.out.println(key + ":" + res.get(key));
+//        }
+
+
+        String url = getUrl("https://\"+CN1+\"/movie-hls/170831/s16/index.m3u8");
+        System.out.println(url);
     }
 
     /**
@@ -141,5 +147,26 @@ public class JavaScriptUtil {
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("javascript");
         return engine;
+    }
+
+    public static String getUrl(String url) {
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName("javascript");
+        try {
+            String filePath = JavaScriptUtil.class.getResource("/static/Cn.js").getPath();
+            engine.eval(new FileReader(new File(filePath)));
+            if (engine instanceof Invocable) {
+                Invocable in = (Invocable) engine;
+                ScriptObjectMirror res = (ScriptObjectMirror) in.invokeFunction("CN");
+                for (Map.Entry<String, Object> r : res.entrySet()) {
+                    String key = r.getKey();
+                    String value = r.getValue().toString();
+                    url = url.replaceAll("\"\\+CN" + key + "\\+\"", value);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return url;
     }
 }
