@@ -45,8 +45,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static com.smsposterpro.utils.CommonUtils.getTime;
 import static com.smsposterpro.utils.HtmlUtils.createFileWithMultilevelDirectory;
@@ -72,7 +70,6 @@ import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 public class PyController extends BaseController {
 
     static volatile int lock = 1;
-    private static ExecutorService executor = Executors.newSingleThreadExecutor();
     RestTemplate restTemplate = new RestTemplate();
     @Autowired
     private MailService mailService;
@@ -137,65 +134,63 @@ public class PyController extends BaseController {
     @ResponseBody
     public String webpyAll(@RequestParam(name = "webpyAll", required = true) String param, HttpServletRequest request) {
         if (!regUrl(param)) {
-            executor.execute(() -> {
-                String IpStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
-                long start = System.currentTimeMillis();
-                //开始压缩文件
-                LinkedHashSet<String> hrefs = new LinkedHashSet<>();
-                String filePath = "./" + TEMP_FILE_DIR + "/" + IpStr;
-                if (!StringUtils.isEmpty(param)) {
-                    URL url;
-                    try {
-                        url = new URL(param);
-                        String host = url.getHost().replaceAll("\\.", "");
-                        filePath += "/" + host;
-                        FileUtils.deleteDir(filePath, "mp4", "jpg", "jpeg", "png");
-                        //开始爬取文件
-                        String resPathNoParamPath = getResPathNoParam(url.getPath());
-                        if (resPathNoParamPath.length() == 0) {
-                            resPathNoParamPath = "/";
-                        }
-                        String finalIpStr = IpStr;
-                        String finalResPathNoParamPath = resPathNoParamPath;
-                        new Thread(() -> {
-                            if (lock == 1) {
-                                HtmlUtils.getArticleURLs(finalIpStr, param, hrefs, finalResPathNoParamPath.substring(0, finalResPathNoParamPath.lastIndexOf("/")));
-                                lock = 2;
-                            }
-                        }).start();
-                        IpStr = host;
-                    } catch (MalformedURLException e) {
-                        log.error("url参数异常！", e);
+            String IpStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
+            long start = System.currentTimeMillis();
+            //开始压缩文件
+            LinkedHashSet<String> hrefs = new LinkedHashSet<>();
+            String filePath = "./" + TEMP_FILE_DIR + "/" + IpStr;
+            if (!StringUtils.isEmpty(param)) {
+                URL url;
+                try {
+                    url = new URL(param);
+                    String host = url.getHost().replaceAll("\\.", "");
+                    filePath += "/" + host;
+                    FileUtils.deleteDir(filePath, "mp4", "jpg", "jpeg", "png");
+                    //开始爬取文件
+                    String resPathNoParamPath = getResPathNoParam(url.getPath());
+                    if (resPathNoParamPath.length() == 0) {
+                        resPathNoParamPath = "/";
                     }
+                    String finalIpStr = IpStr;
+                    String finalResPathNoParamPath = resPathNoParamPath;
+                    new Thread(() -> {
+                        if (lock == 1) {
+                            HtmlUtils.getArticleURLs(finalIpStr, param, hrefs, finalResPathNoParamPath.substring(0, finalResPathNoParamPath.lastIndexOf("/")));
+                            lock = 2;
+                        }
+                    }).start();
+                    IpStr = host;
+                } catch (MalformedURLException e) {
+                    log.error("url参数异常！", e);
                 }
-                String finalFilePath = filePath;
-                String finalFilePath1 = filePath;
-                String finalIpStr1 = IpStr;
-                new Thread(() -> {
-                    if (lock == 2) {
-                        try {
-                            File zipFile = new File(finalFilePath + "/" + finalIpStr1 + ".zip");
-                            if (zipFile.exists()) {
-                                FileUtils.fileToZip(finalFilePath, finalFilePath1, finalIpStr1);
-                                long end = System.currentTimeMillis();
-                                //发邮件TODO
-                                log.info("爬取任务：" + param + "完成，开始发送邮件,推送微信消息。");
-                                String context = finalIpStr1 + "-相关爬取任务已经完成</br>" +
-                                        "本次总共爬取文件数量为：" + hrefs.size() + "个；总耗时" + getTime(end - start) + ";</br>" +
-                                        "请点击连接:<a href='https://sms.liudongyang.top//downloadZip?subPath=" + param + "'>点击下载</a>";
-                                //mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", context);
-                                //String forObject = restTemplate.getForObject("http://sc.ftqq.com/SCU125307T7c9f252f885c51edad0e59ea4a37a64f5faa5441b53e5.send?text=相关爬取任务已经完成&desp=" + context, String.class);
-                                //log.info("微信推送成功：{}", forObject);
-                            }
-                        } catch (AesException e) {
-                            log.info("压缩文件失败！", e);
-                            //mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", IpStr + "-相关爬取任务压缩文件发生异常" + e.getMessage());
-                            //String forObject = restTemplate.getForObject("http://sc.ftqq.com/SCU125307T7c9f252f885c51edad0e59ea4a37a64f5faa5441b53e5.send?text=相关爬取任务压缩文件发生异常&desp=失败原因：" + e.getMessage(), String.class);
+            }
+            String finalFilePath = filePath;
+            String finalFilePath1 = filePath;
+            String finalIpStr1 = IpStr;
+            new Thread(() -> {
+                if (lock == 2) {
+                    try {
+                        File zipFile = new File(finalFilePath + "/" + finalIpStr1 + ".zip");
+                        if (zipFile.exists()) {
+                            FileUtils.fileToZip(finalFilePath, finalFilePath1, finalIpStr1);
+                            long end = System.currentTimeMillis();
+                            //发邮件TODO
+                            log.info("爬取任务：" + param + "完成，开始发送邮件,推送微信消息。");
+                            String context = finalIpStr1 + "-相关爬取任务已经完成</br>" +
+                                    "本次总共爬取文件数量为：" + hrefs.size() + "个；总耗时" + getTime(end - start) + ";</br>" +
+                                    "请点击连接:<a href='https://sms.liudongyang.top//downloadZip?subPath=" + param + "'>点击下载</a>";
+                            //mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", context);
+                            //String forObject = restTemplate.getForObject("http://sc.ftqq.com/SCU125307T7c9f252f885c51edad0e59ea4a37a64f5faa5441b53e5.send?text=相关爬取任务已经完成&desp=" + context, String.class);
                             //log.info("微信推送成功：{}", forObject);
                         }
+                    } catch (AesException e) {
+                        log.info("压缩文件失败！", e);
+                        //mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", IpStr + "-相关爬取任务压缩文件发生异常" + e.getMessage());
+                        //String forObject = restTemplate.getForObject("http://sc.ftqq.com/SCU125307T7c9f252f885c51edad0e59ea4a37a64f5faa5441b53e5.send?text=相关爬取任务压缩文件发生异常&desp=失败原因：" + e.getMessage(), String.class);
+                        //log.info("微信推送成功：{}", forObject);
                     }
-                }).start();
-            });
+                }
+            }).start();
             return "<h2>已开始爬取网站任务，请收到提示后点击导出或下载全部附件按钮下载。</h2>";
         } else {
             return "<h2>请输入有效爬取链接地址</h2>";
