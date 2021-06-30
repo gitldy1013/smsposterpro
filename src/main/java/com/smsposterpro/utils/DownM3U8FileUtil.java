@@ -7,6 +7,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -28,12 +29,18 @@ import static java.util.regex.Pattern.compile;
 @Slf4j
 public class DownM3U8FileUtil {
 
-    public static void downM3U8File(String indexPath, String rootPath, String fileName) {
+    public static final String PREFIX = "完成-";
+
+    public static String downM3U8File(String indexPath, String rootPath, String fileName) {
         File file = new File(rootPath + "/" + fileName + ".mp4");
-        if (file.exists()) {
-            log.info(fileName + ".mp4 已经下载过。");
-            return;
+        File finalFile = new File(rootPath + "/" + PREFIX + fileName + ".mp4");
+        if (finalFile.exists()) {
+            return fileName + ".mp4 已经下载过。";
         }
+        if (file.exists()) {
+            return fileName + ".mp4 正在下载中。";
+        }
+        log.info("文件 " + fileName + ".mp4 开始下载");
         URL url = null;
         try {
             url = new URL(indexPath);
@@ -42,9 +49,12 @@ public class DownM3U8FileUtil {
             log.error("视频地址错误！");
         }
         assert url != null;
-        String orgin = url.getProtocol() + "://" + url.getHost() + ((url.getPort() > 0) ? ":" + url.getPort() : "");
+        //String orgin = url.getProtocol() + "://" + url.getHost() + ((url.getPort() > 0) ? ":" + url.getPort() : "");
         //下载索引文件
         String indexStr = getIndexFile(indexPath);
+        if (indexStr == null) {
+            return "检索文件下载出错";
+        }
         //解析索引文件
         List<String> videoUrlList = analysisIndex(indexStr);
         //生成文件下载目录
@@ -52,21 +62,13 @@ public class DownM3U8FileUtil {
         if (!fileDir.exists()) {
             fileDir.mkdirs();
         }
-        //下载视频片段，分成多个线程切片下载
         HashMap<Integer, String> keyFileMap = new HashMap<>();
-        int downForThreadCount = videoUrlList.size() / 50;
-        for (int i = 0; i < videoUrlList.size(); i += downForThreadCount) {
-            int end = i + downForThreadCount - 1;
-            if (end > videoUrlList.size()) {
-                end = videoUrlList.size() - 1;
-            }
-            new downLoadNode(videoUrlList, i, end, keyFileMap, indexPath.substring(0, indexPath.lastIndexOf("/") + 1), rootPath).start();
-        }
+        new downLoadNode(videoUrlList, 0, videoUrlList.size() - 1, keyFileMap, indexPath.substring(0, indexPath.lastIndexOf("/") + 1), rootPath).start();
         //等待下载并合成文件
         while (keyFileMap.size() < videoUrlList.size()) {
             log.info("当前下载数量" + keyFileMap.size());
             try {
-                Thread.sleep(3000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -79,33 +81,45 @@ public class DownM3U8FileUtil {
                 FileUtils.deleteDir(f, ".mp4", ".jpg", ".jpeg", "png");
             }
         }
+        return fileName + ".mp4 已经下载完成。";
     }
 
     /**
      * 合成视频 删除片段
      */
-    private static void composeFile(String fileOutPath, HashMap<Integer, String> keyFileMap) {
+    private static void composeFile(FileOutputStream finalOutputStream, HashMap<Integer, String> keyFileMap) {
+        FileInputStream fis = null;
+        File file = null;
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream(new File(fileOutPath));
             byte[] bytes = new byte[1024];
-            int length = 0;
+            int length;
             for (int i = 0; i < keyFileMap.size(); i++) {
                 String nodePath = keyFileMap.get(i);
                 if (nodePath == null) {
                     continue;
                 }
-                File file = new File(nodePath);
+                file = new File(nodePath);
                 if (!file.exists()) {
                     continue;
                 }
-                FileInputStream fis = new FileInputStream(file);
+                fis = new FileInputStream(file);
                 while ((length = fis.read(bytes)) != -1) {
-                    fileOutputStream.write(bytes, 0, length);
+                    finalOutputStream.write(bytes, 0, length);
+                    finalOutputStream.flush();
                 }
-                file.delete();
+
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                    file.delete();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -156,7 +170,7 @@ public class DownM3U8FileUtil {
                 return content.toString();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("检索文件下载出错：{}", urlpath, e);
             return null;
         }
     }
@@ -180,40 +194,55 @@ public class DownM3U8FileUtil {
 
         @Override
         public void run() {
+            String[] split = fileRootPath.split("/");
+            FileOutputStream finalOutputStream = null;
+            File finalFile = new File(fileRootPath + "/" + split[split.length - 1] + ".mp4");
+            String urlStr = "";
             try {
+                finalOutputStream = new FileOutputStream(finalFile);
                 for (int i = start; i <= end; i++) {
                     String urlpath = list.get(i);
-                    URL url = new URL(preUrlPath + "/" + urlpath);
+                    urlStr = ResourcesFileUtils.findMaxSubString(preUrlPath, urlpath);
+                    URL url = new URL(urlStr);
                     //下载资源
                     HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
                     httpURLConnection.setRequestMethod("GET");
                     httpURLConnection.setDoOutput(true);
                     httpURLConnection.setDoInput(true);
                     httpURLConnection.setUseCaches(false);
-                    httpURLConnection.setConnectTimeout(30000);
-                    httpURLConnection.setReadTimeout(30000);
+                    httpURLConnection.setConnectTimeout(300000);
+                    httpURLConnection.setReadTimeout(300000);
                     httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
                     DataInputStream dataInputStream = new DataInputStream(httpURLConnection.getInputStream());
-                    String fileOutPath = fileRootPath + urlpath;
+                    String fileOutPath = fileRootPath + "/" + ((!urlpath.contains("/")) ? urlpath : urlpath.substring(urlpath.lastIndexOf("/")+1));
                     String rootPath = new File(".").getAbsolutePath();
-                    String substring = fileOutPath.substring(0, fileOutPath.lastIndexOf("/"));
-                    String[] split = substring.split("/");
                     String fileName = fileOutPath.substring(fileOutPath.lastIndexOf("/"));
                     HtmlUtils.createFileWithMultilevelDirectory(split, fileName, rootPath);
                     FileOutputStream fileOutputStream = new FileOutputStream(new File(fileOutPath));
                     byte[] bytes = new byte[1024];
-                    int length = 0;
+                    int length;
                     while ((length = dataInputStream.read(bytes)) != -1) {
                         fileOutputStream.write(bytes, 0, length);
+                        fileOutputStream.flush();
                     }
                     dataInputStream.close();
+                    fileOutputStream.close();
                     keyFileMap.put(i, fileOutPath);
-                    composeFile(fileRootPath + "/" + fileName + ".mp4", keyFileMap);
+                    composeFile(finalOutputStream, keyFileMap);
                 }
-                log.info("第" + start / (end - start) + "组完成，" + "开始位置" + start + ",结束位置" + end);
+                log.info("文件" + split[split.length - 1] + ".mp4 已经下载并合成已完成");
             } catch (Exception e) {
-                log.info("当前下载异常", e);
+                log.info("当前下载异常:{}", urlStr, e);
                 e.printStackTrace();
+            } finally {
+                if (finalOutputStream != null) {
+                    try {
+                        finalOutputStream.close();
+                        finalFile.renameTo(new File(finalFile.getParent() + "/" + PREFIX + finalFile.getName()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
     }

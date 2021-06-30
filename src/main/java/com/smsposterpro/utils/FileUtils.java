@@ -43,19 +43,20 @@ public class FileUtils {
      * @param flag
      */
     public static void deleteDir(File file, String... flag) {
-        boolean delete;
         if (file.isDirectory()) {
             /*递归删除目录中的子目录下*/
             Arrays.stream(Objects.requireNonNull(file.listFiles())).forEach(child -> deleteDir(child, flag));
-            delete = file.delete();
-            log.info("删除空目录: {}", delete);
+            file.delete();
         }
         if (file.isFile()) {
             if (!(flag != null && flag.length > 0 && file.getName().contains(".") && Arrays.asList(flag).contains(file.getName().substring(file.getName().lastIndexOf(".") + 1)))) {
-                delete = file.delete();
-                log.info("删除文件: {}", delete);
+                file.delete();
             } else {
-                log.info("此为视频或图片资源文件文件：{}", file.getName());
+                if (!file.getName().startsWith(DownM3U8FileUtil.PREFIX)) {
+                    file.delete();
+                } else {
+                    log.info("此为资源文件：{}", file.getName());
+                }
             }
         }
     }

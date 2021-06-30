@@ -45,6 +45,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.smsposterpro.utils.CommonUtils.getTime;
 import static com.smsposterpro.utils.HtmlUtils.createFileWithMultilevelDirectory;
@@ -69,8 +71,11 @@ import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PyController extends BaseController {
 
-    static volatile int lock = 1;
-    RestTemplate restTemplate = new RestTemplate();
+    public static ExecutorService executor = Executors.newFixedThreadPool(10);
+
+    public static volatile int lock = 1;
+    volatile LinkedHashSet<String> hrefs = new LinkedHashSet<>();
+
     @Autowired
     private MailService mailService;
 
@@ -137,7 +142,6 @@ public class PyController extends BaseController {
             String IpStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
             long start = System.currentTimeMillis();
             //开始压缩文件
-            LinkedHashSet<String> hrefs = new LinkedHashSet<>();
             String filePath = "./" + TEMP_FILE_DIR + "/" + IpStr;
             if (!StringUtils.isEmpty(param)) {
                 URL url;
@@ -155,7 +159,8 @@ public class PyController extends BaseController {
                     String finalResPathNoParamPath = resPathNoParamPath;
                     new Thread(() -> {
                         if (lock == 1) {
-                            HtmlUtils.getArticleURLs(finalIpStr, param, hrefs, finalResPathNoParamPath.substring(0, finalResPathNoParamPath.lastIndexOf("/")));
+                            executor.execute(() -> HtmlUtils.getArticleURLs(finalIpStr, param, hrefs, finalResPathNoParamPath.substring(0, finalResPathNoParamPath.lastIndexOf("/"))));
+                            log.info("所有任务已完成!");
                             lock = 2;
                         }
                     }).start();
@@ -190,6 +195,7 @@ public class PyController extends BaseController {
                         //log.info("微信推送成功：{}", forObject);
                     }
                 }
+                lock = 1;
             }).start();
             return "<h2>已开始爬取网站任务，请收到提示后点击导出或下载全部附件按钮下载。</h2>";
         } else {

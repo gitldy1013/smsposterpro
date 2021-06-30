@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +34,9 @@ import static java.util.regex.Pattern.compile;
 
 @Slf4j
 public class HtmlUtils {
+    public static final ExecutorService executorFix = Executors.newFixedThreadPool(5);
+    private static final String[] TYPE = {"vodplayhtml", "vodhtml"};
+
     /* 使用jsoup解析html并转化为提取字符串*/
     public static String html2Str(String html, String flag, String reg, String attr) throws AesException {
         StringBuilder sb = new StringBuilder();
@@ -289,7 +295,9 @@ public class HtmlUtils {
     public static void getArticleURLs(String IPStr, String param, Set<String> hrefs, String local) {
         if (!regUrl(param)) {
             try {
-                Document document = Jsoup.connect(param).get();
+                Connection connect = Jsoup.connect(param);
+                connect.timeout(300000);
+                Document document = connect.get();
                 URL url = new URL(param);
                 String orgin = url.getProtocol() + "://" + url.getHost() + ((url.getPort() > 0) ? ":" + url.getPort() : "");
                 String protocol = url.getProtocol() + ":";
@@ -320,7 +328,7 @@ public class HtmlUtils {
                         }
                     }
                     String resPathNoParam = getResPathNoParam(href);
-                    if (!regUrl(href) && href.startsWith(orgin + local) && !orgin.equals(resPathNoParam)) {
+                    if (!regUrl(href) && href.startsWith(orgin) && !orgin.equals(resPathNoParam)) {
                         try {
                             repyHtml(IPStr, hrefs, sh, resPathNoParam, local);
                         } catch (Exception e) {
@@ -340,7 +348,7 @@ public class HtmlUtils {
                 //String hrefPath = s.substring(0, s.lastIndexOf("/"));
                 //doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
             } catch (Exception e) {
-                log.error("爬取当前页面异常:{}", e.getMessage(), e);
+                log.error("爬取当前页面异常:{}  {}", param, e.getMessage(), e);
             }
         }
     }
@@ -348,8 +356,12 @@ public class HtmlUtils {
     private static void repyHtml(String IPStr, Set<String> hrefs, Element sh, String href, String local) {
         if (!hrefs.contains(href)) {
             hrefs.add(href);
-            log.info("路径：{}；数量：{}。", href, hrefs.size());
-            getArticleURLs(IPStr, href, hrefs, local);
+            //单分类
+            if (href.contains(TYPE[0]) || href.contains(TYPE[1]) || sh.html().trim().matches("[0-9]+") ||
+                    sh.html().trim().equals("下一页") || sh.html().trim().equals("上一页")) {
+                log.info("路径：{}；数量：{}。", href, hrefs.size());
+                getArticleURLs(IPStr, href, hrefs, local);
+            }
         }
         sh.attr("href", href);
     }
@@ -405,9 +417,21 @@ public class HtmlUtils {
             String s = JavaScriptUtil.getUrl(ma.group());
             if (!hrefs.contains(s)) {
                 hrefs.add(s);
-                String title = el.parent().select("title").html();
+                String title = el.parent().select("title").html().replaceAll(":", "").replaceAll("\\.", "");
+                if (StringUtils.isEmpty(title)) {
+                    Elements prev = el.parent().getElementsByTag("title").prev("script");
+                    String html = prev.html();
+                    title = html.substring(html.indexOf("'") + 1, html.lastIndexOf("'"));
+                    if (StringUtils.isEmpty(title)) {
+                        title = UUID.randomUUID().toString();
+                    }
+                }
                 try {
-                    DownM3U8FileUtil.downM3U8File(s, TEMP_FILE_DIR + "/" + IPStr + "/" + domain + "/" + title, title);
+                    String finalTitle = title;
+                    executorFix.execute(() -> {
+                        String downM3U8File = DownM3U8FileUtil.downM3U8File(s, TEMP_FILE_DIR + "/" + IPStr + "/" + domain + "/" + finalTitle, finalTitle);
+                        log.info(downM3U8File);
+                    });
                 } catch (Exception e) {
                     log.error("连接无效: {}", s, e);
                 }
