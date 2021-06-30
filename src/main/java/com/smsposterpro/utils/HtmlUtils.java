@@ -34,7 +34,7 @@ import static java.util.regex.Pattern.compile;
 
 @Slf4j
 public class HtmlUtils {
-    public static final ExecutorService executorFix = Executors.newFixedThreadPool(5);
+    public static final ExecutorService executorFix = Executors.newFixedThreadPool(50);
     private static final String[] TYPE = {"vodplayhtml", "vodhtml"};
 
     /* 使用jsoup解析html并转化为提取字符串*/
@@ -446,7 +446,7 @@ public class HtmlUtils {
             hrefs.add(s);
             log.info("路径：{}；数量：{}。", s, hrefs.size());
             Connection.Response resultImageResponse = Jsoup.connect(s).ignoreContentType(true).timeout(10000).execute();
-            boolean b = doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + resPathDir, getResName(href));
+            doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + resPathDir, getResName(href));
         }
         element.attr(attr, s);
     }

@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
@@ -70,8 +69,6 @@ import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 @Slf4j
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PyController extends BaseController {
-
-    public static ExecutorService executor = Executors.newFixedThreadPool(10);
 
     public static volatile int lock = 1;
     volatile LinkedHashSet<String> hrefs = new LinkedHashSet<>();
@@ -159,7 +156,7 @@ public class PyController extends BaseController {
                     String finalResPathNoParamPath = resPathNoParamPath;
                     new Thread(() -> {
                         if (lock == 1) {
-                            executor.execute(() -> HtmlUtils.getArticleURLs(finalIpStr, param, hrefs, finalResPathNoParamPath.substring(0, finalResPathNoParamPath.lastIndexOf("/"))));
+                            HtmlUtils.getArticleURLs(finalIpStr, param, hrefs, finalResPathNoParamPath.substring(0, finalResPathNoParamPath.lastIndexOf("/")));
                             log.info("所有任务已完成!");
                             lock = 2;
                         }
