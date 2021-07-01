@@ -140,8 +140,8 @@ public class DownM3U8FileUtil {
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setDoInput(true);
             httpURLConnection.setUseCaches(false);
-            httpURLConnection.setConnectTimeout(300000);
-            httpURLConnection.setReadTimeout(300000);
+            httpURLConnection.setConnectTimeout(30000);
+            httpURLConnection.setReadTimeout(30000);
             httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
             BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), StandardCharsets.UTF_8));
             StringBuilder content = new StringBuilder();
@@ -212,8 +212,8 @@ public class DownM3U8FileUtil {
                     httpURLConnection.setDoOutput(true);
                     httpURLConnection.setDoInput(true);
                     httpURLConnection.setUseCaches(false);
-                    httpURLConnection.setConnectTimeout(300000);
-                    httpURLConnection.setReadTimeout(300000);
+                    httpURLConnection.setConnectTimeout(30000);
+                    httpURLConnection.setReadTimeout(30000);
                     httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
                     DataInputStream dataInputStream = new DataInputStream(httpURLConnection.getInputStream());
                     String fileOutPath = fileRootPath + "/" + ((!urlpath.contains("/")) ? urlpath : urlpath.substring(urlpath.lastIndexOf("/") + 1));

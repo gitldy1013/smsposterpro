@@ -12,6 +12,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.FileCopyUtils;
 
+import javax.net.ssl.SSLHandshakeException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -330,16 +331,14 @@ public class HtmlUtils {
                 //递归爬取静态页面
                 for (int i = split.size() - 1; i >= 0; i--) {
                     Set<Map.Entry<String, Element>> set = split.get(i);
-                    executorFix.execute(() -> {
-                        repyTask(IPStr, hrefs, local, orgin, protocol, set);
-                    });
+                    executorFix.execute(() -> repyTask(IPStr, hrefs, local, orgin, protocol, set));
                 }
                 //log.info("保存html：" + param);
                 //String s = domain + param.replace(orgin, "");
                 //String hrefPath = s.substring(0, s.lastIndexOf("/"));
                 //doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
-            } catch (SocketTimeoutException e) {
-
+            } catch (SSLHandshakeException | SocketTimeoutException e) {
+                getArticleURLs(IPStr, param, hrefs, local);
                 log.error("连接超时 请求重试:{}  {}", param, e.getMessage(), e);
             } catch (Exception e) {
                 log.error("爬取当前页面异常:{}  {}", param, e.getMessage(), e);
