@@ -6,11 +6,13 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -40,7 +42,6 @@ public class DownM3U8FileUtil {
         if (file.exists()) {
             return fileName + ".mp4 正在下载中。";
         }
-        log.info("文件 " + fileName + ".mp4 开始下载");
         URL url = null;
         try {
             url = new URL(indexPath);
@@ -66,19 +67,11 @@ public class DownM3U8FileUtil {
         new downLoadNode(videoUrlList, 0, videoUrlList.size() - 1, keyFileMap, indexPath.substring(0, indexPath.lastIndexOf("/") + 1), rootPath).start();
         //等待下载并合成文件
         while (keyFileMap.size() < videoUrlList.size()) {
-            log.info("当前下载数量" + keyFileMap.size());
+            log.info("文件 " + fileName + ".mp4 已下载" + keyFileMap.size() + "/" + videoUrlList.size());
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
-        }
-        //删除视频片段
-        File[] files = fileDir.listFiles();
-        assert files != null;
-        for (File f : files) {
-            if (f.isDirectory()) {
-                FileUtils.deleteDir(f, ".mp4", ".jpg", ".jpeg", "png");
             }
         }
         return fileName + ".mp4 已经下载完成。";
@@ -131,7 +124,6 @@ public class DownM3U8FileUtil {
         while (ma.find()) {
             String s = ma.group();
             list.add(s);
-            log.info(s);
         }
         return list;
     }
@@ -163,14 +155,20 @@ public class DownM3U8FileUtil {
                 }
             }
             in.close();
-            log.info(content.toString());
+//            log.info(content.toString());
             if (!flag) {
                 return getIndexFile(orgin + flagStr);
             } else {
                 return content.toString();
             }
+        } catch (FileNotFoundException ex) {
+            log.info("检索文件未找到：{} {}", urlpath, ex);
+            return null;
+        } catch (SocketException ex) {
+            log.info("链接地址无效：{} {}", urlpath, ex);
+            return null;
         } catch (Exception e) {
-            log.info("检索文件下载出错：{}", urlpath, e);
+            log.info("检索文件下载出错：{} {}", urlpath, e);
             return null;
         }
     }
@@ -194,9 +192,13 @@ public class DownM3U8FileUtil {
 
         @Override
         public void run() {
+            String rootPath = new File(".").getAbsolutePath();
+            fileRootPath = CommonUtils.filenameFilter(fileRootPath, CommonUtils.DIR_PATTERN);
             String[] split = fileRootPath.split("/");
+            String FinalfileName = CommonUtils.filenameFilter(split[split.length - 1], CommonUtils.FILE_PATTERN) + ".mp4";
+            HtmlUtils.createFileWithMultilevelDirectory(split, FinalfileName, rootPath);
+            File finalFile = new File(fileRootPath + "/" + FinalfileName);
             FileOutputStream finalOutputStream = null;
-            File finalFile = new File(fileRootPath + "/" + split[split.length - 1] + ".mp4");
             String urlStr = "";
             try {
                 finalOutputStream = new FileOutputStream(finalFile);
@@ -214,10 +216,7 @@ public class DownM3U8FileUtil {
                     httpURLConnection.setReadTimeout(300000);
                     httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
                     DataInputStream dataInputStream = new DataInputStream(httpURLConnection.getInputStream());
-                    String fileOutPath = fileRootPath + "/" + ((!urlpath.contains("/")) ? urlpath : urlpath.substring(urlpath.lastIndexOf("/")+1));
-                    String rootPath = new File(".").getAbsolutePath();
-                    String fileName = fileOutPath.substring(fileOutPath.lastIndexOf("/"));
-                    HtmlUtils.createFileWithMultilevelDirectory(split, fileName, rootPath);
+                    String fileOutPath = fileRootPath + "/" + ((!urlpath.contains("/")) ? urlpath : urlpath.substring(urlpath.lastIndexOf("/") + 1));
                     FileOutputStream fileOutputStream = new FileOutputStream(new File(fileOutPath));
                     byte[] bytes = new byte[1024];
                     int length;

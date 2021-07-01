@@ -157,7 +157,7 @@ public class PyController extends BaseController {
                     new Thread(() -> {
                         if (lock == 1) {
                             HtmlUtils.getArticleURLs(finalIpStr, param, hrefs, finalResPathNoParamPath.substring(0, finalResPathNoParamPath.lastIndexOf("/")));
-                            log.info("所有任务已完成!");
+                            log.info("当前爬取页面总数" + hrefs.size()+ " 所有任务已完成!");
                             lock = 2;
                         }
                     }).start();

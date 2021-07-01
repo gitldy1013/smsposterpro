@@ -18,8 +18,12 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -317,38 +321,57 @@ public class HtmlUtils {
                 //下载视频
                 downloadByAttr(IPStr, hrefs, orgin, protocol, domain, script, "type");
                 downloadByAttr(IPStr, hrefs, orgin, protocol, domain, source, "src");
-                //递归爬取静态页面
+                //分片
+                HashMap<String, Element> hashMap = new HashMap<>();
                 for (Element sh : select) {
-                    String href = sh.attr("href");
-                    if (!href.startsWith("http")) {
-                        if (!href.contains("javascript")) {
-                            href = orgin + href.replaceAll("^(\\.)*", "");
-                        } else {
-                            continue;
-                        }
-                    }
-                    String resPathNoParam = getResPathNoParam(href);
-                    if (!regUrl(href) && href.startsWith(orgin) && !orgin.equals(resPathNoParam)) {
-                        try {
-                            repyHtml(IPStr, hrefs, sh, resPathNoParam, local);
-                        } catch (Exception e) {
-                            try {
-                                String s = protocol + getResPathNoParam(sh.attr("href"));
-                                repyHtml(IPStr, hrefs, sh, s, local);
-                            } catch (Exception ex) {
-                                log.error("爬取当前页面异常:{}", ex.getMessage(), e);
-                            }
-                        }
-                    } else {
-                        sh.attr("href", href);
-                    }
+                    hashMap.put(sh.attr("href"), sh);
+                }
+                List<Set<Map.Entry<String, Element>>> split = CommonUtils.split(hashMap, 10);
+                //递归爬取静态页面
+                for (int i = split.size() - 1; i >= 0; i--) {
+                    Set<Map.Entry<String, Element>> set = split.get(i);
+                    executorFix.execute(() -> {
+                        repyTask(IPStr, hrefs, local, orgin, protocol, set);
+                    });
                 }
                 //log.info("保存html：" + param);
                 //String s = domain + param.replace(orgin, "");
                 //String hrefPath = s.substring(0, s.lastIndexOf("/"));
                 //doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
+            } catch (SocketTimeoutException e) {
+
+                log.error("连接超时 请求重试:{}  {}", param, e.getMessage(), e);
             } catch (Exception e) {
                 log.error("爬取当前页面异常:{}  {}", param, e.getMessage(), e);
+            }
+        }
+    }
+
+    private static void repyTask(String IPStr, Set<String> hrefs, String local, String orgin, String protocol, Set<Map.Entry<String, Element>> set) {
+        for (Map.Entry<String, Element> hrefSet : set) {
+            String href = hrefSet.getKey();
+            Element sh = hrefSet.getValue();
+            if (!href.startsWith("http")) {
+                if (!href.contains("javascript")) {
+                    href = orgin + href.replaceAll("^(\\.)*", "");
+                } else {
+                    continue;
+                }
+            }
+            String resPathNoParam = getResPathNoParam(href);
+            if (!regUrl(href) && href.startsWith(orgin) && !orgin.equals(resPathNoParam)) {
+                try {
+                    repyHtml(IPStr, hrefs, sh, resPathNoParam, local);
+                } catch (Exception e) {
+                    try {
+                        String s = protocol + getResPathNoParam(sh.attr("href"));
+                        repyHtml(IPStr, hrefs, sh, s, local);
+                    } catch (Exception ex) {
+                        log.error("爬取当前页面异常:{}", ex.getMessage(), e);
+                    }
+                }
+            } else {
+                sh.attr("href", href);
             }
         }
     }
@@ -359,7 +382,7 @@ public class HtmlUtils {
             //单分类
             if (href.contains(TYPE[0]) || href.contains(TYPE[1]) || sh.html().trim().matches("[0-9]+") ||
                     sh.html().trim().equals("下一页") || sh.html().trim().equals("上一页")) {
-                log.info("路径：{}；数量：{}。", href, hrefs.size());
+//                log.info("路径：{}；数量：{}。", href, hrefs.size());
                 getArticleURLs(IPStr, href, hrefs, local);
             }
         }
@@ -427,11 +450,7 @@ public class HtmlUtils {
                     }
                 }
                 try {
-                    String finalTitle = title;
-                    executorFix.execute(() -> {
-                        String downM3U8File = DownM3U8FileUtil.downM3U8File(s, TEMP_FILE_DIR + "/" + IPStr + "/" + domain + "/" + finalTitle, finalTitle);
-                        log.info(downM3U8File);
-                    });
+                    String downM3U8File = DownM3U8FileUtil.downM3U8File(s, TEMP_FILE_DIR + "/" + IPStr + "/" + domain + "/" + title, title);
                 } catch (Exception e) {
                     log.error("连接无效: {}", s, e);
                 }
@@ -444,7 +463,7 @@ public class HtmlUtils {
     private static void pySources(String IPStr, Set<String> hrefs, String domain, String attr, Element element, String href, String s, String resPathDir) throws IOException {
         if (!hrefs.contains(s)) {
             hrefs.add(s);
-            log.info("路径：{}；数量：{}。", s, hrefs.size());
+//            log.info("路径：{}；数量：{}。", s, hrefs.size());
             Connection.Response resultImageResponse = Jsoup.connect(s).ignoreContentType(true).timeout(10000).execute();
             doSaveImgFile(IPStr, resultImageResponse.bodyAsBytes(), domain + resPathDir, getResName(href));
         }
