@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.HashMap;
@@ -337,7 +338,7 @@ public class HtmlUtils {
                 //String s = domain + param.replace(orgin, "");
                 //String hrefPath = s.substring(0, s.lastIndexOf("/"));
                 //doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
-            } catch (SSLHandshakeException | SocketTimeoutException e) {
+            } catch (SSLHandshakeException | SocketTimeoutException | ConnectException e) {
                 getArticleURLs(IPStr, param, hrefs, local);
                 log.error("连接超时 请求重试:{}  {}", param, e.getMessage(), e);
             } catch (Exception e) {

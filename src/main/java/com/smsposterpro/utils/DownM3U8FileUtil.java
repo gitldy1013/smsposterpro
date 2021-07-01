@@ -65,15 +65,6 @@ public class DownM3U8FileUtil {
         }
         HashMap<Integer, String> keyFileMap = new HashMap<>();
         new downLoadNode(videoUrlList, 0, videoUrlList.size() - 1, keyFileMap, indexPath.substring(0, indexPath.lastIndexOf("/") + 1), rootPath).start();
-        //等待下载并合成文件
-        while (keyFileMap.size() < videoUrlList.size()) {
-            log.info("文件 " + fileName + ".mp4 已下载" + keyFileMap.size() + "/" + videoUrlList.size());
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
         return fileName + ".mp4 已经下载完成。";
     }
 
@@ -228,6 +219,7 @@ public class DownM3U8FileUtil {
                     fileOutputStream.close();
                     keyFileMap.put(i, fileOutPath);
                     composeFile(finalOutputStream, keyFileMap);
+                    log.info("文件 " + FinalfileName + ".mp4 已下载" + keyFileMap.size() + "/" + (end + 1));
                 }
                 log.info("文件" + split[split.length - 1] + ".mp4 已经下载并合成已完成");
             } catch (Exception e) {
@@ -237,7 +229,9 @@ public class DownM3U8FileUtil {
                 if (finalOutputStream != null) {
                     try {
                         finalOutputStream.close();
-                        finalFile.renameTo(new File(finalFile.getParent() + "/" + PREFIX + finalFile.getName()));
+                        if (keyFileMap.size() == (end + 1)) {
+                            finalFile.renameTo(new File(finalFile.getParent() + "/" + PREFIX + finalFile.getName()));
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
