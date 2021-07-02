@@ -1,5 +1,6 @@
 package com.smsposterpro.utils;
 
+import com.smsposterpro.api.py.PyController;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -18,6 +19,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,14 +36,18 @@ public class DownM3U8FileUtil {
 
     public static final String PREFIX = "完成-";
 
+    public static volatile Set<String> fileNamesList = new TreeSet<>();
+
     public static String downM3U8File(String indexPath, String rootPath, String fileName) {
         File file = new File(rootPath + "/" + fileName + ".mp4");
         File finalFile = new File(rootPath + "/" + PREFIX + fileName + ".mp4");
-        if (finalFile.exists()) {
-            return fileName + ".mp4 已经下载过。";
-        }
-        if (file.exists()) {
-            return fileName + ".mp4 正在下载中。";
+        synchronized (PREFIX) {
+            if (finalFile.exists()) {
+                return fileName + ".mp4 已经下载过。";
+            }
+            if (file.exists()) {
+                return fileName + ".mp4 正在下载中。";
+            }
         }
         URL url = null;
         try {
@@ -64,7 +71,7 @@ public class DownM3U8FileUtil {
             fileDir.mkdirs();
         }
         HashMap<Integer, String> keyFileMap = new HashMap<>();
-        new downLoadNode(videoUrlList, 0, videoUrlList.size() - 1, keyFileMap, indexPath.substring(0, indexPath.lastIndexOf("/") + 1), rootPath).start();
+        PyController.executorFix.execute(new downLoadNode(videoUrlList, 0, videoUrlList.size() - 1, keyFileMap, indexPath.substring(0, indexPath.lastIndexOf("/") + 1), rootPath));
         return fileName + ".mp4 已经下载完成。";
     }
 
@@ -219,9 +226,9 @@ public class DownM3U8FileUtil {
                     fileOutputStream.close();
                     keyFileMap.put(i, fileOutPath);
                     composeFile(finalOutputStream, keyFileMap);
-                    log.info("文件 " + FinalfileName + ".mp4 已下载" + keyFileMap.size() + "/" + (end + 1));
+                    log.info("文件 " + FinalfileName + " 已下载" + keyFileMap.size() + "/" + (end + 1));
                 }
-                log.info("文件" + split[split.length - 1] + ".mp4 已经下载并合成已完成");
+                log.info("文件 " + FinalfileName + " 已经下载并合成已完成");
             } catch (Exception e) {
                 log.info("当前下载异常:{}", urlStr, e);
                 e.printStackTrace();

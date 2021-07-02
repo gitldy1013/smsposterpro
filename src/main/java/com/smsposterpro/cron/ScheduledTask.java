@@ -1,6 +1,5 @@
 package com.smsposterpro.cron;
 
-import com.smsposterpro.api.py.PyController;
 import com.smsposterpro.utils.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -19,10 +18,8 @@ public class ScheduledTask {
 
     @Scheduled(cron = "0 0 23 ? * *")
     public void deleteTask() {
-        if (PyController.lock == 2) {
-            FileUtils.deleteDir(FileUtils.DELETEDIRSTR, "mp4", "jpg", "jpeg", "png");
-            PyController.lock = 1;
-        }
+        int count = FileUtils.deleteDirWithCount(FileUtils.DELETEDIRSTR, "mp4", "jpg", "jpeg", "png");
+        log.info("总文件数为：" + count);
     }
 
 }

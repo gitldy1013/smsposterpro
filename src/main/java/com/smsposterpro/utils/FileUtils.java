@@ -19,6 +19,8 @@ import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
 @Slf4j
 public class FileUtils {
     public static final String DELETEDIRSTR = "./" + TEMP_FILE_DIR;
+    //总文件数
+    private static int count = 0;
 
     public static void main(String[] args) {
         FileUtils.deleteDir(FileUtils.DELETEDIRSTR, "mp4", "jpg", "jpeg", "png");
@@ -36,13 +38,18 @@ public class FileUtils {
         deleteDir(file, flag);
     }
 
+    public static int deleteDirWithCount(String dir, String... flag) {
+        File file = new File(dir);
+        return deleteDir(file, flag);
+    }
+
     /**
      * flag为保留文件的类型列表数组
      *
      * @param file
      * @param flag
      */
-    public static void deleteDir(File file, String... flag) {
+    public static int deleteDir(File file, String... flag) {
         if (file.isDirectory()) {
             /*递归删除目录中的子目录下*/
             Arrays.stream(Objects.requireNonNull(file.listFiles())).forEach(child -> deleteDir(child, flag));
@@ -55,10 +62,11 @@ public class FileUtils {
                 if (!file.getName().startsWith(DownM3U8FileUtil.PREFIX)) {
                     file.delete();
                 } else {
-                    log.info("此为资源文件：{}", file.getName());
+                    count += 1;
                 }
             }
         }
+        return count;
     }
 
     /**

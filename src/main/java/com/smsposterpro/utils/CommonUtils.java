@@ -6,7 +6,8 @@ import org.jsoup.nodes.Element;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,7 +59,7 @@ public class CommonUtils {
     public static void main(String[] args) throws Exception {
 //        String result = FindOCR("C:\\Users\\liudongyang\\Desktop\\smsposterpro\\file\\test.png", true);
 //        System.out.println(result);
-        HashMap<String, Element> map = new HashMap<>();
+        LinkedHashMap<String, Element> map = new LinkedHashMap<>();
         map.put("12d3", null);
         map.put("432", null);
         map.put("432", null);
@@ -71,11 +72,13 @@ public class CommonUtils {
         map.put("11sz2", null);
         map.put("11c2", null);
         map.put("11z2", null);
-        List<Set<Map.Entry<String, Element>>> split = CommonUtils.split(map, 3);
-        System.out.println(split);
+        List<Set<Map.Entry<String, Element>>> split = CommonUtils.split(map, 2);
+        List<LinkedHashMap<String, Element>> linkedHashMaps = CommonUtils.splitOrder(map, 3);
+//        System.out.println(split);
         String tests = "temp\\绚丽舞台|子滢\\绚丽舞台子滢";
         String s = filenameFilter(tests, FILE_PATTERN);
         System.out.println(s);
+        System.out.println(linkedHashMaps);
     }
 
     /**
@@ -83,20 +86,42 @@ public class CommonUtils {
      * @param input 指定分隔size
      * @return
      */
-    public static List<Set<Map.Entry<String, Element>>> split(HashMap<String, Element> map, int input) {
+    public static List<Set<Map.Entry<String, Element>>> split(LinkedHashMap<String, Element> map, int input) {
         int size = map.size();
-        int limit = (size + input - 1) / input;
-        Set<Map.Entry<String, Element>> entries = map.entrySet();
-        List<Set<Map.Entry<String, Element>>> splitList = Stream.iterate(0, n -> n + 1).limit(limit).
+        int limit = (size % input > 0) ? ((size / input) + 1) : (size / input);
+        //当输入数量小于分隔数量需反转
+        //if (input < limit) {
+        //    int finalLimit = limit;
+        //    splitList = Stream.iterate(0, n -> n + 1).limit(input).
+        //            map(a -> map.entrySet().stream().skip(a * finalLimit).limit(finalLimit).collect(Collectors.toSet())).
+        //            collect(Collectors.toList());
+        //}
+        return Stream.iterate(0, n -> n + 1).limit(limit).
                 map(a -> map.entrySet().stream().skip(a * input).limit(input).collect(Collectors.toSet())).
                 collect(Collectors.toList());
-        //当输入数量小于分隔数量需反转
-        if (input < limit) {
-            splitList = Stream.iterate(0, n -> n + 1).limit(input).
-                    map(a -> map.entrySet().stream().skip(a * limit).limit(limit).collect(Collectors.toSet())).
-                    collect(Collectors.toList());
+    }
+
+    public static List<LinkedHashMap<String, Element>> splitOrder(LinkedHashMap<String, Element> map, int input) {
+        if (input > map.size()) {
+            input = map.size();
         }
-        return splitList;
+        List<LinkedHashMap<String, Element>> res = new ArrayList<>();
+        int i = 0;
+        LinkedHashMap<String, Element> se = new LinkedHashMap<>();
+        for (Map.Entry<String, Element> entry : map.entrySet()) {
+            if ((i % input) == 0) {
+                if (i != 0) {
+                    res.add(se);
+                }
+                se = new LinkedHashMap<>();
+            }
+            se.put(entry.getKey(), entry.getValue());
+            i += 1;
+        }
+        if (map.size() % input > 0 || i == map.size()) {
+            res.add(se);
+        }
+        return res;
     }
 
     public static String filenameFilter(String str, Pattern pattern) {

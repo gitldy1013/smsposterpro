@@ -1,5 +1,6 @@
 package com.smsposterpro.utils;
 
+import com.smsposterpro.api.py.PyController;
 import com.smsposterpro.exception.AesException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -22,14 +23,12 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,7 +39,6 @@ import static java.util.regex.Pattern.compile;
 
 @Slf4j
 public class HtmlUtils {
-    public static final ExecutorService executorFix = Executors.newFixedThreadPool(50);
     private static final String[] TYPE = {"vodplayhtml", "vodhtml"};
 
     /* 使用jsoup解析html并转化为提取字符串*/
@@ -302,7 +300,8 @@ public class HtmlUtils {
         if (!regUrl(param)) {
             try {
                 Connection connect = Jsoup.connect(param);
-                connect.timeout(300000);
+                connect.userAgent("Mozilla/4.0 (compatible; MSIE 9.0; Windows NT 5.0)");
+                connect.timeout(30000);
                 Document document = connect.get();
                 URL url = new URL(param);
                 String orgin = url.getProtocol() + "://" + url.getHost() + ((url.getPort() > 0) ? ":" + url.getPort() : "");
@@ -324,15 +323,15 @@ public class HtmlUtils {
                 downloadByAttr(IPStr, hrefs, orgin, protocol, domain, script, "type");
                 downloadByAttr(IPStr, hrefs, orgin, protocol, domain, source, "src");
                 //分片
-                HashMap<String, Element> hashMap = new HashMap<>();
+                LinkedHashMap<String, Element> hashMap = new LinkedHashMap<>();
                 for (Element sh : select) {
                     hashMap.put(sh.attr("href"), sh);
                 }
-                List<Set<Map.Entry<String, Element>>> split = CommonUtils.split(hashMap, 10);
+                List<LinkedHashMap<String, Element>> split = CommonUtils.splitOrder(hashMap, 1);
                 //递归爬取静态页面
                 for (int i = split.size() - 1; i >= 0; i--) {
-                    Set<Map.Entry<String, Element>> set = split.get(i);
-                    executorFix.execute(() -> repyTask(IPStr, hrefs, local, orgin, protocol, set));
+                    LinkedHashMap<String, Element> map = split.get(i);
+                    PyController.executorFix.execute(() -> repyTask(IPStr, hrefs, local, orgin, protocol, map));
                 }
                 //log.info("保存html：" + param);
                 //String s = domain + param.replace(orgin, "");
@@ -347,8 +346,8 @@ public class HtmlUtils {
         }
     }
 
-    private static void repyTask(String IPStr, Set<String> hrefs, String local, String orgin, String protocol, Set<Map.Entry<String, Element>> set) {
-        for (Map.Entry<String, Element> hrefSet : set) {
+    private static void repyTask(String IPStr, Set<String> hrefs, String local, String orgin, String protocol, LinkedHashMap<String, Element> map) {
+        for (Map.Entry<String, Element> hrefSet : map.entrySet()) {
             String href = hrefSet.getKey();
             Element sh = hrefSet.getValue();
             if (!href.startsWith("http")) {
@@ -382,7 +381,9 @@ public class HtmlUtils {
             //单分类
             if (href.contains(TYPE[0]) || href.contains(TYPE[1]) || sh.html().trim().matches("[0-9]+") ||
                     sh.html().trim().equals("下一页") || sh.html().trim().equals("上一页")) {
-//                log.info("路径：{}；数量：{}。", href, hrefs.size());
+                if (sh.html().trim().matches("[0-9]+")) {
+                    log.info("爬取第 {} 页", sh.html().trim());
+                }
                 getArticleURLs(IPStr, href, hrefs, local);
             }
         }
@@ -450,7 +451,8 @@ public class HtmlUtils {
                     }
                 }
                 try {
-                    String downM3U8File = DownM3U8FileUtil.downM3U8File(s, TEMP_FILE_DIR + "/" + IPStr + "/" + domain + "/" + title, title);
+                    String rootPath = TEMP_FILE_DIR + "/" + IPStr + "/" + domain + "/" + title;
+                    String downM3U8File = DownM3U8FileUtil.downM3U8File(s, rootPath, title);
                 } catch (Exception e) {
                     log.error("连接无效: {}", s, e);
                 }
