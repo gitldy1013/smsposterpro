@@ -1,27 +1,27 @@
 package com.smsposterpro.utils;
 
-import com.smsposterpro.api.py.PyController;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.SocketException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,16 +39,18 @@ public class DownM3U8FileUtil {
 
     public static volatile Set<String> fileNamesList = new TreeSet<>();
 
-    public static String downM3U8File(String indexPath, String rootPath, String fileName) {
+    public static volatile LinkedList<DownLoadNode> downLoadNodes = new LinkedList<>();
+
+    public static void downM3U8File(String indexPath, String rootPath, String fileName) {
         File file = new File(rootPath + "/" + fileName + ".mp4");
         File finalFile = new File(rootPath + "/" + PREFIX + fileName + ".mp4");
-        synchronized (PREFIX) {
-            if (finalFile.exists()) {
-                return fileName + ".mp4 已经下载过。";
-            }
-            if (file.exists()) {
-                return fileName + ".mp4 正在下载中。";
-            }
+        if (finalFile.exists() || fileNamesList.contains(PREFIX + fileName + ".mp4")) {
+            log.info(fileName + ".mp4 已经下载过。");
+            return;
+        }
+        if (file.exists() || fileNamesList.contains(fileName + ".mp4")) {
+            log.info(fileName + ".mp4 正在下载中。");
+            return;
         }
         URL url = null;
         try {
@@ -58,22 +60,8 @@ public class DownM3U8FileUtil {
             log.error("视频地址错误！");
         }
         assert url != null;
-        //String orgin = url.getProtocol() + "://" + url.getHost() + ((url.getPort() > 0) ? ":" + url.getPort() : "");
-        //下载索引文件
-        String indexStr = getIndexFile(indexPath);
-        if (indexStr == null) {
-            return "检索文件下载出错";
-        }
-        //解析索引文件
-        List<String> videoUrlList = analysisIndex(indexStr);
-        //生成文件下载目录
-        File fileDir = new File(rootPath);
-        if (!fileDir.exists()) {
-            fileDir.mkdirs();
-        }
         HashMap<Integer, String> keyFileMap = new HashMap<>();
-        PyController.executorFix.execute(new downLoadNode(videoUrlList, 0, videoUrlList.size() - 1, keyFileMap, indexPath.substring(0, indexPath.lastIndexOf("/") + 1), rootPath));
-        return fileName + ".mp4 已经下载完成。";
+        downLoadNodes.add(new DownLoadNode(indexPath, keyFileMap, indexPath.substring(0, indexPath.lastIndexOf("/") + 1), rootPath));
     }
 
     /**
@@ -146,20 +134,12 @@ public class DownM3U8FileUtil {
                 }
             }
             in.close();
-//            log.info(content.toString());
             if (!flag) {
                 return getIndexFile(orgin + flagStr);
             } else {
                 return content.toString();
             }
-        } catch (FileNotFoundException ex) {
-            log.info("检索文件未找到：{} {}", urlpath, ex);
-            return null;
-        } catch (SocketException ex) {
-            log.info("链接地址无效：{} {}", urlpath, ex);
-            return null;
-        } catch (Exception e) {
-            log.info("检索文件下载出错：{} {}", urlpath, e);
+        } catch (Exception ex) {
             return null;
         }
     }
@@ -181,37 +161,50 @@ public class DownM3U8FileUtil {
         return httpURLConnection;
     }
 
-    static class downLoadNode extends Thread {
+    static class DownLoadNode implements Callable<String> {
         HashMap<Integer, String> keyFileMap;
-        private List<String> list;
-        private int start;
-        private int end;
         private String preUrlPath;
         private String fileRootPath;
+        private String indexPath;
 
-        downLoadNode(List<String> list, int start, int end, HashMap<Integer, String> keyFileMap, String preUrlPath, String fileRootPath) {
-            this.list = list;
-            this.end = end;
-            this.start = start;
+        DownLoadNode(String indexPath, HashMap<Integer, String> keyFileMap, String preUrlPath, String fileRootPath) {
+            this.indexPath = indexPath;
             this.keyFileMap = keyFileMap;
             this.preUrlPath = preUrlPath;
             this.fileRootPath = fileRootPath;
+            log.info(fileRootPath + "任务已经添加到队列");
         }
 
         @Override
-        public void run() {
+        public String call() {
+            String indexFile = getIndexFile(indexPath);
+            List<String> videoUrlList;
+            int end;
+            if (StringUtils.isNotEmpty(indexFile)) {
+                videoUrlList = analysisIndex(indexFile);
+                end = videoUrlList.size() - 1;
+            } else {
+                return "检索文件获取失败:" + indexPath;
+            }
+            //生成文件下载目录
+            File fileDir = new File(fileRootPath);
+            if (!fileDir.exists()) {
+                fileDir.mkdirs();
+            }
+            //下载文件
             String rootPath = new File(".").getAbsolutePath();
             fileRootPath = CommonUtils.filenameFilter(fileRootPath, CommonUtils.DIR_PATTERN);
             String[] split = fileRootPath.split("/");
             String FinalfileName = CommonUtils.filenameFilter(split[split.length - 1], CommonUtils.FILE_PATTERN) + ".mp4";
             HtmlUtils.createFileWithMultilevelDirectory(split, FinalfileName, rootPath);
             File finalFile = new File(fileRootPath + "/" + FinalfileName);
+            fileNamesList.add(finalFile.getName());
             FileOutputStream finalOutputStream = null;
             String urlStr = "";
             try {
                 finalOutputStream = new FileOutputStream(finalFile);
-                for (int i = start; i <= end; i++) {
-                    String urlpath = list.get(i);
+                for (int i = 0; i <= end; i++) {
+                    String urlpath = videoUrlList.get(i);
                     urlStr = ResourcesFileUtils.findMaxSubString(preUrlPath, urlpath);
                     //下载资源
                     URL url = new URL(urlStr);
@@ -242,12 +235,14 @@ public class DownM3U8FileUtil {
                         finalOutputStream.close();
                         if (keyFileMap.size() == (end + 1)) {
                             finalFile.renameTo(new File(finalFile.getParent() + "/" + PREFIX + finalFile.getName()));
+                            fileNamesList.add(PREFIX + finalFile.getName());
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
             }
+            return "文件" + finalFile.getName() + "下载完成!";
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.smsposterpro.utils;
 
+import com.smsposterpro.api.py.PyController;
 import com.smsposterpro.exception.AesException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -24,10 +25,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -347,17 +349,40 @@ public class HtmlUtils {
                 e.printStackTrace();
             }
             //分片
-            if (select != null) {
-                LinkedHashMap<String, Element> hashMap = new LinkedHashMap<>();
-                for (Element sh : select) {
-                    hashMap.put(sh.attr("href"), sh);
+//            if (select != null) {
+//                LinkedHashMap<String, Element> hashMap = new LinkedHashMap<>();
+//                for (Element sh : select) {
+//                    hashMap.put(sh.attr("href"), sh);
+//                }
+//                List<LinkedHashMap<String, Element>> split = CommonUtils.splitOrder(hashMap, 1);
+//                //递归爬取静态页面
+//                for (int i = split.size() - 1; i >= 0; i--) {
+//                    LinkedHashMap<String, Element> map = split.get(i);
+//                    repyTask(IPStr, hrefs, local, orgin, protocol, map);
+//                }
+//            } else {
+//                log.info("当前页面 " + param + " 没有有效连接!");
+//            }
+            try {
+                if (DownM3U8FileUtil.downLoadNodes.size() >= PyController.MAXPY) {
+                    for (Future<String> future : PyController.executorFix.invokeAll(DownM3U8FileUtil.downLoadNodes)) {
+                        log.info("爬取结果：" + future.get());
+                    }
+                    DownM3U8FileUtil.downLoadNodes.clear();
                 }
-                List<LinkedHashMap<String, Element>> split = CommonUtils.splitOrder(hashMap, 1);
-                //递归爬取静态页面
-                for (int i = split.size() - 1; i >= 0; i--) {
-                    LinkedHashMap<String, Element> map = split.get(i);
-                    repyTask(IPStr, hrefs, local, orgin, protocol, map);
+                if (select != null) {
+                    for (Element sh : select) {
+                        doTask(IPStr, hrefs, local, orgin, protocol, sh.attr("href"), sh);
+                    }
+                } else {
+                    for (Future<String> future : PyController.executorFix.invokeAll(DownM3U8FileUtil.downLoadNodes)) {
+                        log.info("爬取结果：" + future.get());
+                    }
+                    DownM3U8FileUtil.downLoadNodes.clear();
+                    log.info("当前页面 " + param + " 没有有效连接!");
                 }
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -366,28 +391,32 @@ public class HtmlUtils {
         for (Map.Entry<String, Element> hrefSet : map.entrySet()) {
             String href = hrefSet.getKey();
             Element sh = hrefSet.getValue();
-            if (!href.startsWith("http")) {
-                if (!href.contains("javascript")) {
-                    href = orgin + href.replaceAll("^(\\.)*", "");
-                } else {
-                    continue;
-                }
-            }
-            String resPathNoParam = getResPathNoParam(href);
-            if (!regUrl(href) && href.startsWith(orgin) && !orgin.equals(resPathNoParam)) {
-                try {
-                    repyHtml(IPStr, hrefs, sh, resPathNoParam, local);
-                } catch (Exception e) {
-                    try {
-                        String s = protocol + getResPathNoParam(sh.attr("href"));
-                        repyHtml(IPStr, hrefs, sh, s, local);
-                    } catch (Exception ex) {
-                        log.error("爬取当前页面异常:{}", ex.getMessage(), e);
-                    }
-                }
+            doTask(IPStr, hrefs, local, orgin, protocol, href, sh);
+        }
+    }
+
+    private static void doTask(String IPStr, Set<String> hrefs, String local, String orgin, String protocol, String href, Element sh) {
+        if (!href.startsWith("http")) {
+            if (!href.contains("javascript")) {
+                href = orgin + href.replaceAll("^(\\.)*", "");
             } else {
-                sh.attr("href", href);
+                return;
             }
+        }
+        String resPathNoParam = getResPathNoParam(href);
+        if (!regUrl(href) && href.startsWith(orgin) && !orgin.equals(resPathNoParam)) {
+            try {
+                repyHtml(IPStr, hrefs, sh, resPathNoParam, local);
+            } catch (Exception e) {
+                try {
+                    String s = protocol + getResPathNoParam(sh.attr("href"));
+                    repyHtml(IPStr, hrefs, sh, s, local);
+                } catch (Exception ex) {
+                    log.error("爬取当前页面异常:{}", ex.getMessage(), e);
+                }
+            }
+        } else {
+            sh.attr("href", href);
         }
     }
 
@@ -468,7 +497,7 @@ public class HtmlUtils {
                 }
                 try {
                     String rootPath = TEMP_FILE_DIR + "/" + IPStr + "/" + domain + "/" + title;
-                    String downM3U8File = DownM3U8FileUtil.downM3U8File(s, rootPath, title);
+                    DownM3U8FileUtil.downM3U8File(s, rootPath, title);
                 } catch (Exception e) {
                     log.error("连接无效: {}", s, e);
                 }

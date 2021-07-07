@@ -75,8 +75,10 @@ import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 @Slf4j
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PyController extends BaseController {
+    //暂定每页视频数
+    public static final int MAXPY = 20;
 
-    public static final ExecutorService executorFix = Executors.newFixedThreadPool(100);
+    public static final ExecutorService executorFix = Executors.newFixedThreadPool(MAXPY);
 
     volatile LinkedHashSet<String> hrefs = new LinkedHashSet<>();
 
@@ -150,7 +152,7 @@ public class PyController extends BaseController {
             String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
             if (doSaveTempFile(IPStr, EntityUtils.toString(httpEntity, "UTF-8"))) return "<h2>爬取网页信息异常</h2>";
         } else {
-            log.info("在线爬取网页失败,可能此网址已经设置防爬策略。返回响应码未：：{}", response.getStatusLine().getStatusCode());
+            log.info("在线爬取网页失败,可能此网址已经设置防爬策略。返回响应码为：{}", response.getStatusLine().getStatusCode());
             return "<h2>在线爬取网页失败,可能此网址已经设置防爬策略。</h2>";
         }
         String IPStr = CusAccessObjectUtil.getIpAddress(request).replaceAll("\\.", "").replaceAll(":", "");
@@ -192,12 +194,13 @@ public class PyController extends BaseController {
                     String finalFilePath = filePath;
                     String finalResPathNoParamPath = resPathNoParamPath;
                     new Thread(() -> {
-                        HtmlUtils.getArticleURLs(IpStr, param, hrefs, finalResPathNoParamPath.substring(0, finalResPathNoParamPath.lastIndexOf("/")));
                         try {
+                            HtmlUtils.getArticleURLs(IpStr, param, hrefs, finalResPathNoParamPath.substring(0, finalResPathNoParamPath.lastIndexOf("/")));
+                            executorFix.shutdown();
                             executorFix.awaitTermination(1, TimeUnit.DAYS);
                             if (executorFix.isTerminated()) {
-                                executorFix.shutdown();
                                 try {
+                                    System.out.println("发送通知");
                                     File zipFile = new File(finalFilePath + "/" + IpStr + ".zip");
                                     if (!zipFile.exists()) {
                                         FileUtils.fileToZip(finalFilePath, finalFilePath, IpStr);
@@ -206,7 +209,7 @@ public class PyController extends BaseController {
                                         log.info("爬取任务：" + param + "完成，开始发送邮件,推送微信消息。");
                                         String context = IpStr + "-相关爬取任务已经完成</br>" +
                                                 "本次总共爬取文件数量为：" + hrefs.size() + "个；总耗时" + getTime(end - start) + ";</br>" +
-                                                "请点击连接:<a href='https://sms.liudongyang.top//downloadZip?subPath=" + param + "'>点击下载</a>";
+                                                "请点击连接:<a href='https://sms.liudongyang.top/downloadZip?subPath=" + param + "'>点击下载</a>";
                                         //mailService.sendMimeMessge("1126176532@qq.com", "爬取任务完成通知", context);
                                         //String forObject = restTemplate.getForObject("http://sc.ftqq.com/SCU125307T7c9f252f885c51edad0e59ea4a37a64f5faa5441b53e5.send?text=相关爬取任务已经完成&desp=" + context, String.class);
                                         //log.info("微信推送成功：{}", forObject);
@@ -226,6 +229,7 @@ public class PyController extends BaseController {
                     log.error("url参数异常！", e);
                 }
             }
+            System.out.println("任务启动完成");
             return "<h2>后台任务已经启动</h2>";
         } else {
             return "<h2>请输入有效爬取链接地址</h2>";

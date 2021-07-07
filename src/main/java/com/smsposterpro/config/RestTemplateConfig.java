@@ -39,9 +39,9 @@ public class RestTemplateConfig {
                         .setMaxConnTotal(500)
                         .setMaxConnPerRoute(500)
                         .build());
-        requestFactory.setConnectTimeout(10000);
-        requestFactory.setReadTimeout(10000);
-        requestFactory.setConnectionRequestTimeout(10000);
+        requestFactory.setConnectTimeout(30000);
+        requestFactory.setReadTimeout(30000);
+        requestFactory.setConnectionRequestTimeout(30000);
         requestFactory.setHttpClient(httpClient);
         RestTemplate restTemplate = new RestTemplate(requestFactory);
         List<HttpMessageConverter<?>> messageConverters = restTemplate.getMessageConverters();
