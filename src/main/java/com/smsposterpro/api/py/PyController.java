@@ -181,6 +181,7 @@ public class PyController extends BaseController {
                     url = new URL(param);
                     String host = url.getHost().replaceAll("\\.", "");
                     filePath += "/" + host;
+                    FileUtils.count = 0;
                     int count = FileUtils.deleteDirWithCount(FileUtils.DELETEDIRSTR, "mp4", "jpg", "jpeg", "png");
                     log.info("总文件数为：" + count);
                     //开始爬取文件

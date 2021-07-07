@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -132,15 +133,7 @@ public class DownM3U8FileUtil {
             String orgin = url.getProtocol() + "://" + url.getHost() + ((url.getPort() > 0) ? ":" + url.getPort() : "");
             boolean flag = true;
             String flagStr = "";
-            //下在资源
-            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.setRequestMethod("GET");
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.setDoInput(true);
-            httpURLConnection.setUseCaches(false);
-            httpURLConnection.setConnectTimeout(30000);
-            httpURLConnection.setReadTimeout(30000);
-            httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+            HttpURLConnection httpURLConnection = DownM3U8FileUtil.getHttpURLConnection(url);
             BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), StandardCharsets.UTF_8));
             StringBuilder content = new StringBuilder();
             String line;
@@ -169,6 +162,23 @@ public class DownM3U8FileUtil {
             log.info("检索文件下载出错：{} {}", urlpath, e);
             return null;
         }
+    }
+
+    public static HttpURLConnection getHttpURLConnection(URL url) {
+        HttpURLConnection httpURLConnection = null;
+        try {
+            httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setDoOutput(true);
+            httpURLConnection.setDoInput(true);
+            httpURLConnection.setUseCaches(false);
+            httpURLConnection.setConnectTimeout(30000);
+            httpURLConnection.setReadTimeout(30000);
+            httpURLConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return httpURLConnection;
     }
 
     static class downLoadNode extends Thread {
@@ -203,17 +213,11 @@ public class DownM3U8FileUtil {
                 for (int i = start; i <= end; i++) {
                     String urlpath = list.get(i);
                     urlStr = ResourcesFileUtils.findMaxSubString(preUrlPath, urlpath);
-                    URL url = new URL(urlStr);
                     //下载资源
-                    HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-                    httpURLConnection.setRequestMethod("GET");
-                    httpURLConnection.setDoOutput(true);
-                    httpURLConnection.setDoInput(true);
-                    httpURLConnection.setUseCaches(false);
-                    httpURLConnection.setConnectTimeout(30000);
-                    httpURLConnection.setReadTimeout(30000);
-                    httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
-                    DataInputStream dataInputStream = new DataInputStream(httpURLConnection.getInputStream());
+                    URL url = new URL(urlStr);
+                    HttpURLConnection httpURLConnection = DownM3U8FileUtil.getHttpURLConnection(url);
+                    InputStream inputStream = httpURLConnection.getInputStream();
+                    DataInputStream dataInputStream = new DataInputStream(inputStream);
                     String fileOutPath = fileRootPath + "/" + ((!urlpath.contains("/")) ? urlpath : urlpath.substring(urlpath.lastIndexOf("/") + 1));
                     FileOutputStream fileOutputStream = new FileOutputStream(new File(fileOutPath));
                     byte[] bytes = new byte[1024];

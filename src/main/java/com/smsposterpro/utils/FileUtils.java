@@ -20,7 +20,7 @@ import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_DIR;
 public class FileUtils {
     public static final String DELETEDIRSTR = "./" + TEMP_FILE_DIR;
     //总文件数
-    private static int count = 0;
+    public static int count = 0;
 
     public static void main(String[] args) {
         FileUtils.deleteDir(FileUtils.DELETEDIRSTR, "mp4", "jpg", "jpeg", "png");

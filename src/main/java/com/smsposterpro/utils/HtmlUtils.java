@@ -1,6 +1,5 @@
 package com.smsposterpro.utils;
 
-import com.smsposterpro.api.py.PyController;
 import com.smsposterpro.exception.AesException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -11,17 +10,17 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.client.RestTemplate;
 
-import javax.net.ssl.SSLHandshakeException;
+import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -38,8 +37,10 @@ import static com.smsposterpro.utils.ResourcesFileUtils.TEMP_FILE_NAME;
 import static java.util.regex.Pattern.compile;
 
 @Slf4j
+@Component
 public class HtmlUtils {
     private static final String[] TYPE = {"vodplayhtml", "vodhtml"};
+    static RestTemplate restTemplate;
 
     /* 使用jsoup解析html并转化为提取字符串*/
     public static String html2Str(String html, String flag, String reg, String attr) throws AesException {
@@ -297,32 +298,56 @@ public class HtmlUtils {
 
     //爬取一个域名下所有url的文件内容
     public static void getArticleURLs(String IPStr, String param, Set<String> hrefs, String local) {
+        Elements select = null;
+        String orgin = null;
+        String protocol = null;
         if (!regUrl(param)) {
             try {
-                Connection connect = Jsoup.connect(param);
-                connect.userAgent("Mozilla/4.0 (compatible; MSIE 9.0; Windows NT 5.0)");
-                connect.timeout(30000);
-                Document document = connect.get();
-                URL url = new URL(param);
-                String orgin = url.getProtocol() + "://" + url.getHost() + ((url.getPort() > 0) ? ":" + url.getPort() : "");
-                String protocol = url.getProtocol() + ":";
-                String domain = url.getHost().replaceAll("\\.", "");
-                Elements select = document.select("a");
-                Elements link = document.select("link");
-                Elements script = document.select("script");
-                Elements img = document.select("img");
-                Elements source = document.select("source");
-                //爬取css和js文件
-                //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
-                //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, script, "src");
-                //img
-                //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
-                //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, img, "src");
-                //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, img, "data-original");
-                //下载视频
-                downloadByAttr(IPStr, hrefs, orgin, protocol, domain, script, "type");
-                downloadByAttr(IPStr, hrefs, orgin, protocol, domain, source, "src");
-                //分片
+                // Connection connect = Jsoup.connect(param);
+                // Document document = connect.userAgent("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)")
+                //         .referrer(param)
+                //         .get();
+                String res = restTemplate.getForObject(param, String.class);
+                if (StringUtils.isNotEmpty(res)) {
+                    Document document = Jsoup.parse(res);
+                    URL url = new URL(param);
+                    orgin = url.getProtocol() + "://" + url.getHost() + ((url.getPort() > 0) ? ":" + url.getPort() : "");
+                    protocol = url.getProtocol() + ":";
+                    String domain = url.getHost().replaceAll("\\.", "");
+                    select = document.select("a");
+                    Elements link = document.select("link");
+                    Elements script = document.select("script");
+                    Elements img = document.select("img");
+                    Elements source = document.select("source");
+                    //爬取css和js文件
+                    //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
+                    //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, script, "src");
+                    //img
+                    //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, link, "href");
+                    //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, img, "src");
+                    //downloadByAttr(IPStr, hrefs, orgin, protocol, domain, img, "data-original");
+                    //下载视频
+                    downloadByAttr(IPStr, hrefs, orgin, protocol, domain, script, "type");
+                    downloadByAttr(IPStr, hrefs, orgin, protocol, domain, source, "src");
+                    //log.info("保存html：" + param);
+                    //String s = domain + param.replace(orgin, "");
+                    //String hrefPath = s.substring(0, s.lastIndexOf("/"));
+                    //doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
+                } else {
+                    log.info("此页面无有效数据:" + param);
+                }
+            }
+//            catch (SSLHandshakeException | SocketTimeoutException | SocketException e) {
+//                log.error("连接超时 请求重试:{} {}", param, e.getMessage());
+//                e.printStackTrace();
+//                getArticleURLs(IPStr, param, hrefs, local);
+//            }
+            catch (Exception e) {
+                log.error("爬取当前页面异常:{} {}", param, e.getMessage());
+                e.printStackTrace();
+            }
+            //分片
+            if (select != null) {
                 LinkedHashMap<String, Element> hashMap = new LinkedHashMap<>();
                 for (Element sh : select) {
                     hashMap.put(sh.attr("href"), sh);
@@ -331,17 +356,8 @@ public class HtmlUtils {
                 //递归爬取静态页面
                 for (int i = split.size() - 1; i >= 0; i--) {
                     LinkedHashMap<String, Element> map = split.get(i);
-                    PyController.executorFix.execute(() -> repyTask(IPStr, hrefs, local, orgin, protocol, map));
+                    repyTask(IPStr, hrefs, local, orgin, protocol, map);
                 }
-                //log.info("保存html：" + param);
-                //String s = domain + param.replace(orgin, "");
-                //String hrefPath = s.substring(0, s.lastIndexOf("/"));
-                //doSaveFile(IPStr, document.toString(), hrefPath, getResName(s));
-            } catch (SSLHandshakeException | SocketTimeoutException | ConnectException e) {
-                getArticleURLs(IPStr, param, hrefs, local);
-                log.error("连接超时 请求重试:{}  {}", param, e.getMessage(), e);
-            } catch (Exception e) {
-                log.error("爬取当前页面异常:{}  {}", param, e.getMessage(), e);
             }
         }
     }
@@ -519,6 +535,11 @@ public class HtmlUtils {
                 "  window.close();" +
                 "});" +
                 "}</script>";
+    }
+
+    @Resource
+    public void setRestTemplate(RestTemplate restTemplate) {
+        HtmlUtils.restTemplate = restTemplate;
     }
 
 }
