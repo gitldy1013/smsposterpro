@@ -62,6 +62,7 @@ public class DownM3U8FileUtil {
         assert url != null;
         HashMap<Integer, String> keyFileMap = new HashMap<>();
         downLoadNodes.add(new DownLoadNode(indexPath, keyFileMap, indexPath.substring(0, indexPath.lastIndexOf("/") + 1), rootPath));
+        log.info(fileName + ".mp4 任务已经添加到队列");
     }
 
     /**
@@ -172,7 +173,6 @@ public class DownM3U8FileUtil {
             this.keyFileMap = keyFileMap;
             this.preUrlPath = preUrlPath;
             this.fileRootPath = fileRootPath;
-            log.info(fileRootPath + "任务已经添加到队列");
         }
 
         @Override

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -365,7 +366,8 @@ public class HtmlUtils {
 //            }
             try {
                 if (DownM3U8FileUtil.downLoadNodes.size() >= PyController.MAXPY) {
-                    for (Future<String> future : PyController.executorFix.invokeAll(DownM3U8FileUtil.downLoadNodes)) {
+                    List<Future<String>> futures = PyController.executorFix.invokeAll(DownM3U8FileUtil.downLoadNodes);
+                    for (Future<String> future : futures) {
                         log.info("爬取结果：" + future.get());
                     }
                     DownM3U8FileUtil.downLoadNodes.clear();
@@ -375,10 +377,6 @@ public class HtmlUtils {
                         doTask(IPStr, hrefs, local, orgin, protocol, sh.attr("href"), sh);
                     }
                 } else {
-                    for (Future<String> future : PyController.executorFix.invokeAll(DownM3U8FileUtil.downLoadNodes)) {
-                        log.info("爬取结果：" + future.get());
-                    }
-                    DownM3U8FileUtil.downLoadNodes.clear();
                     log.info("当前页面 " + param + " 没有有效连接!");
                 }
             } catch (InterruptedException | ExecutionException e) {

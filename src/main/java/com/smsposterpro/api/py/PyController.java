@@ -4,6 +4,7 @@ import com.smsposterpro.api.BaseController;
 import com.smsposterpro.exception.AesException;
 import com.smsposterpro.service.MailService;
 import com.smsposterpro.utils.CusAccessObjectUtil;
+import com.smsposterpro.utils.DownM3U8FileUtil;
 import com.smsposterpro.utils.FileUtils;
 import com.smsposterpro.utils.HtmlUtils;
 import com.smsposterpro.utils.ResourcesFileUtils;
@@ -49,8 +50,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static com.smsposterpro.utils.CommonUtils.getTime;
@@ -78,7 +82,7 @@ public class PyController extends BaseController {
     //暂定每页视频数
     public static final int MAXPY = 20;
 
-    public static final ExecutorService executorFix = Executors.newFixedThreadPool(MAXPY);
+    public static ExecutorService executorFix = null;
 
     volatile LinkedHashSet<String> hrefs = new LinkedHashSet<>();
 
@@ -195,7 +199,16 @@ public class PyController extends BaseController {
                     String finalResPathNoParamPath = resPathNoParamPath;
                     new Thread(() -> {
                         try {
+                            if (executorFix != null && !executorFix.isShutdown()) {
+                                executorFix.shutdownNow();
+                            }
+                            executorFix = Executors.newFixedThreadPool(MAXPY);
                             HtmlUtils.getArticleURLs(IpStr, param, hrefs, finalResPathNoParamPath.substring(0, finalResPathNoParamPath.lastIndexOf("/")));
+                            List<Future<String>> futures = PyController.executorFix.invokeAll(DownM3U8FileUtil.downLoadNodes);
+                            for (Future<String> future : futures) {
+                                log.info("爬取结果：" + future.get());
+                            }
+                            DownM3U8FileUtil.downLoadNodes.clear();
                             executorFix.shutdown();
                             executorFix.awaitTermination(1, TimeUnit.DAYS);
                             if (executorFix.isTerminated()) {
@@ -221,7 +234,7 @@ public class PyController extends BaseController {
                                     //log.info("微信推送成功：{}", forObject);
                                 }
                             }
-                        } catch (InterruptedException e) {
+                        } catch (InterruptedException | ExecutionException e) {
                             e.printStackTrace();
                         }
                     }).start();
