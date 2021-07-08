@@ -42,16 +42,6 @@ public class DownM3U8FileUtil {
     public static volatile LinkedList<DownLoadNode> downLoadNodes = new LinkedList<>();
 
     public static void downM3U8File(String indexPath, String rootPath, String fileName) {
-        File file = new File(rootPath + "/" + fileName + ".mp4");
-        File finalFile = new File(rootPath + "/" + PREFIX + fileName + ".mp4");
-        if (finalFile.exists() || fileNamesList.contains(PREFIX + fileName + ".mp4")) {
-            log.info(fileName + ".mp4 已经下载过。");
-            return;
-        }
-        if (file.exists() || fileNamesList.contains(fileName + ".mp4")) {
-            log.info(fileName + ".mp4 正在下载中。");
-            return;
-        }
         URL url = null;
         try {
             url = new URL(indexPath);
@@ -198,6 +188,13 @@ public class DownM3U8FileUtil {
             String FinalfileName = CommonUtils.filenameFilter(split[split.length - 1], CommonUtils.FILE_PATTERN) + ".mp4";
             HtmlUtils.createFileWithMultilevelDirectory(split, FinalfileName, rootPath);
             File finalFile = new File(fileRootPath + "/" + FinalfileName);
+            File DoneFile = new File(finalFile.getParent() + "/" + PREFIX + finalFile.getName());
+            if (finalFile.exists() || fileNamesList.contains(PREFIX + finalFile.getName())) {
+                return finalFile.getName() + ".mp4 已经下载过。";
+            }
+            if (DoneFile.exists() || fileNamesList.contains(finalFile.getName())) {
+                return finalFile.getName() + ".mp4 正在下载中。";
+            }
             fileNamesList.add(finalFile.getName());
             FileOutputStream finalOutputStream = null;
             String urlStr = "";
@@ -234,7 +231,7 @@ public class DownM3U8FileUtil {
                     try {
                         finalOutputStream.close();
                         if (keyFileMap.size() == (end + 1)) {
-                            finalFile.renameTo(new File(finalFile.getParent() + "/" + PREFIX + finalFile.getName()));
+                            finalFile.renameTo(DoneFile);
                             fileNamesList.add(PREFIX + finalFile.getName());
                         }
                     } catch (IOException e) {
